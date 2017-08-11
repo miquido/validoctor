@@ -9,6 +9,7 @@ Validoctor instance can be created using a builder:
 ```java
 Validoctor validoctor = Validoctor.builder().pedantic(true).exceptional(false).build();
 ```
+
 For now, there are two traits.
 * Pedantic Validoctor will go through all rules to the end and return a complete Diagnosis with all violations. One who is not pedantic will stop on first violation encountered and return this one only.
 * Exceptional Validoctor will throw an exception containing a Diagnosis instead of returning it, if it finds any violations.
@@ -22,10 +23,12 @@ There are 4 types of rules, calling validation with each type is the same:
 Diagnosis diagnosis = validoctor.examine(patient, RULE_1, RULE_2);
 ```
 examine() method accepts any number of rules of given type.
+
 Types are:
-* Just Rule: simple interface used to define validations of one value
-* MultiRule: rule sets that allow defining validations for whole data structures on per property basis
-* ComlexRule: define validations of multiple properties at once
-* ExceptionalRule: rule that will cause exception to be thrown upon violation, even if Validoctor is not exceptional
+
+* Just Rule - simple interface used to define validations of one value
+* MultiRule - rule sets that allow defining validations for whole data structures on per property basis
+* ComlexRule - define validations of multiple properties at once
+* ExceptionalRule - rule that will cause exception to be thrown upon violation, even if Validoctor is not exceptional
 
 Rules can be Exceptional and one of other types at once.
