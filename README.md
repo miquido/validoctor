@@ -23,9 +23,9 @@ Diagnosis diagnosis = validoctor.examine(patient, RULE_1, RULE_2);
 ```
 examine() method accepts any number of rules of given type.
 Types are:
-* Just Rule - simple interface used to define validations of one value
-* MultiRule - rule sets that allow defining validations for whole data structures on per property basis
-* ComlexRule - define validations of multiple properties at once
-* ExceptionalRule - rule that will cause exception to be thrown upon violation, even if Validoctor is not exceptional
+* Just Rule: simple interface used to define validations of one value
+* MultiRule: rule sets that allow defining validations for whole data structures on per property basis
+* ComlexRule: define validations of multiple properties at once
+* ExceptionalRule: rule that will cause exception to be thrown upon violation, even if Validoctor is not exceptional
 
 Rules can be Exceptional and one of other types at once.
