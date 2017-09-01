@@ -1,14 +1,13 @@
 package com.miquido.validoctor.rule;
 
+import com.miquido.validoctor.TestUtil;
 import com.miquido.validoctor.Validoctor;
-import com.miquido.validoctor.ailment.Severity;
-import com.miquido.validoctor.diagnosis.Diagnosis;
 import org.junit.Test;
 
 import java.util.Collections;
 
+import static com.miquido.validoctor.TestUtil.*;
 import static com.miquido.validoctor.rule.Rules.*;
-import static org.junit.Assert.*;
 
 public class SimpleRuleTest {
 
@@ -137,12 +136,4 @@ public class SimpleRuleTest {
     assertOk(validoctor.examine(null, numberInRange(-100, 100)));
   }
 
-
-  private static void assertError(Diagnosis diagnosis) {
-    assertEquals(Severity.ERROR, diagnosis.getSeverity());
-  }
-
-  private static void assertOk(Diagnosis diagnosis) {
-    assertEquals(Severity.OK, diagnosis.getSeverity());
-  }
 }

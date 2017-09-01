@@ -183,8 +183,8 @@ public class MultiRuleBuilder<T> {
 
     private <PropertyType> Function<T, PropertyType> getterFunction(String propertyName) {
       try {
-        Class<?> type = subjectClass.getField(propertyName).getType();
-        String verb = (type.equals(boolean.class) || type.equals(Boolean.class)) ? "is" : "get";
+        Class<?> type = subjectClass.getDeclaredField(propertyName).getType();
+        String verb = type.equals(boolean.class) ? "is" : "get";
         String methodName = verb + StringUtils.capitalize(propertyName);
         Method method = subjectClass.getMethod(methodName);
         return getterFunction(propertyName, method);

@@ -40,16 +40,16 @@ public final class Rules {
    * Passed: patient is not null.
    * Violated: patient is null.
    */
-  public static Rule<Object> notNull() {
-    return NOT_NULL;
+  public static <T> Rule<T> notNull() {
+    return (Rule<T>) NOT_NULL;
   }
 
   /**
    * Passed: patient is null.
    * Violated: patient is not null.
    */
-  public static Rule<Object> isNull() {
-    return NULL;
+  public static <T> Rule<T> isNull() {
+    return (Rule<T>) NULL;
   }
 
   /**
