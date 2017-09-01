@@ -15,4 +15,9 @@ public class Ailment {
   private final Map<String, String> parameters;
   private final Severity severity;
 
+
+  public boolean isMoreSevereThan(Ailment other) {
+    return severity.isWorseThan(other.getSeverity());
+  }
+
 }
