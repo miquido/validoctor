@@ -42,4 +42,5 @@ public class SimpleRule<T> implements Rule<T> {
   public Ailment getAilment() {
     return ailment;
   }
+
 }
