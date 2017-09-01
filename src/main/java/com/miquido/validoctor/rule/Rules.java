@@ -9,7 +9,7 @@ public final class Rules {
       new SimpleRule<>("STRING_NOT_EMPTY", str -> str == null || !str.isEmpty());
 
   private static final Rule<String> STRING_TRIMMED_NOT_EMPTY =
-      new SimpleRule<>("STRING_NOT_EMPTY", str -> str == null || !str.trim().isEmpty());
+      new SimpleRule<>("STRING_TRIMMED_NOT_EMPTY", str -> str == null || !str.trim().isEmpty());
 
   private static final Rule<Object> NULL =
       new SimpleRule<>("OBJECT_NULL", Objects::isNull);
@@ -21,7 +21,7 @@ public final class Rules {
       new SimpleRule<>("BOOLEAN_FALSE", value -> value == null || !value);
 
   private static final Rule<Boolean> TRUE =
-      new SimpleRule<>("BOOLEAN_FALSE", value -> value == null || value);
+      new SimpleRule<>("BOOLEAN_TRUE", value -> value == null || value);
 
   private static final Rule<Number> NUMBER_POSITIVE =
       new SimpleRule<>("NUMBER_POSITIVE", value -> value == null || value.doubleValue() > 0);
@@ -115,7 +115,7 @@ public final class Rules {
    * Violated: patient is string with length other than specified {@code exactLength}.
    */
   public static Rule<String> stringExactLength(int exactLength) {
-    return new SimpleRule<>("STRING_MAX_LENGTH", str -> str == null || str.length() == exactLength);
+    return new SimpleRule<>("STRING_EXACT_LENGTH", str -> str == null || str.length() == exactLength);
   }
 
   /**
