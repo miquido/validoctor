@@ -2,7 +2,9 @@ package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.rule.Rule;
+import lombok.Data;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,38 +20,47 @@ import java.util.stream.Collectors;
  */
 class ConditionalMultiRule<T> implements MultiRule<T> {
 
-  private final Map<String, Function<T, ?>> propertiesGettersMap;
-  private final Map<String, Set<Rule>> propertiesRulesMap;
-  private final Map<String, Predicate<T>> propertiesConditionsMap;
 
-  ConditionalMultiRule(Map<String, Function<T, ?>> propertiesGettersMap,
-                       Map<String, Set<Rule>> propertiesRulesMap,
-                       Map<String, Predicate<T>> propertiesConditionsMap) {
-    this.propertiesGettersMap = propertiesGettersMap;
-    this.propertiesRulesMap = propertiesRulesMap;
-    this.propertiesConditionsMap = propertiesConditionsMap;
+  @Data
+  public static class PropertyValidation<T> {
+    private final Function<T, ?> propertyGetter;
+    private final Set<Rule> rules;
+    private final Predicate<T> condition;
+  }
+
+
+  private final Map<String, PropertyValidation<T>> propertyValidations;
+
+  ConditionalMultiRule(Map<String, PropertyValidation<T>> propertyValidations) {
+    this.propertyValidations = propertyValidations;
   }
 
   @Override
-  public Map<String, Set<Ailment>> test(T obj) {
+  public Map<String, Set<Ailment>> test(T patient) {
     Map<String, Set<Ailment>> propertiesAilments = new HashMap<>();
-    for (String property : propertiesGettersMap.keySet()) {
-      for (Rule rule : propertiesRulesMap.get(property)) {
-        Predicate<T> condition = propertiesConditionsMap.get(property);
-        if (condition == null || condition.test(obj)) {
-          boolean passed = rule.test(propertiesGettersMap.get(property).apply(obj));
-          if (!passed) {
-            propertiesAilments.computeIfAbsent(property, k -> new HashSet<>()).add(rule.getAilment());
-          }
-        }
+    propertyValidations.forEach((property, validation) -> {
+      Predicate<T> condition = validation.getCondition();
+      if (condition == null || condition.test(patient)) {
+        propertiesAilments.putAll(checkRules(property, validation, patient));
       }
-    }
+    });
     return propertiesAilments;
   }
 
   @Override
   public Map<String, Set<Ailment>> getAilments() {
-    return propertiesRulesMap.entrySet().stream()
-        .collect(Collectors.toMap(Map.Entry::getKey, o -> o.getValue().stream().map(Rule::getAilment).collect(Collectors.toSet())));
+    return propertyValidations.entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, o -> o.getValue().getRules().stream().map(Rule::getAilment).collect(Collectors.toSet())));
+  }
+
+
+  private Map<String, Set<Ailment>> checkRules(String property, PropertyValidation<T> validation, T patient) {
+    Map<String, Set<Ailment>> propertiesAilments = new HashMap<>();
+    validation.getRules().forEach(rule -> {
+      if (!rule.test(validation.getPropertyGetter().apply(patient))) {
+        propertiesAilments.computeIfAbsent(property, k -> new HashSet<>()).add(rule.getAilment());
+      }
+    });
+    return propertiesAilments;
   }
 }

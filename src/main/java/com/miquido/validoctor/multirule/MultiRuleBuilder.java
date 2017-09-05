@@ -21,9 +21,7 @@ import java.util.function.Predicate;
 public class MultiRuleBuilder<T> {
 
   private final Class<T> subjectClass;
-  private final Map<String, Function<T, ?>> propertyGettersMap = new HashMap<>();
-  private final Map<String, Set<Rule>> propertyRulesMap = new HashMap<>();
-  private final Map<String, Predicate<T>> propertyConditionMap = new HashMap<>();
+  private final Map<String, ConditionalMultiRule.PropertyValidation<T>> validationsMap = new HashMap<>();
 
   private MultiRuleBuilder(Class<T> subjectClass) {
     this.subjectClass = subjectClass;
@@ -70,17 +68,14 @@ public class MultiRuleBuilder<T> {
                                                                        Predicate<T> condition,
                                                                        Function<T, PropertyType> propertyGetter,
                                                                        Rule<PropertyType>... rules) {
-    propertyGettersMap.put(propertyName, propertyGetter);
-    propertyRulesMap.put(propertyName, new HashSet<>(Arrays.asList(rules)));
-    if (condition != null) {
-      propertyConditionMap.put(propertyName, condition);
-    }
+    validationsMap.put(propertyName,
+        new ConditionalMultiRule.PropertyValidation<>(propertyGetter, new HashSet<>(Arrays.asList(rules)), condition));
     return this;
   }
 
 
   public MultiRule<T> build() {
-    return new ConditionalMultiRule<>(propertyGettersMap, propertyRulesMap, propertyConditionMap);
+    return new ConditionalMultiRule<>(validationsMap);
   }
 
 
