@@ -1,10 +1,10 @@
 Validoctor is an all-purpose data validator for backend java projects. It performs validation basing on rules passed along with object to be validated. It can operate depending on several traits and on various kinds of rules in an effort to cater to specific needs of all projects.
 
-#### Vocabulary
+# Vocabulary
 * Ailment - like a single violation of a Rule. It carries a meaningful name and may have additional parameters.
 * Diagnosis - validation report stating whether object is valid or not and containing all Ailments discovered in it.
 
-#### Traits
+# Traits
 Validoctor instance can be created using a builder:
 
 ```java
@@ -18,7 +18,7 @@ For now, there are two traits.
 
 Pedantic and non-exceptional Validoctor is the default obtained by calling build() without specifying any traits.
 
-#### Rules
+# Rules
 Each rule provides two things: definition of how validity is tested and Ailment that should be stated upon violation of the rule.
 There are 4 types of rules, calling validation with each type is the same:
 
