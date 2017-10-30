@@ -40,7 +40,7 @@ public class ValidoctorTest {
     Validoctor validoctor = Validoctor.builder().pedantic(true).build();
     Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
     assertEquals(Severity.ERROR, diagnosis.getSeverity());
-    assertEquals(2, diagnosis.getAilments().size());
+    assertEquals(2, diagnosis.getAilments().get(null).size());
   }
 
   @Test

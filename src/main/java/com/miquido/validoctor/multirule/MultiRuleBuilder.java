@@ -6,29 +6,21 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * Allows building rules for conditional validation of multiple properties of a single object.
+ * Allows building specialized {@link Rule} lists for conditional validation of multiple properties of a single object.
  *
  * @param <T> type of validated object
  */
 public class MultiRuleBuilder<T> {
 
-  private final Class<T> subjectClass;
-  private final Map<String, ConditionalMultiRule.PropertyValidation<T>> validationsMap = new HashMap<>();
+  private final MultiRule<T> rules;
 
-  private MultiRuleBuilder(Class<T> subjectClass) {
-    this.subjectClass = subjectClass;
-  }
 
-  public static <T> MultiRuleBuilder<T> forClass(Class<T> subjectClass) {
-    return new MultiRuleBuilder<>(subjectClass);
+  MultiRuleBuilder() {
+    rules = new MultiRule<>();
   }
 
   /**
@@ -37,13 +29,13 @@ public class MultiRuleBuilder<T> {
    * - Subject class must contain a getter for each property that is to be validated.<br/>
    * - Subject class may contain getters for boolean or Boolean properties that start with "is".<br/>
    */
-  public ReflexiveMultiRuleBuilder reflexiveProperties() {
-    return new ReflexiveMultiRuleBuilder();
+  public ReflexiveMultiRuleBuilder reflexiveProperties(Class<T> subjectClass) {
+    return new ReflexiveMultiRuleBuilder(subjectClass);
   }
 
   /**
-   * @param propertyName   name of property to apply the rules to
-   * @param propertyGetter getter of the property to apply the rules to
+   * @param propertyName   name of the property the rules apply to
+   * @param propertyGetter getter of the property the rules apply to
    * @param rules          rules to apply
    * @param <PropertyType> type of property
    * @return builder for chaining
@@ -52,34 +44,40 @@ public class MultiRuleBuilder<T> {
   public final <PropertyType> MultiRuleBuilder<T> withRules(String propertyName,
                                                             Function<T, PropertyType> propertyGetter,
                                                             Rule<PropertyType>... rules) {
-    return withConditionalRules(propertyName, null, propertyGetter, rules);
+    return withConditionalRules(t -> true, propertyName, propertyGetter, rules);
   }
 
   /**
-   * @param propertyName   name of property to apply the rules to
-   * @param condition      conditional predicate determining whether to run validation on the property
-   * @param propertyGetter getter of the property to apply the rules to
-   * @param rules          rules to apply
    * @param <PropertyType> type of property
+   * @param condition      conditional predicate determining whether to run validation on the property
+   * @param propertyName   name of the property the rules apply to
+   * @param propertyGetter getter of the property the rules apply to
+   * @param rules          rules to apply
    * @return builder for chaining
    */
   @SafeVarargs
-  public final <PropertyType> MultiRuleBuilder<T> withConditionalRules(String propertyName,
-                                                                       Predicate<T> condition,
+  public final <PropertyType> MultiRuleBuilder<T> withConditionalRules(Predicate<T> condition,
+                                                                       String propertyName,
                                                                        Function<T, PropertyType> propertyGetter,
                                                                        Rule<PropertyType>... rules) {
-    validationsMap.put(propertyName,
-        new ConditionalMultiRule.PropertyValidation<>(propertyGetter, new HashSet<>(Arrays.asList(rules)), condition));
+    for (Rule<PropertyType> rule : rules) {
+      this.rules.add(new ConditionalPropertyRule<>(propertyName, propertyGetter, condition, rule));
+    }
     return this;
   }
 
-
   public MultiRule<T> build() {
-    return new ConditionalMultiRule<>(validationsMap);
+    return rules;
   }
 
 
   public class ReflexiveMultiRuleBuilder {
+
+    private final Class<T> subjectClass;
+
+    private ReflexiveMultiRuleBuilder(Class<T> subjectClass) {
+      this.subjectClass = subjectClass;
+    }
 
     /**
      * If property getter is not found within the object or can not be called at runtime,
@@ -98,61 +96,39 @@ public class MultiRuleBuilder<T> {
     }
 
     /**
-     * Will look for boolean returning is[property_name]Set methods to use as conditional predicates.
-     * If such method is not found for a property, validation will fail.
-     *
-     * @param propertyName   name of property to apply the rules to
-     * @param rules          rules to apply
      * @param <PropertyType> type of property
-     * @return builder for chaining
-     */
-    @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder withIsSetDependentRules(String propertyName,
-                                                                                  Rule<PropertyType>... rules) {
-      return withConditionalRules(propertyName, isSetPredicate(propertyName), rules);
-    }
-
-    /**
-     * @param propertyName   name of property to apply the rules to
      * @param condition      conditional predicate determining whether to run validation on the property
+     * @param propertyName   name of property to apply the rules to
      * @param rules          rules to apply
-     * @param <PropertyType> type of property
      * @return builder for chaining
      */
     @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder withConditionalRules(String propertyName,
-                                                                               Predicate<T> condition,
+    public final <PropertyType> ReflexiveMultiRuleBuilder withConditionalRules(Predicate<T> condition,
+                                                                               String propertyName,
                                                                                Rule<PropertyType>... rules) {
-      MultiRuleBuilder.this.withConditionalRules(propertyName, condition, getterFunction(propertyName), rules);
+      MultiRuleBuilder.this.withConditionalRules(condition, propertyName, getterFunction(propertyName), rules);
       return this;
     }
 
     /**
-     * Applies given rules to all properties found in the subject class. Every method starting with "get" is treated
-     * as a property getter.
-     *
+     * Applies given rules to all properties of given type found in the subject class.
+     * Every method returning a given type and starting with "get" or "is" is treated as a property getter.
+     * @param propertyClass  class of properties to apply the rules to
      * @param rules          rules to apply
      * @param <PropertyType> type of property
      * @return builder for chaining
      */
     @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder withSameRulesForAllProperties(Rule<PropertyType>... rules) {
-      withSameRulesForAllProperties(false, rules);
-      return this;
-    }
-
-    /**
-     * Conditionally applies given rules to all properties found in the subject class. Every method starting with "get"
-     * is treated as a property getter. Conditional predicate is an is[property_name]Set method. If such method is not
-     * found for a property, validation will fail.
-     *
-     * @param rules          rules to apply
-     * @param <PropertyType> type of property
-     * @return builder for chaining
-     */
-    @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder withSameRulesForAllSetProperties(Rule<PropertyType>... rules) {
-      withSameRulesForAllProperties(true, rules);
+    public final <PropertyType> ReflexiveMultiRuleBuilder withRulesForAll(Class<? extends PropertyType> propertyClass,
+                                                                          Rule<PropertyType>... rules) {
+      Arrays.stream(subjectClass.getMethods())
+          .filter(method -> method.getReturnType().equals(propertyClass) &&
+              (method.getName().startsWith("get") || method.getName().startsWith("is")))
+          .forEach(getter -> {
+            boolean isIs = getter.getName().startsWith("is");
+            String propertyName = StringUtils.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
+            MultiRuleBuilder.this.withRules(propertyName, getterFunction(propertyName, getter), rules);
+          });
       return this;
     }
 
@@ -160,21 +136,6 @@ public class MultiRuleBuilder<T> {
       return MultiRuleBuilder.this.build();
     }
 
-
-    @SafeVarargs
-    private final <PropertyType> ReflexiveMultiRuleBuilder withSameRulesForAllProperties(boolean withIsSetProperties,
-                                                                                         Rule<PropertyType>... rules) {
-      Arrays.stream(subjectClass.getMethods())
-          .filter(method -> (method.getName().startsWith("get") && !method.getName().equals("getClass"))
-              || (method.getName().startsWith("is") && !method.getName().endsWith("Set")))
-          .forEach(getter -> {
-            boolean isIs = getter.getName().startsWith("is");
-            String propertyName = StringUtils.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
-            MultiRuleBuilder.this.withConditionalRules(
-                propertyName, withIsSetProperties ? isSetPredicate(propertyName) : null, getterFunction(propertyName, getter), rules);
-          });
-      return this;
-    }
 
     private <PropertyType> Function<T, PropertyType> getterFunction(String propertyName) {
       try {
@@ -198,24 +159,5 @@ public class MultiRuleBuilder<T> {
       };
     }
 
-    private Predicate<T> isSetPredicate(String propertyName) {
-      String isSetMethodName = "is" + StringUtils.capitalize(propertyName) + "Set";
-      try {
-        Method isSetMethod = subjectClass.getMethod(isSetMethodName);
-        if (!isSetMethod.getReturnType().equals(boolean.class)) {
-          throw PropertyAccessException.noIsSetMethod(propertyName, null);
-        }
-        return object -> {
-          try {
-            return (Boolean) isSetMethod.invoke(object);
-          } catch (InvocationTargetException | IllegalAccessException e) {
-            throw PropertyAccessException.noIsSetMethod(propertyName, object, e);
-          }
-        };
-      } catch (NoSuchMethodException e) {
-        throw PropertyAccessException.noIsSetMethod(propertyName, e);
-      }
-    }
   }
-
 }
