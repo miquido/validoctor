@@ -3,7 +3,6 @@ package com.miquido.validoctor.diagnosis;
 
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
-import lombok.Data;
 
 import java.util.Map;
 import java.util.Set;
@@ -13,7 +12,6 @@ import java.util.Set;
  * Ailments are contained in a map, grouped by properties they affect. Ailments affecting the object as a whole,
  * and not any of its properties, are mapped under null key.
  */
-@Data
 public class Diagnosis {
 
   private final Severity severity;
@@ -25,4 +23,29 @@ public class Diagnosis {
     this.ailments = ailments;
   }
 
+  public Severity getSeverity() {
+    return severity;
+  }
+
+  public Map<String, Set<Ailment>> getAilments() {
+    return ailments;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    Diagnosis diagnosis = (Diagnosis) o;
+
+    if (severity != diagnosis.severity) return false;
+    return ailments.equals(diagnosis.ailments);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = severity.hashCode();
+    result = 31 * result + ailments.hashCode();
+    return result;
+  }
 }

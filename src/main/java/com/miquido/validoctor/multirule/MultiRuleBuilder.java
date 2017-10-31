@@ -1,7 +1,6 @@
 package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.rule.Rule;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -126,7 +125,7 @@ public class MultiRuleBuilder<T> {
               (method.getName().startsWith("get") || method.getName().startsWith("is")))
           .forEach(getter -> {
             boolean isIs = getter.getName().startsWith("is");
-            String propertyName = StringUtils.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
+            String propertyName = MethodNames.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
             MultiRuleBuilder.this.withRules(propertyName, getterFunction(propertyName, getter), rules);
           });
       return this;
@@ -141,7 +140,7 @@ public class MultiRuleBuilder<T> {
       try {
         Class<?> type = subjectClass.getDeclaredField(propertyName).getType();
         String verb = type.equals(boolean.class) ? "is" : "get";
-        String methodName = verb + StringUtils.capitalize(propertyName);
+        String methodName = verb + MethodNames.capitalize(propertyName);
         Method method = subjectClass.getMethod(methodName);
         return getterFunction(propertyName, method);
       } catch (NoSuchMethodException | NoSuchFieldException e) {

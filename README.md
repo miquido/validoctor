@@ -32,4 +32,8 @@ Types are:
 
 * Just Rule - simple interface used to define validations of one value
 * MultiRule - rule sets that allow defining validations for whole data structures on per property basis
-* ComlexRule - define validations of multiple properties at once
+* ComplexRule - define validations of multiple properties at once
+
+
+####Dependencies
+None.

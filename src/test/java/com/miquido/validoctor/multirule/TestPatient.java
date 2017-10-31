@@ -1,8 +1,5 @@
 package com.miquido.validoctor.multirule;
 
-import lombok.Data;
-
-@Data
 public class TestPatient {
 
   private boolean idSet;
@@ -27,5 +24,37 @@ public class TestPatient {
   public void setPhone(String phone) {
     phoneSet = true;
     this.phone = phone;
+  }
+
+  public void setRegistered(boolean registered) {
+    this.registered = registered;
+  }
+
+  public boolean isIdSet() {
+    return idSet;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public boolean isNameSet() {
+    return nameSet;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public boolean isPhoneSet() {
+    return phoneSet;
+  }
+
+  public String getPhone() {
+    return phone;
+  }
+
+  public boolean isRegistered() {
+    return registered;
   }
 }
