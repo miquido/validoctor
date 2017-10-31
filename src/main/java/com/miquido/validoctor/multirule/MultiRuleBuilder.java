@@ -4,6 +4,7 @@ import com.miquido.validoctor.rule.Rule;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -111,7 +112,7 @@ public class MultiRuleBuilder<T> {
 
     /**
      * Applies given rules to all properties of given type found in the subject class.
-     * Every method returning a given type and starting with "get" or "is" is treated as a property getter.
+     * Every public method returning a given type and starting with "get" or "is" is treated as a property getter.
      * @param propertyClass  class of properties to apply the rules to
      * @param rules          rules to apply
      * @param <PropertyType> type of property
@@ -121,7 +122,7 @@ public class MultiRuleBuilder<T> {
     public final <PropertyType> ReflexiveMultiRuleBuilder withRulesForAll(Class<? extends PropertyType> propertyClass,
                                                                           Rule<PropertyType>... rules) {
       Arrays.stream(subjectClass.getMethods())
-          .filter(method -> method.getReturnType().equals(propertyClass) &&
+          .filter(method -> Modifier.isPublic(method.getModifiers()) && method.getReturnType().equals(propertyClass) &&
               (method.getName().startsWith("get") || method.getName().startsWith("is")))
           .forEach(getter -> {
             boolean isIs = getter.getName().startsWith("is");
