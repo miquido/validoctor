@@ -1,13 +1,17 @@
 package com.miquido.validoctor.rule;
 
-import com.miquido.validoctor.TestUtil;
 import com.miquido.validoctor.Validoctor;
+import com.miquido.validoctor.ailment.Ailment;
+import com.miquido.validoctor.ailment.Severity;
+import com.miquido.validoctor.diagnosis.Diagnosis;
 import org.junit.Test;
 
 import java.util.Collections;
+import java.util.Set;
 
 import static com.miquido.validoctor.TestUtil.*;
 import static com.miquido.validoctor.rule.Rules.*;
+import static org.junit.Assert.*;
 
 public class SimpleRuleTest {
 
@@ -134,6 +138,28 @@ public class SimpleRuleTest {
     assertOk(validoctor.examine(15, numberInRange(12, 16)));
     assertOk(validoctor.examine(15.000023d, numberInRange(15.000022d, 15.000024d)));
     assertOk(validoctor.examine(null, numberInRange(-100, 100)));
+  }
+
+  @Test
+  public void customRule() {
+    SimpleRule<Long> is5Rule = new SimpleRule<>("IS_5", v -> v == 5);
+    assertOk(validoctor.examine(5L, is5Rule));
+    assertError(validoctor.examine(6L, is5Rule));
+
+    is5Rule = new SimpleRule<>("IS_5", v -> v == 5, Severity.WARN);
+    assertEquals(Severity.WARN, validoctor.examine(6L, is5Rule).getSeverity());
+  }
+
+  @Test
+  public void multipleRules() {
+    assertOk(validoctor.examine(10, numberPositive(), numberInRange(-10, 10)));
+
+    Diagnosis diagnosis = validoctor.examine(-11, numberNonNegative(), numberInRange(-10, 10));
+    assertError(diagnosis);
+    Set<Ailment> objectAilments = diagnosis.getAilments().get(null);
+    assertEquals(2, objectAilments.size());
+    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberNonNegative().getAilment().getName())));
+    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberInRange(-10, 10).getAilment().getName())));
   }
 
 }

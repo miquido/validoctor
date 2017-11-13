@@ -2,18 +2,21 @@ package com.miquido.validoctor;
 
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
-import com.miquido.validoctor.diagnosis.DiagnosisException;
 import com.miquido.validoctor.diagnosis.Diagnosis;
+import com.miquido.validoctor.diagnosis.DiagnosisException;
 import com.miquido.validoctor.multirule.MultiRule;
+import com.miquido.validoctor.rule.PropertyRule;
 import com.miquido.validoctor.rule.Rule;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
+/**
+ * Good Morning! Patients please stand in line, I'll be calling you one by one.
+ */
 public final class Validoctor {
 
   public static Builder builder() {
@@ -38,56 +41,67 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examine(T patient, Rule<T>... rules) {
+    return examine(patient, MultiRule.of(rules));
+  }
+
+  /**
+   * Multi property object examination.
+   * @param patient object to validate
+   * @param rules validation MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examine(T patient, MultiRule<T>... rules) {
+    return examine(patient, Stream.of(rules)
+        .reduce(MultiRule::and)
+        .orElseThrow(() -> new RuntimeException("Never happens")));
+  }
+
+  /**
+   * Multi property object examination. Convenience method same as:<br/>
+   * {@code examine(patient, MultiRule.of(rule), multiRules)}
+   * @param patient object to validate
+   * @param rule validation rule applied to patient object as a whole
+   * @param multiRules validation MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineCombo(T patient, Rule<T> rule, MultiRule<T>... multiRules) {
+    return examine(patient, MultiRule.of(rule).and(Stream.of(multiRules)
+        .reduce(MultiRule::and)
+        .orElseThrow(() -> new RuntimeException("Never happens"))));
+  }
+
+  /**
+   * Multi property object examination.
+   * @param patient object to validate
+   * @param rules validation MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   */
+  public final <T> Diagnosis examine(T patient, MultiRule<T> rules) {
     Severity severity = Severity.OK;
-    Set<Ailment> ailments = new HashSet<>(rules.length);
-    for (Rule<T> rule : rules) {
+    Map<String, Set<Ailment>> ailments = new HashMap<>();
+    for (PropertyRule<T> rule : rules) {
       boolean valid = rule.test(patient);
       if (!valid) {
         Ailment ailment = rule.getAilment();
         if (ailment.getSeverity().isWorseThan(severity)) {
           severity = ailment.getSeverity();
         }
-        ailments.add(ailment);
+        ailments.computeIfAbsent(rule.getProperty(), key -> new HashSet<>()).add(ailment);
         if (!pedantic) {
           break;
         }
       }
     }
-    Diagnosis diagnosis = new Diagnosis(severity, ailments);
-    if (exceptional && severity == Severity.ERROR) {
-      throw new DiagnosisException(diagnosis);
-    }
-    return diagnosis;
+    return stateDiagnosis(severity, ailments);
   }
 
-  /**
-   * Object examination with {@link MultiRule}s.
-   * @param patient object to validate
-   * @param rules validation MultiRules
-   * @return diagnosis detailing validity of patient
-   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
-   */
-  @SafeVarargs
-  public final <T> Diagnosis examine(T patient, MultiRule<T>... rules) {
-    Severity severity = Severity.OK;
-    Map<String, Set<Ailment>> ailments = new HashMap<>(rules.length);
-    for (MultiRule<T> rule : rules) {
-      Map<String, Set<Ailment>> ruleAilments = rule.test(patient);
-      if (!ruleAilments.isEmpty()) {
-        Severity ailmentSeverity = ruleAilments.values().stream()
-            .flatMap(Set::stream)
-            .reduce((a1, a2) -> a2.isMoreSevereThan(a1) ? a2 : a1)
-            .map(Ailment::getSeverity)
-            .orElse(Severity.OK);
-        if (ailmentSeverity.isWorseThan(severity)) {
-          severity = ailmentSeverity;
-        }
-        ailments.putAll(ruleAilments);
-        if (!pedantic) {
-          break;
-        }
-      }
-    }
+
+  private Diagnosis stateDiagnosis(Severity severity, Map<String, Set<Ailment>> ailments) {
     Diagnosis diagnosis = new Diagnosis(severity, ailments);
     if (exceptional && severity == Severity.ERROR) {
       throw new DiagnosisException(diagnosis);
