@@ -37,7 +37,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is not null.
+   * Passed: patient is not null.<br/>
    * Violated: patient is null.
    */
   public static <T> Rule<T> notNull() {
@@ -45,7 +45,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null.
+   * Passed: patient is null.<br/>
    * Violated: patient is not null.
    */
   public static <T> Rule<T> isNull() {
@@ -53,7 +53,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or false.
+   * Passed: patient is null or false.<br/>
    * Violated: patient is true.
    */
   public static Rule<Boolean> isFalse() {
@@ -61,7 +61,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null of true.
+   * Passed: patient is null of true.<br/>
    * Violated: patient is false.
    */
   public static Rule<Boolean> isTrue() {
@@ -69,7 +69,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or not empty collection.
+   * Passed: patient is null or not empty collection.<br/>
    * Violated: patient is empty collection.
    */
   public static Rule<Collection> collectionNotEmpty() {
@@ -77,7 +77,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or not empty string.
+   * Passed: patient is null or not empty string.<br/>
    * Violated: patient is empty string.
    * @see Rules#stringTrimmedNotEmpty()
    */
@@ -86,7 +86,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null, not empty and not all-whitespace string.
+   * Passed: patient is null, not empty and not all-whitespace string.<br/>
    * Violated: patient is empty or all-whitespace string.
    * @see Rules#stringNotEmpty()
    */
@@ -95,7 +95,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or string with length greater than or equal to specified {@code minLength}.
+   * Passed: patient is null or string with length greater than or equal to specified {@code minLength}.<br/>
    * Violated: patient is string with length lesser than specified {@code minLength}.
    */
   public static Rule<String> stringMinLength(int minLength) {
@@ -103,7 +103,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or string with length lesser than or equal to specified {@code maxLength}.
+   * Passed: patient is null or string with length lesser than or equal to specified {@code maxLength}.<br/>
    * Violated: patient is string with length greater than specified {@code maxLength}.
    */
   public static Rule<String> stringMaxLength(int maxLength) {
@@ -111,7 +111,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or string with length equal to specified {@code exactLength}.
+   * Passed: patient is null or string with length equal to specified {@code exactLength}.<br/>
    * Violated: patient is string with length other than specified {@code exactLength}.
    */
   public static Rule<String> stringExactLength(int exactLength) {
@@ -119,7 +119,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or number with value greater than 0.
+   * Passed: patient is null or number with value greater than 0.<br/>
    * Violated: patient is number with value lesser than or equal to 0.
    */
   public static Rule<Number> numberPositive() {
@@ -127,7 +127,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or number with value greater than or equal to 0.
+   * Passed: patient is null or number with value greater than or equal to 0.<br/>
    * Violated: patient is number with value lesser than 0.
    */
   public static Rule<Number> numberNonNegative() {
@@ -135,7 +135,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or number with value {@code >= minRange} and {@code <= maxRange}.
+   * Passed: patient is null or number with value {@code >= minRange} and {@code <= maxRange}.<br/>
    * Violated: patient is number with value {@code < minRange} or {@code > maxRange}.
    */
   public static Rule<Number> numberInRange(Number minRange, Number maxRange) {
