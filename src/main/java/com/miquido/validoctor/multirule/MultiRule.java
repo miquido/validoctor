@@ -1,12 +1,14 @@
 package com.miquido.validoctor.multirule;
 
-import com.miquido.validoctor.rule.PropertyRule;
-import com.miquido.validoctor.rule.PropertyRuleAdapter;
+import com.miquido.validoctor.complexrule.ComplexRule;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * List of {@link PropertyRule}s for validation of a single class of objects.
@@ -45,6 +47,23 @@ public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
   public static <T> MultiRule<T> of(List<? extends Rule<T>> list) {
     MultiRule<T> multiRule = new MultiRule<>(list.size());
     list.forEach(rule -> multiRule.add(new PropertyRuleAdapter<>(rule)));
+    return multiRule;
+  }
+
+  /**
+   * Creates a MultiRule out of passed ComplexRules. Intended for internal use, not very useful for client code.
+   */
+  @SafeVarargs
+  public static <T> MultiRule<T> of(ComplexRule<T>... complexRules) {
+    int sumSizes = Stream.of(complexRules)
+        .map(rule -> rule.getProperties().size())
+        .reduce((sumSize, size) -> sumSize + size).orElse(0);
+    MultiRule<T> multiRule = new MultiRule<>(sumSizes);
+
+    Stream.of(complexRules).forEach(rule -> {
+      TrueShadowRule<T> originalShadow = new TrueShadowRule<>(rule);
+      rule.getProperties().forEach(property -> multiRule.add(new ShadowRule<>(property, originalShadow)));
+    });
     return multiRule;
   }
 

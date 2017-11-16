@@ -1,7 +1,6 @@
 package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.ailment.Ailment;
-import com.miquido.validoctor.rule.PropertyRule;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.function.Function;

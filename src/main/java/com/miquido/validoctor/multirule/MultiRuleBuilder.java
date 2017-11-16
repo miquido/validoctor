@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -129,6 +130,11 @@ public class MultiRuleBuilder<T> {
             String propertyName = MethodNames.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
             MultiRuleBuilder.this.withRules(propertyName, getterFunction(propertyName, getter), rules);
           });
+      return this;
+    }
+
+    public final ReflexiveMultiRuleBuilder withRuleForGroup(Rule<List<String>> rule, String... properties) {
+      
       return this;
     }
 

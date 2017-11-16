@@ -2,16 +2,20 @@ package com.miquido.validoctor;
 
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
+import com.miquido.validoctor.complexrule.ComplexRule;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.diagnosis.DiagnosisException;
 import com.miquido.validoctor.multirule.MultiRule;
-import com.miquido.validoctor.rule.PropertyRule;
+import com.miquido.validoctor.multirule.PropertyRule;
 import com.miquido.validoctor.rule.Rule;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
@@ -57,12 +61,25 @@ public final class Validoctor {
         .reduce(MultiRule::and)
         .orElseThrow(() -> new RuntimeException("Never happens")));
   }
+  /**
+   * Object examination with ComplexRules.
+   * @param patient object to validate
+   * @param complexRules validation ComplexRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examine(T patient, ComplexRule<T>... complexRules) {
+    return examine(patient, MultiRule.of(complexRules));
+  }
 
   /**
-   * Multi property object examination. Convenience method same as:<br/>
-   * {@code examine(patient, MultiRule.of(rule), multiRules)}
+   * Multi property object examination. Convenience method same as:<br/><br/>
+   * {@code examine(patient, MultiRule.of(rule), multiRules)}<br/><br/>
+   * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
+   * {@code examineCombo(patient, Rules.notNull(), multiRules)}<br/>
    * @param patient object to validate
-   * @param rule validation rule applied to patient object as a whole
+   * @param rule validation Rule applied to patient object as a whole
    * @param multiRules validation MultiRules for properties of patient
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
@@ -77,21 +94,28 @@ public final class Validoctor {
   /**
    * Multi property object examination.
    * @param patient object to validate
-   * @param rules validation MultiRules for properties of patient
+   * @param rules validation MultiRule for properties of patient
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
   public final <T> Diagnosis examine(T patient, MultiRule<T> rules) {
+    return innerExamine(patient, rules,
+        (ailments, rule) -> ailments.computeIfAbsent(rule.getProperty(), key -> new HashSet<>()).add(rule.getAilment()));
+  }
+
+
+  private <T, R extends Rule<T>> Diagnosis innerExamine(T patient, List<R> rules,
+                                                        BiConsumer<Map<String, Set<Ailment>>, R> ailmentPutter) {
     Severity severity = Severity.OK;
     Map<String, Set<Ailment>> ailments = new HashMap<>();
-    for (PropertyRule<T> rule : rules) {
+    for (R rule : rules) {
       boolean valid = rule.test(patient);
       if (!valid) {
-        Ailment ailment = rule.getAilment();
-        if (ailment.getSeverity().isWorseThan(severity)) {
-          severity = ailment.getSeverity();
+        Severity ailmentSeverity = rule.getAilment().getSeverity();
+        if (ailmentSeverity.isWorseThan(severity)) {
+          severity = ailmentSeverity;
         }
-        ailments.computeIfAbsent(rule.getProperty(), key -> new HashSet<>()).add(ailment);
+        ailmentPutter.accept(ailments, rule);
         if (!pedantic) {
           break;
         }
@@ -99,7 +123,6 @@ public final class Validoctor {
     }
     return stateDiagnosis(severity, ailments);
   }
-
 
   private Diagnosis stateDiagnosis(Severity severity, Map<String, Set<Ailment>> ailments) {
     Diagnosis diagnosis = new Diagnosis(severity, ailments);

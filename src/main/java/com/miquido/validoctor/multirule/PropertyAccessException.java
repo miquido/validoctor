@@ -10,7 +10,7 @@ class PropertyAccessException extends RuntimeException {
     return new PropertyAccessException("Property '" + propertyName + "' was not found", cause);
   }
 
-  PropertyAccessException(String message, Throwable cause) {
+  private PropertyAccessException(String message, Throwable cause) {
     super(message, cause);
   }
 }
