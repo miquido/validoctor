@@ -1,5 +1,6 @@
 package com.miquido.validoctor.multirule;
 
+import com.miquido.validoctor.TestPatient;
 import com.miquido.validoctor.Validoctor;
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.diagnosis.Diagnosis;
@@ -50,32 +51,23 @@ public class MultiRuleTest {
   }
 
   private void testNonConditionalMultiRule(MultiRule<TestPatient> multiRule) {
-    TestPatient patient = new TestPatient();
-    patient.setId(1L);
-    patient.setName("Name");
-    patient.setPhone("+48.123123123");
-    patient.setRegistered(true);
+    TestPatient patient = new TestPatient(1L, "Name", "+48.123123123", true);
 
     assertOk(validoctor.examine(patient, multiRule));
+
+    patient.setPhone("?48.123123123");
+    Diagnosis diagnosis = validoctor.examine(patient, multiRule);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(PHONE_FORMAT, diagnosis, "phone");
 
     patient = new TestPatient();
     patient.setName("Name");
     patient.setPhone("+48.123123");
     patient.setRegistered(true);
 
-    Diagnosis diagnosis = validoctor.examine(patient, multiRule);
-    assertError(diagnosis);
-    assertEquals(notNull().getAilment().getName(), diagnosis.getAilments().get("id").iterator().next().getName());
-
-    patient = new TestPatient();
-    patient.setId(1L);
-    patient.setName("Name");
-    patient.setPhone("?48.123123123");
-    patient.setRegistered(true);
-
     diagnosis = validoctor.examine(patient, multiRule);
     assertError(diagnosis);
-    assertEquals(PHONE_FORMAT.getAilment().getName(), diagnosis.getAilments().get("phone").iterator().next().getName());
+    assertOnlyViolationForProperty(notNull(), diagnosis, "id");
   }
 
 
@@ -122,8 +114,8 @@ public class MultiRuleTest {
     Diagnosis diagnosis = validoctor.examine(patient, multiRule);
     assertError(diagnosis);
     assertEquals(2, diagnosis.getAilments().size());
-    assertEquals(stringMinLength(3).getAilment().getName(), diagnosis.getAilments().get("name").iterator().next().getName());
-    assertEquals(isTrue().getAilment().getName(), diagnosis.getAilments().get("registered").iterator().next().getName());
+    assertOnlyViolationForProperty(stringMinLength(3), diagnosis, "name");
+    assertOnlyViolationForProperty(isTrue(), diagnosis, "registered");
   }
 
 
@@ -135,11 +127,7 @@ public class MultiRuleTest {
         .withRulesForAll(long.class, numberPositive())
         .build();
 
-    TestPatient patient = new TestPatient();
-    patient.setId(1L);
-    patient.setName("Name");
-    patient.setPhone("+48.123123123");
-    patient.setRegistered(true);
+    TestPatient patient = new TestPatient(1L, "Name", "+48.123123123", 1L, true);
 
     assertOk(validoctor.examine(patient, multiRule));
 
@@ -148,7 +136,7 @@ public class MultiRuleTest {
     Diagnosis diagnosis = validoctor.examine(patient, multiRule);
     assertError(diagnosis);
     assertEquals(1, diagnosis.getAilments().size());
-    assertEquals(stringMinLength(3).getAilment().getName(), diagnosis.getAilments().get("phone").iterator().next().getName());
+    assertOnlyViolationForProperty(stringMinLength(3), diagnosis, "phone");
   }
 
   @Test
@@ -162,11 +150,7 @@ public class MultiRuleTest {
         .withRules("name", TestPatient::getName, stringExactLength(10))
         .build();
 
-    TestPatient patient = new TestPatient();
-    patient.setId(1L);
-    patient.setName("Name10long");
-    patient.setPhone("+48.123123123");
-    patient.setRegistered(true);
+    TestPatient patient = new TestPatient(1L, "Name10long", "+48.123123123", true);
 
     Diagnosis diagnosis1 = validoctor.examine(patient, multiRule1, multiRule2);
     assertOk(diagnosis1);
@@ -176,16 +160,15 @@ public class MultiRuleTest {
     Diagnosis diagnosis2 = validoctor.examine(patient, multiRule1, multiRule2);
     assertError(diagnosis2);
     assertEquals(1, diagnosis2.getAilments().size());
-    assertEquals(stringExactLength(10).getAilment().getName(), diagnosis2.getAilments().get("name").iterator().next().getName());
+    assertOnlyViolationForProperty(stringExactLength(10), diagnosis2, "name");
 
     patient.setName("a");
 
     Diagnosis diagnosis3 = validoctor.examine(patient, multiRule1, multiRule2);
     assertError(diagnosis3);
-    Set<Ailment> nameAilments = diagnosis3.getAilments().get("name");
-    assertEquals(2, nameAilments.size());
-    assertTrue(nameAilments.stream().anyMatch(ailment -> ailment.getName().equals(stringMinLength(3).getAilment().getName())));
-    assertTrue(nameAilments.stream().anyMatch(ailment -> ailment.getName().equals(stringExactLength(10).getAilment().getName())));
+    assertEquals(2, diagnosis3.getAilments().get("name").size());
+    assertPropertyViolates(stringMinLength(3), diagnosis3, "name");
+    assertPropertyViolates(stringExactLength(10), diagnosis3, "name");
   }
 
   @Test
@@ -199,25 +182,18 @@ public class MultiRuleTest {
         .withRules("name", TestPatient::getName, stringExactLength(10))
         .build();
 
-    TestPatient patient = new TestPatient();
-    patient.setId(1L);
-    patient.setName("Name10long");
-    patient.setPhone("+48.123123123");
-    patient.setRegistered(true);
+    TestPatient patient = new TestPatient(1L, "Name10long", "+48.123123123", true);
+    Diagnosis diagnosis = validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2);
+    assertOk(diagnosis);
 
-    Diagnosis diagnosis1 = validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2);
-    assertOk(diagnosis1);
+    patient = new TestPatient(1L, "Name9long", "+48.123123123", true);
+    diagnosis = validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(stringExactLength(10), diagnosis, "name");
 
-    SimpleRule<TestPatient> rule1 = new SimpleRule<>("IS_REGISTERED", TestPatient::isRegistered);
-    Diagnosis diagnosis2 = validoctor.examine(patient, MultiRule.of(notNull(), rule1), multiRule1, multiRule2);
-    assertOk(diagnosis2);
-
-    patient.setRegistered(false);
-    Diagnosis diagnosis3 = validoctor.examine(patient, MultiRule.of(notNull(), rule1), multiRule1, multiRule2);
-    assertError(diagnosis3);
-    Set<Ailment> objectAilments = diagnosis3.getAilments().get(null);
-    assertEquals(2, diagnosis3.getAilments().size());
-    assertEquals(1, objectAilments.size());
-    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(rule1.getAilment().getName())));
+    patient = null;
+    diagnosis = validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(notNull(), diagnosis, null);
   }
 }

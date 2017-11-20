@@ -2,14 +2,12 @@ package com.miquido.validoctor;
 
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
-import com.miquido.validoctor.complexrule.ComplexRule;
+import com.miquido.validoctor.reducerrule.ReducerRule;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.diagnosis.DiagnosisException;
 import com.miquido.validoctor.multirule.MultiRule;
-import com.miquido.validoctor.multirule.PropertyRule;
 import com.miquido.validoctor.rule.Rule;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,44 +49,75 @@ public final class Validoctor {
   /**
    * Multi property object examination.
    * @param patient object to validate
-   * @param rules validation MultiRules for properties of patient
-   * @return diagnosis detailing validity of patient
-   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
-   */
-  @SafeVarargs
-  public final <T> Diagnosis examine(T patient, MultiRule<T>... rules) {
-    return examine(patient, Stream.of(rules)
-        .reduce(MultiRule::and)
-        .orElseThrow(() -> new RuntimeException("Never happens")));
-  }
-  /**
-   * Object examination with ComplexRules.
-   * @param patient object to validate
-   * @param complexRules validation ComplexRules for properties of patient
-   * @return diagnosis detailing validity of patient
-   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
-   */
-  @SafeVarargs
-  public final <T> Diagnosis examine(T patient, ComplexRule<T>... complexRules) {
-    return examine(patient, MultiRule.of(complexRules));
-  }
-
-  /**
-   * Multi property object examination. Convenience method same as:<br/><br/>
-   * {@code examine(patient, MultiRule.of(rule), multiRules)}<br/><br/>
-   * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
-   * {@code examineCombo(patient, Rules.notNull(), multiRules)}<br/>
-   * @param patient object to validate
-   * @param rule validation Rule applied to patient object as a whole
    * @param multiRules validation MultiRules for properties of patient
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
   @SafeVarargs
-  public final <T> Diagnosis examineCombo(T patient, Rule<T> rule, MultiRule<T>... multiRules) {
-    return examine(patient, MultiRule.of(rule).and(Stream.of(multiRules)
-        .reduce(MultiRule::and)
-        .orElseThrow(() -> new RuntimeException("Never happens"))));
+  public final <T> Diagnosis examine(T patient, MultiRule<T>... multiRules) {
+    return examine(patient, Stream.of(multiRules).reduce(MultiRule::and)
+        .orElseThrow(() -> new RuntimeException("Never happens")));
+  }
+
+  /**
+   * Object examination with ReducerRules.
+   * @param patient object to validate
+   * @param reducerRules validation ReducerRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examine(T patient, ReducerRule<T, ?>... reducerRules) {
+    return examine(patient, MultiRule.of(reducerRules));
+  }
+
+  /**
+   * Object examination with ReducerRules, pre-examined with a single Rule. If the preRule examination results in
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.
+   * @param patient object to validate
+   * @param preRule validation Rule applied to patient object as a whole before attempting to apply other rules
+   * @param reducerRules validation ReducerRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineCombo(T patient, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
+    Diagnosis preDiagnosis = examine(patient, preRule);
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.of(reducerRules));
+  }
+
+  /**
+   * Multi property object examination, pre-examined with a single Rule. If the preRule examination results in
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
+   * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
+   * {@code examineCombo(patient, Rules.notNull(), multiRules)}<br/>
+   * @param patient object to validate
+   * @param preRule validation Rule applied to patient object as a whole before attempting to apply other rules
+   * @param multiRules validation MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineCombo(T patient, Rule<T> preRule, MultiRule<T>... multiRules) {
+    Diagnosis preDiagnosis = examine(patient, preRule);
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
+        : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
+  }
+
+  /**
+   * Multi property object examination, pre-examined with a single ReducerRule. If the preRule examination results in
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
+   * @param patient object to validate
+   * @param preRule validation ReducerRule applied to patient object as a whole before attempting to apply other rules
+   * @param multiRules validation MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineCombo(T patient, ReducerRule<T, ?> preRule, MultiRule<T>... multiRules) {
+    Diagnosis preDiagnosis = examine(patient, preRule);
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
+        : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
   }
 
   /**

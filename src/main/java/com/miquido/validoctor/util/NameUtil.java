@@ -1,15 +1,15 @@
-package com.miquido.validoctor.multirule;
+package com.miquido.validoctor.util;
 
-class MethodNames {
+public class NameUtil {
 
-  private MethodNames() {}
+  private NameUtil() {}
 
-  static String capitalize(String str) {
+  public static String capitalize(String str) {
     char capChar = Character.toUpperCase(str.charAt(0));
     return String.valueOf(capChar) + str.substring(1);
   }
 
-  static String uncapitalize(String str) {
+  public static String uncapitalize(String str) {
     char uncapChar = Character.toLowerCase(str.charAt(0));
     return String.valueOf(uncapChar) + str.substring(1);
   }

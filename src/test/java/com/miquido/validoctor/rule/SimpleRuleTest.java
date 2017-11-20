@@ -91,6 +91,15 @@ public class SimpleRuleTest {
   }
 
   @Test
+  public void predefinedRule_stringLengthInRAnge() {
+    assertError(validoctor.examine("aa", stringLengthInRange(3, 3)));
+    assertError(validoctor.examine("   ", stringLengthInRange(0, 0)));
+    assertError(validoctor.examine("aa aa", stringLengthInRange(1, 4)));
+    assertOk(validoctor.examine(null, stringLengthInRange(1, 10)));
+    assertOk(validoctor.examine("aa aa", stringLengthInRange(5, 6)));
+  }
+
+  @Test
   public void predefinedRule_stringExactLength() {
     assertError(validoctor.examine("aa", stringExactLength(5)));
     assertError(validoctor.examine("   ", stringExactLength(2)));

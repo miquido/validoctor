@@ -10,7 +10,7 @@ import com.miquido.validoctor.rule.Rule;
 public interface PropertyRule<PatientType> extends Rule<PatientType> {
 
   /**
-   * @return Name of property this Rule is associated with, or null if there is not property association and Rule is used
+   * @return Name of property this Rule is associated with, or null if there is no property association and Rule is used
    * for object as a whole.
    */
   String getProperty();

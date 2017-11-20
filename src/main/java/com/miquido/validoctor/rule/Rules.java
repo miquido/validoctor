@@ -99,7 +99,7 @@ public final class Rules {
    * Violated: patient is string with length lesser than specified {@code minLength}.
    */
   public static Rule<String> stringMinLength(int minLength) {
-    return new SimpleRule<>("STRING_MIN_LENGTH", str -> str == null || str.length() >= minLength);
+    return new SimpleRule<>("STRING_MIN_LENGTH:" + minLength, str -> str == null || str.length() >= minLength);
   }
 
   /**
@@ -107,7 +107,18 @@ public final class Rules {
    * Violated: patient is string with length greater than specified {@code maxLength}.
    */
   public static Rule<String> stringMaxLength(int maxLength) {
-    return new SimpleRule<>("STRING_MAX_LENGTH", str -> str == null || str.length() <= maxLength);
+    return new SimpleRule<>("STRING_MAX_LENGTH:" + maxLength, str -> str == null || str.length() <= maxLength);
+  }
+
+  /**
+   * Passed: patient is null or string with length greater than or equal to specified {@code minLength} and
+   * lesser than or equal to specified {@code maxLength}.<br/>
+   * Violated: patient is string with length lesser than or equal to specified {@code minLength} or
+   * greater than specified {@code maxLength}.
+   */
+  public static Rule<String> stringLengthInRange(int minLength, int maxLength) {
+    return new SimpleRule<>("STRING_LENGTH_IN_RANGE:" + minLength + "-" + maxLength, str -> str == null
+        || str.length() >= minLength && str.length() <= maxLength);
   }
 
   /**
@@ -115,7 +126,7 @@ public final class Rules {
    * Violated: patient is string with length other than specified {@code exactLength}.
    */
   public static Rule<String> stringExactLength(int exactLength) {
-    return new SimpleRule<>("STRING_EXACT_LENGTH", str -> str == null || str.length() == exactLength);
+    return new SimpleRule<>("STRING_EXACT_LENGTH:" + exactLength, str -> str == null || str.length() == exactLength);
   }
 
   /**
@@ -139,7 +150,7 @@ public final class Rules {
    * Violated: patient is number with value {@code < minRange} or {@code > maxRange}.
    */
   public static Rule<Number> numberInRange(Number minRange, Number maxRange) {
-    return new SimpleRule<>("NUMBER_IN_RANGE", value -> value == null
+    return new SimpleRule<>("NUMBER_IN_RANGE:" + minRange + "-" + maxRange, value -> value == null
         || value.doubleValue() >= minRange.doubleValue() && value.doubleValue() <= maxRange.doubleValue());
   }
 }

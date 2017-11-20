@@ -1,12 +1,13 @@
 package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.rule.Rule;
+import com.miquido.validoctor.util.NameUtil;
+import com.miquido.validoctor.util.PropertyAccessException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -127,14 +128,9 @@ public class MultiRuleBuilder<T> {
               (method.getName().startsWith("get") || method.getName().startsWith("is")))
           .forEach(getter -> {
             boolean isIs = getter.getName().startsWith("is");
-            String propertyName = MethodNames.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
-            MultiRuleBuilder.this.withRules(propertyName, getterFunction(propertyName, getter), rules);
+            String propertyName = NameUtil.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
+            MultiRuleBuilder.this.withRules(propertyName, getterFunction(getter), rules);
           });
-      return this;
-    }
-
-    public final ReflexiveMultiRuleBuilder withRuleForGroup(Rule<List<String>> rule, String... properties) {
-      
       return this;
     }
 
@@ -147,20 +143,20 @@ public class MultiRuleBuilder<T> {
       try {
         Class<?> type = subjectClass.getDeclaredField(propertyName).getType();
         String verb = type.equals(boolean.class) ? "is" : "get";
-        String methodName = verb + MethodNames.capitalize(propertyName);
+        String methodName = verb + NameUtil.capitalize(propertyName);
         Method method = subjectClass.getMethod(methodName);
-        return getterFunction(propertyName, method);
+        return getterFunction(method);
       } catch (NoSuchMethodException | NoSuchFieldException e) {
         throw PropertyAccessException.noGetter(propertyName, e);
       }
     }
 
-    private <PropertyType> Function<T, PropertyType> getterFunction(String propertyName, Method method) {
+    private <PropertyType> Function<T, PropertyType> getterFunction(Method method) {
       return object -> {
         try {
           return (PropertyType) method.invoke(object);
         } catch (IllegalAccessException | InvocationTargetException e) {
-          throw PropertyAccessException.noGetter(propertyName, object, e);
+          throw PropertyAccessException.noGetter(method.getName(), object, e);
         }
       };
     }

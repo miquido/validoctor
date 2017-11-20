@@ -3,12 +3,12 @@ package com.miquido.validoctor.multirule;
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.rule.Rule;
 
-class TrueShadowRule<PatientType> implements Rule<PatientType> {
+class RealShadowRule<PatientType> implements Rule<PatientType> {
 
   private final Rule<PatientType> delegate;
   private Boolean result;
 
-  TrueShadowRule(Rule<PatientType> delegate) {
+  RealShadowRule(Rule<PatientType> delegate) {
     this.delegate = delegate;
   }
 
