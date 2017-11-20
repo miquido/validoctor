@@ -27,7 +27,7 @@ public class ReducerRule<PatientType, PropertyType> implements Rule<PatientType>
    * @param propertyClass class of properties to reduce and validate
    * @param <T> type of patient object
    * @param <P> type of properties to reduce and validate
-   * @return fluent, reflexive builder for instance of ReducerRule
+   * @return builder for instance of ReducerRule
    */
   public static <T, P> ReducerRuleBuilder<T, P> builder(Class<T> patientClass, Class<P> propertyClass) {
     return new ReducerRuleBuilder<>(patientClass, propertyClass);

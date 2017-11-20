@@ -34,6 +34,8 @@ public class ReducerRuleBuilder<T, P> {
   }
 
   /**
+   * Reflexively reads specified properties using getters. For property named foo, looks for getFoo method,
+   * except for the case when foo is boolean when it looks for isFoo instead.
    * @param properties names of properties that are to be reduced and validated by the rule
    * @return this builder for chaining
    */
@@ -69,7 +71,7 @@ public class ReducerRuleBuilder<T, P> {
   }
 
   /**
-   * @param reducer reduction operator used reduce the properties into one value
+   * @param reducer reduction operator used to reduce the properties into one value
    * @return this builder for chaining
    */
   public ReducerRuleBuilder<T, P> reducer(BinaryOperator<P> reducer) {
@@ -77,8 +79,15 @@ public class ReducerRuleBuilder<T, P> {
     return this;
   }
 
-  public ReducerRule<T, P> build() {
-    return new ReducerRule<>(propertyNames, propertyGetters, reducer, rule);
+  private boolean buildable() {
+    return !propertyGetters.isEmpty() && rule != null && reducer != null;
   }
+
+  public ReducerRule<T, P> build() {
+      if (!buildable()) {
+        throw new IllegalStateException("Properties, rule and reducer must all be set before building");
+      }
+      return new ReducerRule<>(propertyNames, propertyGetters, reducer, rule);
+    }
 
 }
