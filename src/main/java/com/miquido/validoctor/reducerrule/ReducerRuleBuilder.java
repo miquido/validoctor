@@ -5,10 +5,10 @@ import com.miquido.validoctor.util.NameUtil;
 import com.miquido.validoctor.util.PropertyAccessException;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,21 +40,18 @@ public class ReducerRuleBuilder<T, P> {
   public ReducerRuleBuilder<T, P> properties(String... properties) {
     propertyNames = Arrays.asList(properties);
     propertyGetters = Arrays.stream(properties)
-        .map(property -> {
-          try {
-            return subjectClass.getDeclaredMethod(
-                (propertiesClass.isAssignableFrom(boolean.class) ? "is" : "get") + NameUtil.capitalize(property));
-          } catch (NoSuchMethodException e) {
-            throw PropertyAccessException.noGetter(property, e);
-          }
-        })
-        .filter(Objects::nonNull)
-        .map(method ->
+        .map(property ->
             (Function<T, P>) o -> {
+              String methodName = "getter of " + property;
               try {
+                Method method = subjectClass.getDeclaredMethod(
+                    (propertiesClass.isAssignableFrom(boolean.class) ? "is" : "get") + NameUtil.capitalize(property));
+                methodName = method.getName();
                 return (P) method.invoke(o);
+              } catch (NoSuchMethodException e) {
+                throw PropertyAccessException.noGetter(property, e);
               } catch (IllegalAccessException | InvocationTargetException e) {
-                throw PropertyAccessException.noGetter(method.getName(), o, e);
+                throw PropertyAccessException.noGetter(methodName, o, e);
               }
             }
           )
