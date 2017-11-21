@@ -14,7 +14,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Builder for {@link ReducerRule}s. Uses reflection to find getter of properties.
+ * Builder for {@link ReducerRule}s. Call to all methods is mandatory before ReducerRule can be built.
+ * Uses reflection to find getters of properties.
  * @param <T> type of patient object
  * @param <P> type of reduced and validated properties
  */
@@ -83,11 +84,16 @@ public class ReducerRuleBuilder<T, P> {
     return !propertyGetters.isEmpty() && rule != null && reducer != null;
   }
 
+  /**
+   * Builds the ReducerRule. Properties, rule and reducer must have all been set for this method to succeed.
+   * @return new ReducerRule
+   * @throws IllegalStateException if properties, rule or reducer were not set
+   */
   public ReducerRule<T, P> build() {
-      if (!buildable()) {
-        throw new IllegalStateException("Properties, rule and reducer must all be set before building");
-      }
-      return new ReducerRule<>(propertyNames, propertyGetters, reducer, rule);
+    if (!buildable()) {
+      throw new IllegalStateException("Properties, rule and reducer must all be set before building");
     }
+    return new ReducerRule<>(propertyNames, propertyGetters, reducer, rule);
+  }
 
 }

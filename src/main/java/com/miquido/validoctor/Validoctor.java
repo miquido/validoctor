@@ -2,18 +2,17 @@ package com.miquido.validoctor;
 
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
-import com.miquido.validoctor.reducerrule.ReducerRule;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.diagnosis.DiagnosisException;
 import com.miquido.validoctor.multirule.MultiRule;
+import com.miquido.validoctor.multirule.PropertyRule;
+import com.miquido.validoctor.reducerrule.ReducerRule;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
@@ -73,7 +72,9 @@ public final class Validoctor {
 
   /**
    * Object examination with ReducerRules, pre-examined with a single Rule. If the preRule examination results in
-   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
+   * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
+   * {@code examineCombo(patient, Rules.notNull(), reducerRules)}<br/>
    * @param patient object to validate
    * @param preRule validation Rule applied to patient object as a whole before attempting to apply other rules
    * @param reducerRules validation ReducerRules for properties of patient
@@ -128,23 +129,16 @@ public final class Validoctor {
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
   public final <T> Diagnosis examine(T patient, MultiRule<T> rules) {
-    return innerExamine(patient, rules,
-        (ailments, rule) -> ailments.computeIfAbsent(rule.getProperty(), key -> new HashSet<>()).add(rule.getAilment()));
-  }
-
-
-  private <T, R extends Rule<T>> Diagnosis innerExamine(T patient, List<R> rules,
-                                                        BiConsumer<Map<String, Set<Ailment>>, R> ailmentPutter) {
     Severity severity = Severity.OK;
     Map<String, Set<Ailment>> ailments = new HashMap<>();
-    for (R rule : rules) {
+    for (PropertyRule<T> rule : rules) {
       boolean valid = rule.test(patient);
       if (!valid) {
-        Severity ailmentSeverity = rule.getAilment().getSeverity();
-        if (ailmentSeverity.isWorseThan(severity)) {
-          severity = ailmentSeverity;
+        Ailment ailment = rule.getAilment();
+        if (ailment.getSeverity().isWorseThan(severity)) {
+          severity = ailment.getSeverity();
         }
-        ailmentPutter.accept(ailments, rule);
+        ailments.computeIfAbsent(rule.getProperty(), key -> new HashSet<>()).add(ailment);
         if (!pedantic) {
           break;
         }
