@@ -2,13 +2,11 @@ package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.TestPatient;
 import com.miquido.validoctor.Validoctor;
-import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.rule.Rule;
 import com.miquido.validoctor.rule.SimpleRule;
 import org.junit.Test;
 
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.miquido.validoctor.TestUtil.*;
@@ -29,10 +27,10 @@ public class MultiRuleTest {
   @Test
   public void nonConditional_nonReflexive() {
     MultiRule<TestPatient> multiRule = MultiRule.<TestPatient>builder()
-        .withRules("id", TestPatient::getId, notNull(), numberNonNegative())
-        .withRules("name", TestPatient::getName, stringMinLength(3), stringMaxLength(20))
-        .withRules("phone", TestPatient::getPhone, stringExactLength(13), PHONE_FORMAT)
-        .withRules("registered", TestPatient::isRegistered, notNull(), isTrue())
+        .addRules("id", TestPatient::getId, notNull(), numberNonNegative())
+        .addRules("name", TestPatient::getName, stringMinLength(3), stringMaxLength(20))
+        .addRules("phone", TestPatient::getPhone, stringExactLength(13), PHONE_FORMAT)
+        .addRules("registered", TestPatient::isRegistered, notNull(), isTrue())
         .build();
 
     testNonConditionalMultiRule(multiRule);
@@ -41,10 +39,10 @@ public class MultiRuleTest {
   @Test
   public void nonConditional_reflexive() {
     MultiRule<TestPatient> multiRule = MultiRule.<TestPatient>builder().reflexiveProperties(TestPatient.class)
-        .withRules("id", notNull(), numberNonNegative())
-        .withRules("name", stringMinLength(3), stringMaxLength(20))
-        .withRules("phone", stringExactLength(13), PHONE_FORMAT)
-        .withRules("registered", notNull(), isTrue())
+        .addRules("id", notNull(), numberNonNegative())
+        .addRules("name", stringMinLength(3), stringMaxLength(20))
+        .addRules("phone", stringExactLength(13), PHONE_FORMAT)
+        .addRules("registered", notNull(), isTrue())
         .build();
 
     testNonConditionalMultiRule(multiRule);
@@ -74,10 +72,10 @@ public class MultiRuleTest {
   @Test
   public void conditional() {
     MultiRule<TestPatient> multiRule = MultiRule.<TestPatient>builder()
-        .withConditionalRules(TestPatient::isIdSet, "id", TestPatient::getId, notNull(), numberNonNegative())
-        .withConditionalRules(TestPatient::isNameSet, "name", TestPatient::getName, stringMinLength(3), stringMaxLength(20))
-        .withConditionalRules(TestPatient::isPhoneSet, "phone", TestPatient::getPhone, stringExactLength(13), PHONE_FORMAT)
-        .withRules("registered", TestPatient::isRegistered, notNull(), isTrue())
+        .addRules(TestPatient::isIdSet, "id", TestPatient::getId, notNull(), numberNonNegative())
+        .addRules(TestPatient::isNameSet, "name", TestPatient::getName, stringMinLength(3), stringMaxLength(20))
+        .addRules(TestPatient::isPhoneSet, "phone", TestPatient::getPhone, stringExactLength(13), PHONE_FORMAT)
+        .addRules("registered", TestPatient::isRegistered, notNull(), isTrue())
         .build();
 
     testConditionalMultiRule(multiRule);
@@ -86,10 +84,10 @@ public class MultiRuleTest {
   @Test
   public void conditional_reflexive() {
     MultiRule<TestPatient> multiRule = MultiRule.<TestPatient>builder().reflexiveProperties(TestPatient.class)
-        .withConditionalRules(TestPatient::isIdSet, "id", notNull(), numberNonNegative(), numberPositive())
-        .withConditionalRules(TestPatient::isNameSet, "name", stringMinLength(3), stringMaxLength(20))
-        .withConditionalRules(TestPatient::isPhoneSet, "phone", stringExactLength(13), PHONE_FORMAT)
-        .withRules("registered", notNull(), isTrue())
+        .addRules(TestPatient::isIdSet, "id", notNull(), numberNonNegative(), numberPositive())
+        .addRules(TestPatient::isNameSet, "name", stringMinLength(3), stringMaxLength(20))
+        .addRules(TestPatient::isPhoneSet, "phone", stringExactLength(13), PHONE_FORMAT)
+        .addRules("registered", notNull(), isTrue())
         .build();
 
     testConditionalMultiRule(multiRule);
@@ -122,9 +120,9 @@ public class MultiRuleTest {
   @Test
   public void sameForAll() {
     MultiRule<TestPatient> multiRule = MultiRule.<TestPatient>builder().reflexiveProperties(TestPatient.class)
-        .withRulesForAll(String.class, stringMinLength(3), stringMaxLength(20))
-        .withRulesForAll(boolean.class, notNull(), isTrue())
-        .withRulesForAll(long.class, numberPositive())
+        .addRulesForAll(String.class, stringMinLength(3), stringMaxLength(20))
+        .addRulesForAll(boolean.class, notNull(), isTrue())
+        .addRulesForAll(long.class, numberPositive())
         .build();
 
     TestPatient patient = new TestPatient(1L, "Name", "+48.123123123", 1L, true);
@@ -142,12 +140,12 @@ public class MultiRuleTest {
   @Test
   public void multipleMultiRules() {
     MultiRule<TestPatient> multiRule1 = MultiRule.<TestPatient>builder()
-        .withRules("name", TestPatient::getName, stringMinLength(3), stringMaxLength(20))
-        .withRules("registered", TestPatient::isRegistered, notNull(), isTrue())
+        .addRules("name", TestPatient::getName, stringMinLength(3), stringMaxLength(20))
+        .addRules("registered", TestPatient::isRegistered, notNull(), isTrue())
         .build();
     MultiRule<TestPatient> multiRule2 = MultiRule.<TestPatient>builder()
-        .withRules("phone", TestPatient::getPhone, stringExactLength(13), PHONE_FORMAT)
-        .withRules("name", TestPatient::getName, stringExactLength(10))
+        .addRules("phone", TestPatient::getPhone, stringExactLength(13), PHONE_FORMAT)
+        .addRules("name", TestPatient::getName, stringExactLength(10))
         .build();
 
     TestPatient patient = new TestPatient(1L, "Name10long", "+48.123123123", true);
@@ -174,12 +172,12 @@ public class MultiRuleTest {
   @Test
   public void multiRulesAndSimpleRules() {
     MultiRule<TestPatient> multiRule1 = MultiRule.<TestPatient>builder()
-        .withRules("name", TestPatient::getName, stringMinLength(3), stringMaxLength(20))
-        .withRules("registered", TestPatient::isRegistered, notNull(), isTrue())
+        .addRules("name", TestPatient::getName, stringMinLength(3), stringMaxLength(20))
+        .addRules("registered", TestPatient::isRegistered, notNull(), isTrue())
         .build();
     MultiRule<TestPatient> multiRule2 = MultiRule.<TestPatient>builder()
-        .withRules("phone", TestPatient::getPhone, stringExactLength(13), PHONE_FORMAT)
-        .withRules("name", TestPatient::getName, stringExactLength(10))
+        .addRules("phone", TestPatient::getPhone, stringExactLength(13), PHONE_FORMAT)
+        .addRules("name", TestPatient::getName, stringExactLength(10))
         .build();
 
     TestPatient patient = new TestPatient(1L, "Name10long", "+48.123123123", true);

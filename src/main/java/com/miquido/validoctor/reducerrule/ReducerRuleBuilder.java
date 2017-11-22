@@ -80,10 +80,6 @@ public class ReducerRuleBuilder<T, P> {
     return this;
   }
 
-  private boolean buildable() {
-    return !propertyGetters.isEmpty() && rule != null && reducer != null;
-  }
-
   /**
    * Builds the ReducerRule. Properties, rule and reducer must have all been set for this method to succeed.
    * @return new ReducerRule
@@ -94,6 +90,11 @@ public class ReducerRuleBuilder<T, P> {
       throw new IllegalStateException("Properties, rule and reducer must all be set before building");
     }
     return new ReducerRule<>(propertyNames, propertyGetters, reducer, rule);
+  }
+
+
+  private boolean buildable() {
+    return !propertyGetters.isEmpty() && rule != null && reducer != null;
   }
 
 }

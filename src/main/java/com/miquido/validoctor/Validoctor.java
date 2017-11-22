@@ -107,7 +107,7 @@ public final class Validoctor {
 
   /**
    * Multi property object examination, pre-examined with a single ReducerRule. If the preRule examination results in
-   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.
    * @param patient object to validate
    * @param preRule validation ReducerRule applied to patient object as a whole before attempting to apply other rules
    * @param multiRules validation MultiRules for properties of patient

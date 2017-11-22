@@ -93,13 +93,13 @@ public class ReducerRuleTest {
     TestPatient patient = new TestPatient(1L, "Name", "+48123", 5L, true);
 
     MultiRule<TestPatient> multiRule1 = MultiRule.<TestPatient>builder().reflexiveProperties(TestPatient.class)
-        .withRules("name", stringMinLength(3), stringMaxLength(20))
-        .withRules("phone", stringExactLength(6))
-        .withRules("registered", notNull(), isTrue())
+        .addRules("name", stringMinLength(3), stringMaxLength(20))
+        .addRules("phone", stringExactLength(6))
+        .addRules("registered", notNull(), isTrue())
         .build();
 
     MultiRule<TestPatient> multiRule2 = MultiRule.<TestPatient>builder().reflexiveProperties(TestPatient.class)
-        .withRulesForAll(Long.class, notNull(), numberNonNegative())
+        .addRulesForAll(Long.class, notNull(), numberNonNegative())
         .build();
 
     assertOk(validoctor.examineCombo(patient, rule1, multiRule1, multiRule2));
