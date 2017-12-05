@@ -1,12 +1,12 @@
 package com.miquido.validoctor.multirule;
 
-import com.miquido.validoctor.rule.PropertyRule;
-import com.miquido.validoctor.rule.PropertyRuleAdapter;
+import com.miquido.validoctor.reducerrule.ReducerRule;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * List of {@link PropertyRule}s for validation of a single class of objects.
@@ -24,12 +24,12 @@ public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
   }
 
   /**
-   * Creates a MultiRule out of passed Rules.<br/>
+   * For internal use. Creates a MultiRule out of passed Rules.<br/>
    * Important: it adapts the rules as {@link PropertyRule}s with null property association.
    * If these already were PropertyRules, their associations will be overridden with null, which is interpreted as
-   * association to whole object, not a property of it. This is usually undesired, but may be useful for passing
-   * both whole object value and properties validations in one Validoctor call:<br/><br/>
-   * {@code validoctor.examine(patient, MultiRule.of(notNull(), collectionNotEmpty()), multiRule1, multiRule2)}.
+   * association to whole object, not a property of it. This is usually undesired. If you need to perform both whole
+   * object and properties validation in one call, use:<br/><br/>
+   * {@code validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2)}.<br/>
    * @param rules rules to put into new MultiRule. Non null.
    * @param <T> type of patient object
    * @return a new MultiRule
@@ -48,6 +48,29 @@ public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
     return multiRule;
   }
 
+  /**
+   * For internal use. Creates a MultiRule out of passed ReducerRules. This results in a MultiRule containing a
+   * PropertyRule for each property the ReducerRule is associated with. These are special implementations of
+   * PropertyRule that are aware of rules for other properties are share the results of their examination to them,
+   * avoiding excess validations.
+   * @param reducerRules rules to translate into new MultiRule. Non null.
+   * @param <T> type of patient object
+   * @return a new MultiRule
+   */
+  @SafeVarargs
+  public static <T> MultiRule<T> of(ReducerRule<T, ?>... reducerRules) {
+    int sumSizes = Stream.of(reducerRules)
+        .map(rule -> rule.getProperties().size())
+        .reduce((sumSize, size) -> sumSize + size).orElse(0);
+    MultiRule<T> multiRule = new MultiRule<>(sumSizes);
+
+    Stream.of(reducerRules).forEach(rule -> {
+      RealShadowRule<T> originalShadow = new RealShadowRule<>(rule);
+      rule.getProperties().forEach(property -> multiRule.add(new ShadowRule<>(property, originalShadow)));
+    });
+    return multiRule;
+  }
+
 
   MultiRule(int initialCapacity) {
     super(initialCapacity);
@@ -59,7 +82,7 @@ public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
 
   /**
    * Merges two MultiRules dealing with the same type of patient into one MultiRule.
-   * @param other MultiRule to merge with this rule
+   * @param other MultiRule to merge with this MultiRule
    * @return new MultiRule, with all rules from both this and the other MultiRule added
    */
   public MultiRule<T> and(MultiRule<T> other) {
@@ -67,6 +90,16 @@ public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
     multiRule.addAll(this);
     multiRule.addAll(other);
     return multiRule;
+  }
+
+  /**
+   * Merges this MultiRule and a ReducerRule dealing with the same type of patient into one MultiRule.
+   * Convenience method same as {@code and(MultiRule.of(reducerRule))}
+   * @param reducerRule ReducerRule to merge with this MultiRule
+   * @return new MultiRule, with all rules from this MultiRule and ones inferred from ReducerRule.
+   */
+  public MultiRule<T> and(ReducerRule<T, ?> reducerRule) {
+    return and(MultiRule.of(reducerRule));
   }
 
 }

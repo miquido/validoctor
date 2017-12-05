@@ -1,4 +1,4 @@
-package com.miquido.validoctor.multirule;
+package com.miquido.validoctor;
 
 public class TestPatient {
 
@@ -8,8 +8,27 @@ public class TestPatient {
   private String name;
   private boolean phoneSet;
   private String phone;
+  private boolean ordinalSet;
+  private Long ordinal;
   private boolean registered;
 
+
+  public TestPatient() {}
+
+  public TestPatient(long id, String name, String phone, boolean registered) {
+    setId(id);
+    setName(name);
+    setPhone(phone);
+    setRegistered(registered);
+  }
+
+  public TestPatient(long id, String name, String phone, long ordinal, boolean registered) {
+    setId(id);
+    setName(name);
+    setPhone(phone);
+    setOrdinal(ordinal);
+    setRegistered(registered);
+  }
 
   public void setId(Long id) {
     idSet = true;
@@ -24,6 +43,11 @@ public class TestPatient {
   public void setPhone(String phone) {
     phoneSet = true;
     this.phone = phone;
+  }
+
+  public void setOrdinal(Long ordinal) {
+    ordinalSet = true;
+    this.ordinal = ordinal;
   }
 
   public void setRegistered(boolean registered) {
@@ -52,6 +76,14 @@ public class TestPatient {
 
   public String getPhone() {
     return phone;
+  }
+
+  public boolean isOrdinalSet() {
+    return ordinalSet;
+  }
+
+  public Long getOrdinal() {
+    return ordinal;
   }
 
   public boolean isRegistered() {

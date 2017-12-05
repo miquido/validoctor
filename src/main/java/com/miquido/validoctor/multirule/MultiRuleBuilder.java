@@ -1,6 +1,8 @@
 package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.rule.Rule;
+import com.miquido.validoctor.util.NameUtil;
+import com.miquido.validoctor.util.PropertyAccessException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -41,10 +43,10 @@ public class MultiRuleBuilder<T> {
    * @return builder for chaining
    */
   @SafeVarargs
-  public final <PropertyType> MultiRuleBuilder<T> withRules(String propertyName,
-                                                            Function<T, PropertyType> propertyGetter,
-                                                            Rule<PropertyType>... rules) {
-    return withConditionalRules(t -> true, propertyName, propertyGetter, rules);
+  public final <PropertyType> MultiRuleBuilder<T> addRules(String propertyName,
+                                                           Function<T, PropertyType> propertyGetter,
+                                                           Rule<PropertyType>... rules) {
+    return addRules(t -> true, propertyName, propertyGetter, rules);
   }
 
   /**
@@ -56,10 +58,10 @@ public class MultiRuleBuilder<T> {
    * @return builder for chaining
    */
   @SafeVarargs
-  public final <PropertyType> MultiRuleBuilder<T> withConditionalRules(Predicate<T> condition,
-                                                                       String propertyName,
-                                                                       Function<T, PropertyType> propertyGetter,
-                                                                       Rule<PropertyType>... rules) {
+  public final <PropertyType> MultiRuleBuilder<T> addRules(Predicate<T> condition,
+                                                           String propertyName,
+                                                           Function<T, PropertyType> propertyGetter,
+                                                           Rule<PropertyType>... rules) {
     for (Rule<PropertyType> rule : rules) {
       this.rules.add(new ConditionalPropertyRule<>(propertyName, propertyGetter, condition, rule));
     }
@@ -89,9 +91,9 @@ public class MultiRuleBuilder<T> {
      * @return builder for chaining
      */
     @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder withRules(String propertyName,
-                                                                    Rule<PropertyType>... rules) {
-      MultiRuleBuilder.this.withRules(propertyName, getterFunction(propertyName), rules);
+    public final <PropertyType> ReflexiveMultiRuleBuilder addRules(String propertyName,
+                                                                   Rule<PropertyType>... rules) {
+      MultiRuleBuilder.this.addRules(propertyName, getterFunction(propertyName), rules);
       return this;
     }
 
@@ -103,10 +105,10 @@ public class MultiRuleBuilder<T> {
      * @return builder for chaining
      */
     @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder withConditionalRules(Predicate<T> condition,
-                                                                               String propertyName,
-                                                                               Rule<PropertyType>... rules) {
-      MultiRuleBuilder.this.withConditionalRules(condition, propertyName, getterFunction(propertyName), rules);
+    public final <PropertyType> ReflexiveMultiRuleBuilder addRules(Predicate<T> condition,
+                                                                   String propertyName,
+                                                                   Rule<PropertyType>... rules) {
+      MultiRuleBuilder.this.addRules(condition, propertyName, getterFunction(propertyName), rules);
       return this;
     }
 
@@ -119,15 +121,15 @@ public class MultiRuleBuilder<T> {
      * @return builder for chaining
      */
     @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder withRulesForAll(Class<? extends PropertyType> propertyClass,
-                                                                          Rule<PropertyType>... rules) {
+    public final <PropertyType> ReflexiveMultiRuleBuilder addRulesForAll(Class<? extends PropertyType> propertyClass,
+                                                                         Rule<PropertyType>... rules) {
       Arrays.stream(subjectClass.getMethods())
           .filter(method -> Modifier.isPublic(method.getModifiers()) && method.getReturnType().equals(propertyClass) &&
               (method.getName().startsWith("get") || method.getName().startsWith("is")))
           .forEach(getter -> {
             boolean isIs = getter.getName().startsWith("is");
-            String propertyName = MethodNames.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
-            MultiRuleBuilder.this.withRules(propertyName, getterFunction(propertyName, getter), rules);
+            String propertyName = NameUtil.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
+            MultiRuleBuilder.this.addRules(propertyName, getterFunction(getter), rules);
           });
       return this;
     }
@@ -141,20 +143,20 @@ public class MultiRuleBuilder<T> {
       try {
         Class<?> type = subjectClass.getDeclaredField(propertyName).getType();
         String verb = type.equals(boolean.class) ? "is" : "get";
-        String methodName = verb + MethodNames.capitalize(propertyName);
+        String methodName = verb + NameUtil.capitalize(propertyName);
         Method method = subjectClass.getMethod(methodName);
-        return getterFunction(propertyName, method);
+        return getterFunction(method);
       } catch (NoSuchMethodException | NoSuchFieldException e) {
         throw PropertyAccessException.noGetter(propertyName, e);
       }
     }
 
-    private <PropertyType> Function<T, PropertyType> getterFunction(String propertyName, Method method) {
+    private <PropertyType> Function<T, PropertyType> getterFunction(Method method) {
       return object -> {
         try {
           return (PropertyType) method.invoke(object);
         } catch (IllegalAccessException | InvocationTargetException e) {
-          throw PropertyAccessException.noGetter(propertyName, object, e);
+          throw PropertyAccessException.noGetter(method.getName(), object, e);
         }
       };
     }

@@ -1,13 +1,12 @@
 package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.ailment.Ailment;
-import com.miquido.validoctor.rule.PropertyRule;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class ConditionalPropertyRule<PatientType, PropertyType> implements PropertyRule<PatientType> {
+class ConditionalPropertyRule<PatientType, PropertyType> implements PropertyRule<PatientType> {
 
   private final String property;
   private final Function<PatientType, PropertyType> propertyGetter;

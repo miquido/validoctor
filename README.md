@@ -26,13 +26,17 @@ There are 3 types of rules, calling validation with each type is the same:
 Diagnosis diagnosis = validoctor.examine(patient, RULE_1, RULE_2);
 ```
 
-examine() method accepts any number of rules of given type. There also are overloads of examine method that allow passing some permutations of rules of several kinds.
+examine() method accepts any number of rules of given type. There also are examineCombo methods that allow passing some permutations of rules of several kinds:
+
+```java
+Diagnosis diagnosis = validoctor.examineCombo(patient, Rules.notNull(), multiRule1, multiRule2);
+```
 
 Types are:
 
 * Just Rule - simple interface used to define validations of one value
 * MultiRule - rule sets that allow defining validations for whole data structures on per property basis
-* ComplexRule - define validations of multiple properties at once
+* ReducerRules - rules that are applied to a set of properties of the same type that is reduced to one value
 
 
 # Dependencies
@@ -40,5 +44,4 @@ None.
 
 
 # TODO
-* ComplexRules
 * Rules for elements of collection

@@ -1,12 +1,13 @@
-package com.miquido.validoctor.rule;
+package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.ailment.Ailment;
+import com.miquido.validoctor.rule.Rule;
 
-public class PropertyRuleAdapter<T> implements PropertyRule<T> {
+class PropertyRuleAdapter<T> implements PropertyRule<T> {
 
   private final Rule<T> rule;
 
-  public PropertyRuleAdapter(Rule<T> rule) {
+  PropertyRuleAdapter(Rule<T> rule) {
     this.rule = rule;
   }
 

@@ -4,6 +4,8 @@ package com.miquido.validoctor.diagnosis;
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,6 +31,19 @@ public class Diagnosis {
 
   public Map<String, Set<Ailment>> getAilments() {
     return ailments;
+  }
+
+  /**
+   * Creates a new Diagnosis that is the sum of this Diagnosis and the specified one. New Diagnosis has the worse
+   * (see {@link Severity#isWorseThan(Severity)}) severity of the two, and contains all the ailments of the two.
+   * @param other diagnosis to sum with this one
+   * @return new Diagnosis
+   */
+  public Diagnosis and(Diagnosis other) {
+    Severity severity = getSeverity().isWorseThan(other.getSeverity()) ? getSeverity() : other.getSeverity();
+    Map<String, Set<Ailment>> ailments = new HashMap<>(getAilments());
+    other.getAilments().forEach((property, propertyAilments) -> ailments.computeIfAbsent(property, prop -> new HashSet<>()).addAll(propertyAilments));
+    return new Diagnosis(severity, ailments);
   }
 
   @Override
