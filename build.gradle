@@ -2,15 +2,18 @@ group 'com.miquido'
 version '1.0.0-rc1'
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 
 sourceCompatibility = 1.8
 
 buildscript {
+    ext.kotlin_version = '1.2.0'
     repositories {
         jcenter()
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -18,8 +21,15 @@ repositories {
     mavenCentral()
 }
 
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }
 
 apply from: "publish-config.gradle"

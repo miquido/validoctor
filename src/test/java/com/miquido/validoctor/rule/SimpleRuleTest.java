@@ -91,7 +91,7 @@ public class SimpleRuleTest {
   }
 
   @Test
-  public void predefinedRule_stringLengthInRAnge() {
+  public void predefinedRule_stringLengthInRange() {
     assertError(validoctor.examine("aa", stringLengthInRange(3, 3)));
     assertError(validoctor.examine("   ", stringLengthInRange(0, 0)));
     assertError(validoctor.examine("aa aa", stringLengthInRange(1, 4)));
@@ -107,6 +107,28 @@ public class SimpleRuleTest {
     assertError(validoctor.examine("aa aa", stringExactLength(6)));
     assertOk(validoctor.examine(null, stringExactLength(1)));
     assertOk(validoctor.examine("aa aa", stringExactLength(5)));
+  }
+
+  @Test
+  public void predefinedRule_stringAlphanumeric() {
+    assertError(validoctor.examine("aa5 ", stringAlphanumeric()));
+    assertError(validoctor.examine("aa-5", stringAlphanumeric()));
+    assertError(validoctor.examine("&*(%$", stringAlphanumeric()));
+    assertError(validoctor.examine("12^1", stringAlphanumeric()));
+    assertOk(validoctor.examine(null, stringAlphanumeric()));
+    assertOk(validoctor.examine("aa5aa", stringAlphanumeric()));
+    assertOk(validoctor.examine("aaaa", stringAlphanumeric()));
+    assertOk(validoctor.examine("555", stringAlphanumeric()));
+  }
+
+  @Test
+  public void predefinedRule_stringAlphabetic() {
+    assertError(validoctor.examine("aa5", stringAlphabetic()));
+    assertError(validoctor.examine("a a", stringAlphabetic()));
+    assertError(validoctor.examine("aa-aa", stringAlphabetic()));
+    assertError(validoctor.examine("*7^%", stringAlphabetic()));
+    assertOk(validoctor.examine(null, stringAlphabetic()));
+    assertOk(validoctor.examine("aaaa", stringAlphabetic()));
   }
 
   @Test

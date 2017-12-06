@@ -1,13 +1,7 @@
 package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.rule.Rule;
-import com.miquido.validoctor.util.NameUtil;
-import com.miquido.validoctor.util.PropertyAccessException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -29,10 +23,10 @@ public class MultiRuleBuilder<T> {
    * Will use reflection to get properties. Failure to find or call property getters will cause validation fail.
    * <br/><b></b>Contract:</b><br/>
    * - Subject class must contain a getter for each property that is to be validated.<br/>
-   * - Subject class may contain getters for boolean or Boolean properties that start with "is".<br/>
+   * - Subject class may contain getters for boolean properties that start with "is".<br/>
    */
-  public ReflexiveMultiRuleBuilder reflexiveProperties(Class<T> subjectClass) {
-    return new ReflexiveMultiRuleBuilder(subjectClass);
+  public ReflexiveMultiRuleBuilder<T> reflexiveProperties(Class<T> subjectClass) {
+    return new ReflexiveMultiRuleBuilder<>(this, subjectClass);
   }
 
   /**
@@ -50,11 +44,26 @@ public class MultiRuleBuilder<T> {
   }
 
   /**
+   * Adds a multiRule for validating an object that is a property of patient.
+   *
+   * @param propertyName   name of property to apply the multiRule to
+   * @param propertyGetter getter of the property the rules apply to
+   * @param multiRule      multiRule to apply
    * @param <PropertyType> type of property
+   * @return builder for chaining
+   */
+  public <PropertyType> MultiRuleBuilder<T> addMultiRule(String propertyName,
+                                                         Function<T, PropertyType> propertyGetter,
+                                                         MultiRule<PropertyType> multiRule) {
+    return addMultiRule(t -> true, propertyName, propertyGetter, multiRule);
+  }
+
+  /**
    * @param condition      conditional predicate determining whether to run validation on the property
    * @param propertyName   name of the property the rules apply to
    * @param propertyGetter getter of the property the rules apply to
    * @param rules          rules to apply
+   * @param <PropertyType> type of property
    * @return builder for chaining
    */
   @SafeVarargs
@@ -68,98 +77,28 @@ public class MultiRuleBuilder<T> {
     return this;
   }
 
+  /**
+   * Adds a multiRule for validating an object that is a property of patient.
+   *
+   * @param condition      conditional predicate determining whether to run validation on the property
+   * @param propertyName   name of property to apply the multiRule to
+   * @param propertyGetter getter of the property the rules apply to
+   * @param multiRule      multiRule to apply
+   * @param <PropertyType> type of property
+   * @return builder for chaining
+   */
+  public <PropertyType> MultiRuleBuilder<T> addMultiRule(Predicate<T> condition,
+                                                         String propertyName,
+                                                         Function<T, PropertyType> propertyGetter,
+                                                         MultiRule<PropertyType> multiRule) {
+    for (PropertyRule<PropertyType> rule : multiRule) {
+      addRules(condition, propertyName + "." + rule.getProperty(), propertyGetter, rule);
+    }
+    return this;
+  }
+
   public MultiRule<T> build() {
     return rules;
   }
 
-
-  public class ReflexiveMultiRuleBuilder {
-
-    private final Class<T> subjectClass;
-
-    private ReflexiveMultiRuleBuilder(Class<T> subjectClass) {
-      this.subjectClass = subjectClass;
-    }
-
-    /**
-     * If property getter is not found within the object or can not be called at runtime,
-     * {@link PropertyAccessException} is thrown.
-     *
-     * @param propertyName   name of property to apply the rules to
-     * @param rules          rules to apply
-     * @param <PropertyType> type of property
-     * @return builder for chaining
-     */
-    @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder addRules(String propertyName,
-                                                                   Rule<PropertyType>... rules) {
-      MultiRuleBuilder.this.addRules(propertyName, getterFunction(propertyName), rules);
-      return this;
-    }
-
-    /**
-     * @param <PropertyType> type of property
-     * @param condition      conditional predicate determining whether to run validation on the property
-     * @param propertyName   name of property to apply the rules to
-     * @param rules          rules to apply
-     * @return builder for chaining
-     */
-    @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder addRules(Predicate<T> condition,
-                                                                   String propertyName,
-                                                                   Rule<PropertyType>... rules) {
-      MultiRuleBuilder.this.addRules(condition, propertyName, getterFunction(propertyName), rules);
-      return this;
-    }
-
-    /**
-     * Applies given rules to all properties of given type found in the subject class.
-     * Every public method returning a given type and starting with "get" or "is" is treated as a property getter.
-     * @param propertyClass  class of properties to apply the rules to
-     * @param rules          rules to apply
-     * @param <PropertyType> type of property
-     * @return builder for chaining
-     */
-    @SafeVarargs
-    public final <PropertyType> ReflexiveMultiRuleBuilder addRulesForAll(Class<? extends PropertyType> propertyClass,
-                                                                         Rule<PropertyType>... rules) {
-      Arrays.stream(subjectClass.getMethods())
-          .filter(method -> Modifier.isPublic(method.getModifiers()) && method.getReturnType().equals(propertyClass) &&
-              (method.getName().startsWith("get") || method.getName().startsWith("is")))
-          .forEach(getter -> {
-            boolean isIs = getter.getName().startsWith("is");
-            String propertyName = NameUtil.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
-            MultiRuleBuilder.this.addRules(propertyName, getterFunction(getter), rules);
-          });
-      return this;
-    }
-
-    public MultiRule<T> build() {
-      return MultiRuleBuilder.this.build();
-    }
-
-
-    private <PropertyType> Function<T, PropertyType> getterFunction(String propertyName) {
-      try {
-        Class<?> type = subjectClass.getDeclaredField(propertyName).getType();
-        String verb = type.equals(boolean.class) ? "is" : "get";
-        String methodName = verb + NameUtil.capitalize(propertyName);
-        Method method = subjectClass.getMethod(methodName);
-        return getterFunction(method);
-      } catch (NoSuchMethodException | NoSuchFieldException e) {
-        throw PropertyAccessException.noGetter(propertyName, e);
-      }
-    }
-
-    private <PropertyType> Function<T, PropertyType> getterFunction(Method method) {
-      return object -> {
-        try {
-          return (PropertyType) method.invoke(object);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-          throw PropertyAccessException.noGetter(method.getName(), object, e);
-        }
-      };
-    }
-
-  }
 }
