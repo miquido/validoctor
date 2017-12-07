@@ -179,10 +179,10 @@ public final class Rules {
   }
 
   /**
-   * Builds a very simple wrapper rule for validating collection type fields.
+   * Builds a very simple wrapper rule for validating collections.
    */
-  public static <T> Rule<List<T>> each(Rule<T> rule) {
+  public static <T> Rule<Collection<T>> each(Rule<T> rule) {
     return new SimpleRule<>(rule.getAilment().getName(),
-        list -> list == null || list.stream().allMatch(rule::test), rule.getAilment().getSeverity());
+        col -> col == null || col.stream().allMatch(rule::test), rule.getAilment().getSeverity());
   }
 }

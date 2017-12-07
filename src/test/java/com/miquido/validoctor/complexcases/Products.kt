@@ -1,4 +1,4 @@
-package com.miquido.validoctor.nestedrules
+package com.miquido.validoctor.complexcases
 
 enum class Tag {
   MEAT, VEGETABLE, SOY, FRUIT, DOUGH
@@ -13,4 +13,4 @@ data class Comment(var authorId: Long?, var text: String?, var upVotedUsersIds: 
 
 data class Product(var name: String?, var skuId: String?, var description: String?, var weightG: Float?, var volumeMl: Float?,
                    var nutritionFacts: NutritionFacts?, var glutenFree: Boolean?, var vegan: Boolean?, var tags: Set<Tag>?,
-                   var comments: List<Comment>?)
+                   var comments: List<Comment>?, var reviewScores: MutableList<Int>?)

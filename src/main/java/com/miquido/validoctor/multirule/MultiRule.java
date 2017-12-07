@@ -51,7 +51,7 @@ public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
   /**
    * For internal use. Creates a MultiRule out of passed ReducerRules. This results in a MultiRule containing a
    * PropertyRule for each property the ReducerRule is associated with. These are special implementations of
-   * PropertyRule that are aware of rules for other properties are share the results of their examination to them,
+   * PropertyRule that are aware of rules for other properties and share the results of their examination to them,
    * avoiding excess validations.
    * @param reducerRules rules to translate into new MultiRule. Non null.
    * @param <T> type of patient object

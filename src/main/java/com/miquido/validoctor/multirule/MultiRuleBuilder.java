@@ -1,7 +1,9 @@
 package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.rule.Rule;
+import com.miquido.validoctor.rule.Rules;
 
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -59,6 +61,21 @@ public class MultiRuleBuilder<T> {
   }
 
   /**
+   * Adds a multiRule for validating a collection of objects that is a property of patient.
+   *
+   * @param propertyName   name of property to apply the multiRule to
+   * @param propertyGetter getter of the collection property that will have rules applied to its elements
+   * @param multiRule      multiRule to apply
+   * @param <PropertyType> type of property
+   * @return builder for chaining
+   */
+  public <PropertyType> MultiRuleBuilder<T> addMultiRuleForElements(String propertyName,
+                                                                    Function<T, Collection<PropertyType>> propertyGetter,
+                                                                    MultiRule<PropertyType> multiRule) {
+    return addMultiRuleForElements(t -> true, propertyName, propertyGetter, multiRule);
+  }
+
+  /**
    * @param condition      conditional predicate determining whether to run validation on the property
    * @param propertyName   name of the property the rules apply to
    * @param propertyGetter getter of the property the rules apply to
@@ -93,6 +110,26 @@ public class MultiRuleBuilder<T> {
                                                          MultiRule<PropertyType> multiRule) {
     for (PropertyRule<PropertyType> rule : multiRule) {
       addRules(condition, propertyName + "." + rule.getProperty(), propertyGetter, rule);
+    }
+    return this;
+  }
+
+  /**
+   * Adds a multiRule for validating a collection of objects that is a property of patient.
+   *
+   * @param condition      conditional predicate determining whether to run validation on the property
+   * @param propertyName   name of property to apply the multiRule to
+   * @param propertyGetter getter of the collection property that will have rules applied to its elements
+   * @param multiRule      multiRule to apply
+   * @param <PropertyType> type of property
+   * @return builder for chaining
+   */
+  public <PropertyType> MultiRuleBuilder<T> addMultiRuleForElements(Predicate<T> condition,
+                                                                    String propertyName,
+                                                                    Function<T, Collection<PropertyType>> propertyGetter,
+                                                                    MultiRule<PropertyType> multiRule) {
+    for (PropertyRule<PropertyType> rule : multiRule) {
+      addRules(condition, propertyName + "_element." + rule.getProperty(), propertyGetter, Rules.each(rule));
     }
     return this;
   }

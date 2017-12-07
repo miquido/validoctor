@@ -1,6 +1,7 @@
 package com.miquido.validoctor.multirule;
 
 import com.miquido.validoctor.rule.Rule;
+import com.miquido.validoctor.rule.Rules;
 import com.miquido.validoctor.util.NameUtil;
 import com.miquido.validoctor.util.PropertyAccessException;
 
@@ -53,6 +54,21 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   /**
+   * Adds a multiRule for validating a collection of objects that is a property of patient.</br>
+   * If property getter is not found within the object or can not be called at runtime,
+   * {@link PropertyAccessException} is thrown.
+   *
+   * @param propertyName   name of property to apply the multiRule to
+   * @param multiRule      multiRule to apply
+   * @param <PropertyType> type of property
+   * @return builder for chaining
+   */
+  public <PropertyType> ReflexiveMultiRuleBuilder<PatientType> addMultiRuleForElements(String propertyName,
+                                                                                       MultiRule<PropertyType> multiRule) {
+    return addMultiRuleForElements(t -> true, propertyName, multiRule);
+  }
+
+  /**
    * If property getter is not found within the object or can not be called at runtime,
    * {@link PropertyAccessException} is thrown.
    *
@@ -91,6 +107,26 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   /**
+   * Adds a multiRule for validating a collection of objects that is a property of patient.</br>
+   * If property getter is not found within the object or can not be called at runtime,
+   * {@link PropertyAccessException} is thrown.
+   *
+   * @param condition      conditional predicate determining whether to run validation on the property
+   * @param propertyName   name of property to apply the multiRule to
+   * @param multiRule      multiRule to apply
+   * @param <PropertyType> type of property
+   * @return builder for chaining
+   */
+  public <PropertyType> ReflexiveMultiRuleBuilder<PatientType> addMultiRuleForElements(Predicate<PatientType> condition,
+                                                                                       String propertyName,
+                                                                                       MultiRule<PropertyType> multiRule) {
+    for (PropertyRule<PropertyType> rule : multiRule) {
+      multiRuleBuilder.addRules(condition, propertyName + "_element." + rule.getProperty(), getterFunction(propertyName), Rules.each(rule));
+    }
+    return this;
+  }
+
+  /**
    * Applies given rules to all properties of given type found in the subject class.
    * Every public method returning a given type and starting with "get" or "is" is treated as a property getter.
    *
@@ -118,7 +154,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   /**
-   * Short version of {@link ReflexiveMultiRuleBuilder#addRulesForAll(Class, boolean, Rule[]) addRulesForAll(class, false, rules)}
+   * Short version of {@link ReflexiveMultiRuleBuilder#addRulesForAll(Class, boolean, Rule[]) addRulesForAll(clazz, false, rules)}
    */
   @SafeVarargs
   public final <PropertyType> ReflexiveMultiRuleBuilder<PatientType> addRulesForAll(Class<? extends PropertyType> propertyClass,
