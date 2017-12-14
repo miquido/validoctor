@@ -1,7 +1,9 @@
 package com.miquido.validoctor.rule;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public final class Rules {
 
@@ -10,6 +12,12 @@ public final class Rules {
 
   private static final Rule<String> STRING_TRIMMED_NOT_EMPTY =
       new SimpleRule<>("STRING_TRIMMED_NOT_EMPTY", str -> str == null || !str.trim().isEmpty());
+
+  private static final Rule<String> STRING_ALPHANUMERIC =
+      new SimpleRule<>("STRING_ALPHANUMERIC", str -> str == null || str.chars().allMatch(Character::isLetterOrDigit));
+
+  private static final Rule<String> STRING_ALPHABETIC =
+      new SimpleRule<>("STRING_ALPHABETIC", str -> str == null || str.chars().allMatch(Character::isLetter));
 
   private static final Rule<Object> NULL =
       new SimpleRule<>("OBJECT_NULL", Objects::isNull);
@@ -95,6 +103,22 @@ public final class Rules {
   }
 
   /**
+   * Passed: patient is null or contains only letters and digits.
+   * Violated: patient contains any character that is not letter or digit.
+   */
+  public static Rule<String> stringAlphanumeric() {
+    return STRING_ALPHANUMERIC;
+  }
+
+  /**
+   * Passed: patient is null or contains only letters.
+   * Violated: patient contains any character that is not letter.
+   */
+  public static Rule<String> stringAlphabetic() {
+    return STRING_ALPHABETIC;
+  }
+
+  /**
    * Passed: patient is null or string with length greater than or equal to specified {@code minLength}.<br/>
    * Violated: patient is string with length lesser than specified {@code minLength}.
    */
@@ -152,5 +176,13 @@ public final class Rules {
   public static Rule<Number> numberInRange(Number minRange, Number maxRange) {
     return new SimpleRule<>("NUMBER_IN_RANGE:" + minRange + "-" + maxRange, value -> value == null
         || value.doubleValue() >= minRange.doubleValue() && value.doubleValue() <= maxRange.doubleValue());
+  }
+
+  /**
+   * Builds a very simple wrapper rule for validating collections.
+   */
+  public static <T> Rule<Collection<T>> each(Rule<T> rule) {
+    return new SimpleRule<>(rule.getAilment().getName(),
+        col -> col == null || col.stream().allMatch(rule::test), rule.getAilment().getSeverity());
   }
 }

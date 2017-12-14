@@ -16,6 +16,10 @@ public class TestUtil {
     assertEquals(Severity.OK, diagnosis.getSeverity());
   }
 
+  public static void assertWarn(Diagnosis diagnosis) {
+    assertEquals(Severity.WARN, diagnosis.getSeverity());
+  }
+
   public static void assertOnlyViolationForProperty(Rule rule, Diagnosis diagnosis, String property) {
     assertEquals(1, diagnosis.getAilments().get(property).size());
     assertEquals(rule.getAilment().getName(), diagnosis.getAilments().get(property).iterator().next().getName());
