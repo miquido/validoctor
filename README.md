@@ -42,6 +42,3 @@ Types are:
 # Dependencies
 None.
 
-
-# TODO
-* Rules for elements of collection
