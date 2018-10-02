@@ -16,6 +16,7 @@ public class DiagnosisTest {
     Diagnosis d1 = validoctor.examine("test", Rules.stringMinLength(5));
     Diagnosis d2 = validoctor.examine("test", Rules.stringMaxLength(3));
     Diagnosis d3 = d1.and(d2);
+    System.out.println(d3.toString());
     assertEquals(Severity.ERROR, d3.getSeverity());
     assertEquals(2, d3.getAilments().get(null).size());
   }
@@ -25,6 +26,7 @@ public class DiagnosisTest {
     Diagnosis d1 = validoctor.examine("test", Rules.stringMinLength(5));
     Diagnosis d2 = validoctor.examine("test", Rules.stringMaxLength(5));
     Diagnosis d3 = d1.and(d2);
+    System.out.println(d3.toString());
     assertEquals(Severity.ERROR, d3.getSeverity());
     assertEquals(1, d3.getAilments().get(null).size());
   }

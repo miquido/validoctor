@@ -63,4 +63,9 @@ public class Diagnosis {
     result = 31 * result + ailments.hashCode();
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "{ severity: " + severity + ", ailments: " + ailments + " }";
+  }
 }
