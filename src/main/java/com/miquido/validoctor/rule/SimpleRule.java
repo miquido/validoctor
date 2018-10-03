@@ -4,6 +4,7 @@ import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -43,4 +44,18 @@ public class SimpleRule<T> implements Rule<T> {
     return ailment;
   }
 
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof SimpleRule)) return false;
+    SimpleRule<?> that = (SimpleRule<?>) o;
+    return Objects.equals(predicate, that.predicate) &&
+        Objects.equals(ailment, that.ailment);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(predicate, ailment);
+  }
 }

@@ -4,6 +4,7 @@ import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
@@ -58,5 +59,22 @@ public class ReducerRule<PatientType, PropertyType> implements Rule<PatientType>
    */
   public List<String> getProperties() {
     return properties;
+  }
+
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof ReducerRule)) return false;
+    ReducerRule<?, ?> that = (ReducerRule<?, ?>) o;
+    return Objects.equals(properties, that.properties) &&
+        Objects.equals(getters, that.getters) &&
+        Objects.equals(reducer, that.reducer) &&
+        Objects.equals(rule, that.rule);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(properties, getters, reducer, rule);
   }
 }
