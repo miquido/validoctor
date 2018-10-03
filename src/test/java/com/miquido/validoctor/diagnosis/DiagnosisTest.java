@@ -31,4 +31,18 @@ public class DiagnosisTest {
     assertEquals(1, d3.getAilments().get(null).size());
   }
 
+  @Test
+  public void equals_sameDiagnosis() {
+    Diagnosis d1 = validoctor.examine("test", Rules.stringMinLength(5));
+    Diagnosis d2 = validoctor.examine("test", Rules.stringMinLength(5));
+    assertEquals(d1, d2);
+  }
+
+  @Test
+  public void equals_differentDiagnosis() {
+    Diagnosis d1 = validoctor.examine("test", Rules.stringMinLength(5));
+    Diagnosis d2 = validoctor.examine("test", Rules.stringMaxLength(5));
+    assertNotEquals(d1, d2);
+  }
+
 }
