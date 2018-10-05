@@ -42,3 +42,8 @@ Types are:
 # Dependencies
 None.
 
+# TODO
+* Implement missing toString and equals/hashCode methods. 
+* Return rule parameters and actual patient value in Ailment for easier result handling by clients.
+* Add trait for multitheaded validation.
+
