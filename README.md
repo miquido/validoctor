@@ -1,5 +1,16 @@
 Validoctor is an all-purpose data validator for backend java projects. It performs validation basing on rules passed along with object to be validated. It can operate depending on several traits and on various kinds of rules in an effort to cater to specific needs of all projects.
 
+# Getting started
+To add validoctor to your project:
+```groovy
+repositories {
+    jcenter()
+}
+dependencies {
+  compile 'com.miquido.validoctor:validoctor:1.0.0'
+}
+```
+
 # Vocabulary
 * Ailment - like a single violation of a Rule. It carries a meaningful name and may have additional parameters.
 * Diagnosis - validation report stating whether object is valid or not and containing all Ailments discovered in it.
