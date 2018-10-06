@@ -1,9 +1,9 @@
 package com.miquido.validoctor.rule;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public final class Rules {
 
@@ -123,7 +123,9 @@ public final class Rules {
    * Violated: patient is string with length lesser than specified {@code minLength}.
    */
   public static Rule<String> stringMinLength(int minLength) {
-    return new SimpleRule<>("STRING_MIN_LENGTH:" + minLength, str -> str == null || str.length() >= minLength);
+    Map<String, Object> params = new HashMap<>();
+    params.put("minLength", minLength);
+    return new SimpleRule<>("STRING_MIN_LENGTH:" + minLength, params, str -> str == null || str.length() >= minLength);
   }
 
   /**
@@ -131,7 +133,9 @@ public final class Rules {
    * Violated: patient is string with length greater than specified {@code maxLength}.
    */
   public static Rule<String> stringMaxLength(int maxLength) {
-    return new SimpleRule<>("STRING_MAX_LENGTH:" + maxLength, str -> str == null || str.length() <= maxLength);
+    Map<String, Object> params = new HashMap<>();
+    params.put("maxLength", maxLength);
+    return new SimpleRule<>("STRING_MAX_LENGTH:" + maxLength, params, str -> str == null || str.length() <= maxLength);
   }
 
   /**
@@ -141,8 +145,11 @@ public final class Rules {
    * greater than specified {@code maxLength}.
    */
   public static Rule<String> stringLengthInRange(int minLength, int maxLength) {
-    return new SimpleRule<>("STRING_LENGTH_IN_RANGE:" + minLength + "-" + maxLength, str -> str == null
-        || str.length() >= minLength && str.length() <= maxLength);
+    Map<String, Object> params = new HashMap<>();
+    params.put("minLength", minLength);
+    params.put("maxLength", maxLength);
+    return new SimpleRule<>("STRING_LENGTH_IN_RANGE:" + minLength + "-" + maxLength, params,
+        str -> str == null || str.length() >= minLength && str.length() <= maxLength);
   }
 
   /**
@@ -150,7 +157,9 @@ public final class Rules {
    * Violated: patient is string with length other than specified {@code exactLength}.
    */
   public static Rule<String> stringExactLength(int exactLength) {
-    return new SimpleRule<>("STRING_EXACT_LENGTH:" + exactLength, str -> str == null || str.length() == exactLength);
+    Map<String, Object> params = new HashMap<>();
+    params.put("requiredLength", exactLength);
+    return new SimpleRule<>("STRING_EXACT_LENGTH:" + exactLength, params, str -> str == null || str.length() == exactLength);
   }
 
   /**
@@ -174,7 +183,10 @@ public final class Rules {
    * Violated: patient is number with value {@code < minRange} or {@code > maxRange}.
    */
   public static Rule<Number> numberInRange(Number minRange, Number maxRange) {
-    return new SimpleRule<>("NUMBER_IN_RANGE:" + minRange + "-" + maxRange, value -> value == null
+    Map<String, Object> params = new HashMap<>();
+    params.put("minRange", minRange);
+    params.put("maxRange", maxRange);
+    return new SimpleRule<>("NUMBER_IN_RANGE:" + minRange + "-" + maxRange, params, value -> value == null
         || value.doubleValue() >= minRange.doubleValue() && value.doubleValue() <= maxRange.doubleValue());
   }
 
@@ -182,7 +194,7 @@ public final class Rules {
    * Builds a very simple wrapper rule for validating collections.
    */
   public static <T> Rule<Collection<T>> each(Rule<T> rule) {
-    return new SimpleRule<>(rule.getAilment().getName(),
-        col -> col == null || col.stream().allMatch(rule::test), rule.getAilment().getSeverity());
+    return new SimpleRule<>(rule.peekAilment().getName(), rule.getParams(),
+        col -> col == null || col.stream().allMatch(obj -> rule.apply(obj) == null), rule.peekAilment().getSeverity());
   }
 }

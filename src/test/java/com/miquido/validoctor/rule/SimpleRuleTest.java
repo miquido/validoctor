@@ -189,8 +189,8 @@ public class SimpleRuleTest {
     assertError(diagnosis);
     Set<Ailment> objectAilments = diagnosis.getAilments().get(null);
     assertEquals(2, objectAilments.size());
-    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberNonNegative().getAilment().getName())));
-    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberInRange(-10, 10).getAilment().getName())));
+    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberNonNegative().peekAilment().getName())));
+    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberInRange(-10, 10).peekAilment().getName())));
   }
 
 }

@@ -22,11 +22,11 @@ public class TestUtil {
 
   public static void assertOnlyViolationForProperty(Rule rule, Diagnosis diagnosis, String property) {
     assertEquals(1, diagnosis.getAilments().get(property).size());
-    assertEquals(rule.getAilment().getName(), diagnosis.getAilments().get(property).iterator().next().getName());
+    assertEquals(rule.peekAilment().getName(), diagnosis.getAilments().get(property).iterator().next().getName());
   }
 
   public static void assertPropertyViolates(Rule rule, Diagnosis diagnosis, String property) {
-    assertTrue(diagnosis.getAilments().get(property).stream().anyMatch(ailment -> ailment.getName().equals(rule.getAilment().getName())));
+    assertTrue(diagnosis.getAilments().get(property).stream().anyMatch(ailment -> ailment.getName().equals(rule.peekAilment().getName())));
   }
 
 }

@@ -3,6 +3,7 @@ package com.miquido.validoctor.multirule;
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.rule.Rule;
 
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -27,8 +28,21 @@ class ConditionalPropertyRule<PatientType, PropertyType> implements PropertyRule
   }
 
   @Override
-  public Ailment getAilment() {
-    return rule.getAilment();
+  public Ailment apply(PatientType obj) {
+    if (condition.test(obj)) {
+      return rule.apply(propertyGetter.apply(obj));
+    }
+    return null;
+  }
+
+  @Override
+  public Ailment peekAilment() {
+    return rule.peekAilment();
+  }
+
+  @Override
+  public Map<String, Object> getParams() {
+    return rule.getParams();
   }
 
   @Override

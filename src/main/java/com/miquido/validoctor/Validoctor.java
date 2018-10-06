@@ -7,6 +7,7 @@ import com.miquido.validoctor.diagnosis.DiagnosisException;
 import com.miquido.validoctor.multirule.MultiRule;
 import com.miquido.validoctor.multirule.PropertyRule;
 import com.miquido.validoctor.reducerrule.ReducerRule;
+import com.miquido.validoctor.rule.MeticulousRuleDecorator;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.HashMap;
@@ -27,10 +28,12 @@ public final class Validoctor {
 
   private final boolean pedantic;
   private final boolean exceptional;
+  private final boolean meticulous;
 
-  private Validoctor(boolean pedantic, boolean exceptional) {
+  private Validoctor(boolean pedantic, boolean exceptional, boolean meticulous) {
     this.pedantic = pedantic;
     this.exceptional = exceptional;
+    this.meticulous = meticulous;
   }
 
   /**
@@ -132,13 +135,13 @@ public final class Validoctor {
     Severity severity = Severity.OK;
     Map<String, Set<Ailment>> ailments = new HashMap<>();
     for (PropertyRule<T> rule : rules) {
-      boolean valid = rule.test(patient);
-      if (!valid) {
-        Ailment ailment = rule.getAilment();
+      PropertyRule<T> theRule = meticulous ? new MeticulousRuleDecorator<>(rule) : rule;
+      Ailment ailment = theRule.apply(patient);
+      if (ailment != null) {
         if (ailment.getSeverity().isWorseThan(severity)) {
           severity = ailment.getSeverity();
         }
-        ailments.computeIfAbsent(rule.getProperty(), key -> new HashSet<>()).add(ailment);
+        ailments.computeIfAbsent(theRule.getProperty(), key -> new HashSet<>()).add(ailment);
         if (!pedantic) {
           break;
         }
@@ -160,19 +163,50 @@ public final class Validoctor {
 
     private boolean pedantic = true;
     private boolean exceptional = false;
+    private boolean meticulous = false;
 
+    /**
+     * Sets whether this Validoctor will be pedantic or not. Defaults to true.
+     * <li>If true, will execute all passed rules, continuing even after encountering violations, and will return
+     * a diagnosis with all violations found.</li>
+     * <li>If false, will only execute rules until first violation, and will return a diagnosis with just this one.</li>
+     * @param pedantic
+     * @return this Builder
+     */
     public Builder pedantic(boolean pedantic) {
       this.pedantic = pedantic;
       return this;
     }
 
+    /**
+     * Sets whether this Validoctor will be exceptional or not. Defaults to false.
+     * <li>If true, will throw an exception containing the Diagnosis.</li>
+     * <li>If false, will just return the Diagnosis.</li>
+     * @param exceptional
+     * @return this Builder
+     */
     public Builder exceptional(boolean exceptional) {
       this.exceptional = exceptional;
       return this;
     }
 
+    /**
+     * Sets whether this Validoctor will be meticulous or not. Defaults to false.
+     * <li>If true, will put some additional information like actual value of patient object and examination duration
+     * in {@link Ailment#getSpecs() specs of Ailments} returned in Diagnosis, in addition to rule's
+     * {@link Rule#getParams() params}.</li>
+     * <li>If false, will only put rule's {@link Rule#getParams() params} into
+     * {@link Ailment#getSpecs() specs of Ailments}.</li>
+     * @param meticulous
+     * @return this Builder
+     */
+    public Builder meticulous(boolean meticulous) {
+      this.meticulous = meticulous;
+      return this;
+    }
+
     public Validoctor build() {
-      return new Validoctor(pedantic, exceptional);
+      return new Validoctor(pedantic, exceptional, meticulous);
     }
   }
 

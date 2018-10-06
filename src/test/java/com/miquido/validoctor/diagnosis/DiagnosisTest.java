@@ -39,9 +39,23 @@ public class DiagnosisTest {
   }
 
   @Test
-  public void equals_differentDiagnosis() {
+  public void equals_differentSeverityDiagnosis() {
     Diagnosis d1 = validoctor.examine("test", Rules.stringMinLength(5));
     Diagnosis d2 = validoctor.examine("test", Rules.stringMaxLength(5));
+    assertNotEquals(d1, d2);
+  }
+
+  @Test
+  public void equals_differentAilmentDiagnosis() {
+    Diagnosis d1 = validoctor.examine("test", Rules.stringMinLength(5));
+    Diagnosis d2 = validoctor.examine("test", Rules.stringMaxLength(3));
+    assertNotEquals(d1, d2);
+  }
+
+  @Test
+  public void equals_differenAilmentSpecDiagnosis() {
+    Diagnosis d1 = validoctor.examine("test", Rules.stringMaxLength(2));
+    Diagnosis d2 = validoctor.examine("test", Rules.stringMaxLength(3));
     assertNotEquals(d1, d2);
   }
 

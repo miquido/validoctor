@@ -4,6 +4,7 @@ import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -50,8 +51,19 @@ public class ReducerRule<PatientType, PropertyType> implements Rule<PatientType>
   }
 
   @Override
-  public Ailment getAilment() {
-    return rule.getAilment();
+  public Ailment apply(PatientType obj) {
+    PropertyType sum = getters.stream().map(getter -> getter.apply(obj)).reduce(reducer).orElse(null);
+    return rule.apply(sum);
+  }
+
+  @Override
+  public Ailment peekAilment() {
+    return rule.peekAilment();
+  }
+
+  @Override
+  public Map<String, Object> getParams() {
+    return rule.getParams();
   }
 
   /**
