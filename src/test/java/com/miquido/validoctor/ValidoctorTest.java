@@ -2,6 +2,7 @@ package com.miquido.validoctor;
 
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
+import com.miquido.validoctor.ailment.SpecsKey;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.diagnosis.DiagnosisException;
 import com.miquido.validoctor.rule.Rules;
@@ -15,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static com.miquido.validoctor.rule.MeticulousRuleDecorator.*;
 import static org.junit.Assert.*;
 
 public class ValidoctorTest {
@@ -64,40 +64,25 @@ public class ValidoctorTest {
   }
 
   @Test
-  public void meticulousValidoctor_putsAdditionalEntriesInSpecs() {
-    Validoctor validoctor = Validoctor.builder().meticulous(true).build();
+  public void validoctor_putsRuleParamsAndPatientValueInSpecs() {
+    Validoctor validoctor = Validoctor.builder().build();
     Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
     Set<Ailment> ailments = diagnosis.getAilments().get(null);
     Ailment ailment = ailments.stream().filter(a ->
         a.getName().equals(Rules.numberNonNegative().peekAilment().getName())).findFirst().orElse(null);
     assertNotNull(ailment);
-    assertTrue(ailment.getSpecs().toString(), ailment.getSpecs().containsKey(PATIENT_VALUE));
-    assertTrue(ailment.getSpecs().toString(), ailment.getSpecs().containsKey(EXAMINATION_DURATION));
+    assertTrue(ailment.getSpecs().toString(), ailment.getSpecs().containsKey(SpecsKey.PATIENT_VALUE));
     ailment = ailments.stream().filter(a ->
         a.getName().equals(Rules.numberInRange(0, 5).peekAilment().getName())).findFirst().orElse(null);
     assertNotNull(ailment);
-    assertTrue(ailment.getSpecs().toString(), ailment.getSpecs().containsKey(PATIENT_VALUE));
-    assertTrue(ailment.getSpecs().toString(), ailment.getSpecs().containsKey(EXAMINATION_DURATION));
+    assertTrue(ailment.getSpecs().toString(), ailment.getSpecs().containsKey(SpecsKey.PATIENT_VALUE));
+    assertTrue(ailment.getSpecs().toString(), ailment.getSpecs().containsKey(SpecsKey.MIN_RANGE));
+    assertTrue(ailment.getSpecs().toString(), ailment.getSpecs().containsKey(SpecsKey.MAX_RANGE));
   }
 
   @Test
-  public void nonMeticulousValidoctor_returnsDefaultSpecs() {
-    Validoctor validoctor = Validoctor.builder().meticulous(false).build();
-    Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
-    Set<Ailment> ailments = diagnosis.getAilments().get(null);
-    Ailment ailment = ailments.stream().filter(a ->
-        a.getName().equals(Rules.numberNonNegative().peekAilment().getName())).findFirst().orElse(null);
-    assertNotNull(ailment);
-    assertEquals(ailment.getSpecs().toString(), 0, ailment.getSpecs().size());
-    ailment = ailments.stream().filter(a ->
-        a.getName().equals(Rules.numberInRange(0, 5).peekAilment().getName())).findFirst().orElse(null);
-    assertNotNull(ailment);
-    assertEquals(ailment.getSpecs().toString(), 2, ailment.getSpecs().size());
-  }
-
-  @Test
-  public void meticulousValidoctor_multithreaded() throws ExecutionException, InterruptedException {
-    Validoctor validoctor = Validoctor.builder().meticulous(true).build();
+  public void validoctor_multithreaded() throws ExecutionException, InterruptedException {
+    Validoctor validoctor = Validoctor.builder().build();
     List<Future<Diagnosis>> futures = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
       int patient = i;
@@ -113,7 +98,8 @@ public class ValidoctorTest {
       Ailment ailment = ailments.stream().filter(a ->
           a.getName().equals(Rules.numberPositive().peekAilment().getName())).findFirst().orElse(null);
       assertNotNull(ailment);
-      assertEquals(-i, ailment.getSpecs().get(PATIENT_VALUE));
+      assertEquals(-i, ailment.getSpecs().get(SpecsKey.PATIENT_VALUE));
+      System.out.println(diagnosis);
     }
   }
 

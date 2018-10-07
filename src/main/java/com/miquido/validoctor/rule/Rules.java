@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.miquido.validoctor.ailment.SpecsKey.*;
+
 public final class Rules {
 
   private static final Rule<String> STRING_NOT_EMPTY =
@@ -124,7 +126,7 @@ public final class Rules {
    */
   public static Rule<String> stringMinLength(int minLength) {
     Map<String, Object> params = new HashMap<>();
-    params.put("minLength", minLength);
+    params.put(MIN_LENGTH, minLength);
     return new SimpleRule<>("STRING_MIN_LENGTH:" + minLength, params, str -> str == null || str.length() >= minLength);
   }
 
@@ -134,7 +136,7 @@ public final class Rules {
    */
   public static Rule<String> stringMaxLength(int maxLength) {
     Map<String, Object> params = new HashMap<>();
-    params.put("maxLength", maxLength);
+    params.put(MAX_LENGTH, maxLength);
     return new SimpleRule<>("STRING_MAX_LENGTH:" + maxLength, params, str -> str == null || str.length() <= maxLength);
   }
 
@@ -146,8 +148,8 @@ public final class Rules {
    */
   public static Rule<String> stringLengthInRange(int minLength, int maxLength) {
     Map<String, Object> params = new HashMap<>();
-    params.put("minLength", minLength);
-    params.put("maxLength", maxLength);
+    params.put(MIN_LENGTH, minLength);
+    params.put(MAX_LENGTH, maxLength);
     return new SimpleRule<>("STRING_LENGTH_IN_RANGE:" + minLength + "-" + maxLength, params,
         str -> str == null || str.length() >= minLength && str.length() <= maxLength);
   }
@@ -158,7 +160,7 @@ public final class Rules {
    */
   public static Rule<String> stringExactLength(int exactLength) {
     Map<String, Object> params = new HashMap<>();
-    params.put("requiredLength", exactLength);
+    params.put(REQUIRED_LENGTH, exactLength);
     return new SimpleRule<>("STRING_EXACT_LENGTH:" + exactLength, params, str -> str == null || str.length() == exactLength);
   }
 
@@ -184,8 +186,8 @@ public final class Rules {
    */
   public static Rule<Number> numberInRange(Number minRange, Number maxRange) {
     Map<String, Object> params = new HashMap<>();
-    params.put("minRange", minRange);
-    params.put("maxRange", maxRange);
+    params.put(MIN_RANGE, minRange);
+    params.put(MAX_RANGE, maxRange);
     return new SimpleRule<>("NUMBER_IN_RANGE:" + minRange + "-" + maxRange, params, value -> value == null
         || value.doubleValue() >= minRange.doubleValue() && value.doubleValue() <= maxRange.doubleValue());
   }

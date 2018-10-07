@@ -4,6 +4,7 @@ import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.AilmentFactory;
 import com.miquido.validoctor.ailment.CachingAilmentFactory;
 import com.miquido.validoctor.ailment.Severity;
+import com.miquido.validoctor.ailment.SpecsKey;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,7 +67,13 @@ public class SimpleRule<T> implements Rule<T> {
   @Override
   public Ailment apply(T obj) {
     boolean valid = predicate.test(obj);
-    return valid ? null : peekAilment();
+    if (valid) {
+      return null;
+    } else {
+      Ailment ailment = peekAilment();
+      ailment.getSpecs().put(SpecsKey.PATIENT_VALUE, obj);
+      return ailment;
+    }
   }
 
   @Override
