@@ -40,8 +40,8 @@ public interface Rule<T> {
   /**
    * Returns Ailment as it would be stated if rule was applied to patient violating it. Useful when consequences of
    * violation must be known before actually performing the validation. {@link Ailment#getSpecs() Specs} of returned
-   * Ailment will obviously not contain any entries that would be added by
-   * {@link com.miquido.validoctor.Validoctor.Builder#meticulous(boolean) meticulous Validoctor}.
+   * Ailment will obviously not contain any specs entries that would be added during validation
+   * (like {@link com.miquido.validoctor.ailment.SpecsKey#PATIENT_VALUE}).
    * @return Ailment that should be stated in case of violation
    */
   Ailment peekAilment();

@@ -175,7 +175,7 @@ public final class Validoctor {
 
     /**
      * Sets whether this Validoctor will be exceptional or not. Defaults to false.
-     * <li>If true, will throw an exception containing the Diagnosis.</li>
+     * <li>If true, will throw a {@link DiagnosisException} containing the Diagnosis.</li>
      * <li>If false, will just return the Diagnosis.</li>
      * @param exceptional
      * @return this Builder

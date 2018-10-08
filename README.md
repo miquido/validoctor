@@ -53,8 +53,8 @@ Types are:
 # Dependencies
 None.
 
-# TODO
-* Implement missing toString and equals/hashCode methods. 
-* Return rule parameters and actual patient value in Ailment for easier result handling by clients.
+# In next release
+* Add missing toString and equals/hashCode methods - DONE.
+* Return rule parameters and actual patient value in Ailment for easier result handling by clients - in PR.
 * Add trait for multitheaded validation.
 
