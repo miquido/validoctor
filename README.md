@@ -55,6 +55,8 @@ None.
 
 # In next release
 * Add missing toString and equals/hashCode methods - DONE.
-* Return rule parameters and actual patient value in Ailment for easier result handling by clients - in PR.
+* Return rule parameters and actual patient value in Ailment for easier result handling by clients - DONE.
 * Add trait for multitheaded validation.
-
+* Write quick start guide.
+* Create develop branch.
+* Building snapshots to bintray from master.
