@@ -25,6 +25,7 @@ public class ReducerRuleTest {
       .properties("phone", "name")
       .reducer(String::concat)
       .rule(stringMinLength(8))
+      .nullIgnoring()
       .build();
 
   private ReducerRule<TestPatient, Long> rule3 = ReducerRule.builder(TestPatient.class, Long.class)
@@ -114,6 +115,28 @@ public class ReducerRuleTest {
     diagnosis = validoctor.examineCombo(patient, rule1, multiRule1, multiRule2);
     assertError(diagnosis);
     assertOnlyViolationForProperty(numberNonNegative(), diagnosis, "ordinal");
+  }
+
+  @Test
+  public void reducerRuleWithNullValues() {
+    TestPatient patient = new TestPatient(1L, "Name", null, 5L, true);
+    assertError(validoctor.examine(patient, rule2)); //rule2 is nullIgnoring
+
+    ReducerRule<TestPatient, String> nonNullIgnoringRule = //but with null handling reducer
+        ReducerRule.builder(TestPatient.class, String.class)
+            .properties("phone", "name")
+            .reducer((s, s2) -> {
+              if (s == null) return s2;
+              else return s.concat(s2);
+            })
+            .rule(stringMinLength(8))
+            .build();
+
+    assertError(validoctor.examine(patient, nonNullIgnoringRule));
+
+    patient.setName("Name8888");
+    assertOk(validoctor.examine(patient, rule2));
+    assertOk(validoctor.examine(patient, nonNullIgnoringRule));
   }
 
 }

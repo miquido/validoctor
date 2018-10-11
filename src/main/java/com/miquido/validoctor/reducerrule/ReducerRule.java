@@ -22,6 +22,7 @@ public class ReducerRule<PatientType, PropertyType> implements Rule<PatientType>
   private final List<Function<PatientType, PropertyType>> getters;
   private final BinaryOperator<PropertyType> reducer;
   private final Rule<? super PropertyType> rule;
+  private final boolean nullIgnoring;
 
 
   /**
@@ -37,22 +38,29 @@ public class ReducerRule<PatientType, PropertyType> implements Rule<PatientType>
 
 
   ReducerRule(List<String> properties, List<Function<PatientType, PropertyType>> getters,
-              BinaryOperator<PropertyType> reducer, Rule<? super PropertyType> rule) {
+              BinaryOperator<PropertyType> reducer, Rule<? super PropertyType> rule, boolean nullIgnoring) {
     this.properties = properties;
     this.getters = getters;
     this.reducer = reducer;
     this.rule = rule;
+    this.nullIgnoring = nullIgnoring;
   }
 
   @Override
   public boolean test(PatientType obj) {
-    PropertyType sum = getters.stream().map(getter -> getter.apply(obj)).reduce(reducer).orElse(null);
+    PropertyType sum = getters.stream()
+        .map(getter -> getter.apply(obj))
+        .filter(value -> !nullIgnoring || value != null)
+        .reduce(reducer).orElse(null);
     return rule.test(sum);
   }
 
   @Override
   public Ailment apply(PatientType obj) {
-    PropertyType sum = getters.stream().map(getter -> getter.apply(obj)).reduce(reducer).orElse(null);
+    PropertyType sum = getters.stream()
+        .map(getter -> getter.apply(obj))
+        .filter(value -> !nullIgnoring || value != null)
+        .reduce(reducer).orElse(null);
     return rule.apply(sum);
   }
 
