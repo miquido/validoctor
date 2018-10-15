@@ -32,4 +32,11 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }
 
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "short"
+    }
+}
+
 apply from: "publish-config.gradle"

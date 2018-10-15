@@ -72,19 +72,19 @@ class ComplexCasesTest {
     val diagnosis2 = validoctor.examine(product, nullityRules, validityRules)
     assertError(diagnosis2)
     assertEquals(2, diagnosis2.ailments.size)
-    assertTrue(diagnosis2.ailments["nutritionFacts.fibre"]!!.any { a -> a.name == numberPositive().ailment.name })
+    assertTrue(diagnosis2.ailments["nutritionFacts.fibre"]!!.any { a -> a.name == numberPositive().peekAilment().name })
 
     product.name = null
     val diagnosis3 = validoctor.examine(product, nullityRules, validityRules)
     assertError(diagnosis3)
     assertEquals(3, diagnosis3.ailments.size)
-    assertTrue(diagnosis3.ailments["name"]!!.any { a -> a.name == notNull<Any>().ailment.name })
+    assertTrue(diagnosis3.ailments["name"]!!.any { a -> a.name == notNull<Any>().peekAilment().name })
 
     product.reviewScores!!.add(6)
     val diagnosis4 = validoctor.examine(product, nullityRules, validityRules)
     assertError(diagnosis4)
     assertEquals(4, diagnosis4.ailments.size)
-    assertTrue(diagnosis4.ailments["reviewScores"]!!.any { a -> a.name == numberInRange(1, 5).ailment.name })
+    assertTrue(diagnosis4.ailments["reviewScores"]!!.any { a -> a.name == numberInRange(1, 5).peekAilment().name })
   }
 
 }
