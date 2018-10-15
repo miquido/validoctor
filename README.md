@@ -47,7 +47,8 @@ There are 3 types of rules, calling validation with each type is the same:
 Diagnosis diagnosis = validoctor.examine(patient, RULE_1, RULE_2);
 ```
 
-examine() method accepts any number of rules of given type. There also are examineCombo methods that allow passing some permutations of rules of several kinds:
+examine() method accepts any number of rules of given type. There also are examineCombo methods that allow passing some 
+permutations of rules of several kinds:
 
 ```java
 Diagnosis diagnosis = validoctor.examineCombo(patient, Rules.notNull(), multiRule1, multiRule2);
@@ -59,7 +60,48 @@ Types are:
 * MultiRule - rule sets that allow defining validations for whole data structures on per property basis
 * ReducerRules - rules that are applied to a set of properties of the same type that is reduced to one value
 
-# Example
+# Quick start examples
+Create instance of Validoctor. Unless you need different reporting of errors for different cases 
+(exceptions or just returned Diagnoses, all violations, or just the first one), you will only need one instance of Validoctor.
+```java
+Validoctor validoctor = Validoctor.builder().build();
+```
+For validating primitive or String values, just use SimpleRules. Most commonly used ones are supplied in Rules class.
+```java
+Diagnosis diagnosis = validoctor.examine(stringToValidate, Rules.notNull(), Rules.stringAlphabetic(), Rules.stringTrimmedNotEmpty());
+```
+This will check if stringToValidate is not null, not empty or whitespace only and only containing letters.
+
+Validoctor's main strength lies in validating complex objects in one call using MultiRules or ReducerRules. Those need to 
+be created with builders. For example this validates fields foo and bar of object Example with specified rules:
+```java
+MultiRule<Example> exampleMultiRule = MultiRule.<Example>builder()
+        .reflexiveProperties(TestPatient.class)
+        .addRules("foo", notNull(), numberPositive())
+        .addRules("bar", stringMinLength(3), stringMaxLength(20))
+        .build();
+```
+It is then passed for Validoctor's examination the same way as SimpleRules:
+```java
+Diagnosis diagnosis = validoctor.examine(exampleObject, exampleMultiRule);
+```
+It can also accept several MultiRules just as it could accept several SimpleRules.
+
+ReducerRules are useful when you need to validate some properties of an object as a group. For example when you have 
+a firstName and a lastName, and want their concatenation to be no longer than 40 characters you can do:
+```java
+ReducerRule<TestPatient, String> reducerRule = ReducerRule.builder(TestPatient.class, String.class)
+      .properties("firstName", "lastName")
+      .reducer(String::concat)
+      .rule(stringMaxLength(40))
+      .nullIgnoring()
+      .build();
+```
+This will get listed properties of specified type and reduce them to one value with given function, then validate it 
+with passed rules. nullIgnoring() lifts responsibility of handling nulls form reducer function. Validation is called 
+exactly the same as with MultiRules and SimpleRules. 
+
+# Production grade example
 This is a description of slightly simplified ComplexCase1Test class as it shows and tests validation of 
 production-grade complexity.
 
