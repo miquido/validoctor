@@ -11,6 +11,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class ReflexiveMultiRuleBuilder<PatientType> {
 
@@ -127,12 +128,42 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   /**
-   * Applies given rules to all properties of given type found in the subject class.
-   * Every public method returning a given type and starting with "get" or "is" is treated as a property getter.
+   * Applies given MultiRules to all properties of given type found in the subject class.
+   * For use with complex types.
+   * Every public method returning a given type and starting with "get" is treated as a property getter.
    *
    * @param propertyClass    class of properties to apply the rules to
    * @param strictClassMatch if true, only properties with the exact specified class will have the rules applied.
-   *                         If false, rules will be applied to properties of super types as well.
+   *                         If false, rules will be applied to properties of subtypes as well.
+   * @param rules            MultiRules to apply
+   * @param <PropertyType>   type of property
+   * @return builder for chaining
+   */
+  @SafeVarargs
+  public final <PropertyType> ReflexiveMultiRuleBuilder<PatientType> addRulesForAll(Class<? extends PropertyType> propertyClass,
+                                                                                    boolean strictClassMatch,
+                                                                                    MultiRule<PropertyType>... rules) {
+    Arrays.stream(subjectClass.getMethods())
+        .filter(method -> Modifier.isPublic(method.getModifiers())
+            && (strictClassMatch ? method.getReturnType().equals(propertyClass) : propertyClass.isAssignableFrom(method.getReturnType()))
+            && (method.getName().startsWith("get")))
+        .forEach(getter -> {
+          String propertyName = NameUtil.uncapitalize(getter.getName().substring(3));
+          Stream.of(rules).reduce(MultiRule::and).ifPresent(
+              multiRule -> multiRuleBuilder.addMultiRule(propertyName, getterFunction(getter), multiRule)
+          );
+        });
+    return this;
+  }
+
+  /**
+   * Applies given rules to all properties of given type found in the subject class.
+   * For use with primitive types.
+   * Every public method returning a given type and starting with "get" (or "is" for boolean) is treated as a property getter.
+   *
+   * @param propertyClass    class of properties to apply the rules to
+   * @param strictClassMatch if true, only properties with the exact specified class will have the rules applied.
+   *                         If false, rules will be applied to properties of subtypes as well.
    * @param rules            rules to apply
    * @param <PropertyType>   type of property
    * @return builder for chaining
@@ -147,7 +178,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
             && (method.getName().startsWith("get") || method.getName().startsWith("is")))
         .forEach(getter -> {
           boolean isIs = getter.getName().startsWith("is");
-          String propertyName = NameUtil.uncapitalize(getter.getName().substring(isIs ? 2 : 3, getter.getName().length()));
+          String propertyName = NameUtil.uncapitalize(getter.getName().substring(isIs ? 2 : 3));
           multiRuleBuilder.addRules(propertyName, getterFunction(getter), rules);
         });
     return this;
@@ -159,6 +190,15 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   @SafeVarargs
   public final <PropertyType> ReflexiveMultiRuleBuilder<PatientType> addRulesForAll(Class<? extends PropertyType> propertyClass,
                                                                                     Rule<PropertyType>... rules) {
+    return addRulesForAll(propertyClass, false, rules);
+  }
+
+  /**
+   * Short version of {@link ReflexiveMultiRuleBuilder#addRulesForAll(Class, boolean, MultiRule[]) addRulesForAll(clazz, false, multiRules)}
+   */
+  @SafeVarargs
+  public final <PropertyType> ReflexiveMultiRuleBuilder<PatientType> addRulesForAll(Class<? extends PropertyType> propertyClass,
+                                                                                    MultiRule<PropertyType>... rules) {
     return addRulesForAll(propertyClass, false, rules);
   }
 

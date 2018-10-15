@@ -1,5 +1,6 @@
 package com.miquido.validoctor.rule;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,7 +106,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or contains only letters and digits.
+   * Passed: patient is null or contains only letters and digits.<br/>
    * Violated: patient contains any character that is not letter or digit.
    */
   public static Rule<String> stringAlphanumeric() {
@@ -113,7 +114,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or contains only letters.
+   * Passed: patient is null or contains only letters.<br/>
    * Violated: patient contains any character that is not letter.
    */
   public static Rule<String> stringAlphabetic() {
@@ -190,6 +191,17 @@ public final class Rules {
     params.put(MAX_RANGE, maxRange);
     return new SimpleRule<>("NUMBER_IN_RANGE:" + minRange + "-" + maxRange, params, value -> value == null
         || value.doubleValue() >= minRange.doubleValue() && value.doubleValue() <= maxRange.doubleValue());
+  }
+
+  /**
+   * Passed: patient is equal to at least one of values passed in allowedValues argument.</br>
+   * Violated: patient is not equal to any of the values passed in allowedValues.
+   */
+  public static Rule<Object> valueIn(Object... allowedValues) {
+    Map<String, Object> params = new HashMap<>();
+    params.put(ALLOWED_VALUES, allowedValues);
+    return new SimpleRule<>("VALUE_IN:" + Arrays.toString(allowedValues), params,
+        value -> Arrays.asList(allowedValues).contains(value));
   }
 
   /**
