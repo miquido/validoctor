@@ -1,6 +1,18 @@
-Validoctor is an all-purpose data validator for backend java projects. It performs validation basing on rules passed 
-along with object to be validated. It can operate depending on several traits and on various kinds of rules in an effort 
-to cater to specific needs of all projects.
+Validoctor is an all-purpose data validator for backend java and kotlin projects. It performs validation basing on rules 
+passed along with object to be validated. It can operate depending on several traits and on various kinds of rules in an 
+effort to cater to specific needs of all projects. Specially designed for simple validation of complex structures.
+
+# Motivation
+Validoctor is a tool that allows defining and performing validations in a clean, simple, deterministic, zero-magic way. 
+Key features:
+* validation rules clearly defined and well separated from model objects themselves, imposing no restrictions upon their 
+structure and allowing you to keep them clean
+* no generated code nor annotation processing involved for simple, understandable and readable validation process
+* concise API and rich collection of predefined rules make even the most complex validations require little code
+* flexible, configurable and extensible - its quick and easy to define custom validations and alter Validoctor's behavior
+* readable and useful error reports, ready to be propagated back to clients as they are
+* full control over validation process - call it when you want, run it on whatever number of threads, 
+split it into several steps if you feel like it, process results however you want
 
 # Getting started
 To add validoctor to your project:
@@ -34,7 +46,8 @@ Validoctor validoctor = Validoctor.builder().pedantic(true).exceptional(false).b
 
 For now, there are two traits.
 
-* Pedantic Validoctor will go through all rules to the end and return a complete Diagnosis with all violations. One who is not pedantic will stop on first violation encountered and return this one only.
+* Pedantic Validoctor will go through all rules to the end and return a complete Diagnosis with all violations. 
+One who is not pedantic will stop on first violation encountered and return this one only.
 * Exceptional Validoctor will throw an exception containing a Diagnosis instead of returning it, if it finds any violations.
 
 Pedantic and non-exceptional Validoctor is the default obtained by calling build() without specifying any traits.
@@ -101,12 +114,14 @@ This will get listed properties of specified type and reduce them to one value w
 with passed rules. nullIgnoring() lifts responsibility of handling nulls form reducer function. Validation is called 
 exactly the same as with MultiRules and SimpleRules. 
 
+All Rules are stateless and can be reused for multiple validations.
+
 # Production grade example
 This is a description of slightly simplified ComplexCase1Test class as it shows and tests validation of 
 production-grade complexity.
 
 Imagine you need to validate an instance of a Product defined like this:
-```java
+```kotlin
 data class NutritionFacts(var kcal: Int?, 
                           var fibre: Double?, 
                           var protein: Double?, 
@@ -132,7 +147,7 @@ data class Product(var name: String?,
 Let's start with thinking about what we want to validate. Thinking on a per-class basis is the recommended approach 
 for using Validoctor. So, starting with NutritionFacts class, we surely want all of the values to be positive. 
 We write a simple MultiRule for that:
-```java
+```kotlin
 val nutritionFactsRules: MultiRule<NutritionFacts> =
         MultiRule.builder<NutritionFacts>().reflexiveProperties(NutritionFacts::class.java)
             .addRulesForAll(Number::class.java, numberPositive())
@@ -147,7 +162,7 @@ available in Rules class that just checks if number is larger than 0.
 Ok, so that is what we want to validate in NutritionFacts. Let's move on to Comment class. We certainly need a valid, 
 non-null authorId and we want the text of the comment to be not empty, not longer that certain characters count and not 
 contain any inappropriate words. For that, we will first need to define our own custom censor rule like this:
-```java
+```kotlin
 val stringCensorRule: SimpleRule<String> =
         SimpleRule("CENSORED_WORD", Predicate { str -> str == null || !str.contains("fuck", true) }, Severity.WARN)
 ```
@@ -159,7 +174,7 @@ of violation of this rule. We decided on just WARN and not ERROR as we assume Co
 will need to be reviewed by moderators and not just plain rejected.
 
 Now, we are ready to create a MultiRule for Comment object that will specify all validations we need:
-```java
+```kotlin
 val commentRules: MultiRule<Comment> = 
         MultiRule.builder<Comment>().reflexiveProperties(Comment::class.java)
             .addRules("authorId", notNull(), numberPositive())
@@ -168,14 +183,14 @@ val commentRules: MultiRule<Comment> =
 ```
 We used MultiRuleBuilder just like for NutritionFacts. This time though, we specify fields we want the rules to be 
 applied to one by one, by their name. If we did not use reflexiveProperties, we would need to also specify the getters 
-for these fields. Each addRules call will make resulting rule apply all the specified rules to given field. So here, 
+for these fields. Each addRules call will make resulting MultiRule apply all the specified rules to given field. So here, 
 authorId will be checked if it is not null and then if it is a positive number, and text will be checked for nullity, 
 not emptiness, max allowed length and inappropriate words with our custom censor rule.
 
 And now, for the biggest task: we need to apply a series of various validations to fields of Product class. For better 
 readability, we can decide to split validations of such complex classes into a few MultiRules. Let's do that here and 
 first specify rules that deal exclusively with nullity of Product's fields:
-```java
+```kotlin
 val nullityRules: MultiRule<Product> = 
         MultiRule.builder<Product>().reflexiveProperties(Product::class.java)
             .addRulesForAll(Boolean::class.java, notNull())
@@ -193,7 +208,7 @@ first argument. Those are conditional rules, that will only be applied if that p
 to require the nutrition facts are present only if we also have the skuId of the product, and are null otherwise.
 
 Now, we also need to validate a bunch of other stuff on Product object. Let's look at the last MultiRule we need:
-```java
+```kotlin
 val validityRules: MultiRule<Product> = 
         MultiRule.builder<Product>().reflexiveProperties(Product::class.java)
             .addRules("name", stringTrimmedNotEmpty(), stringMaxLength(40))
@@ -219,7 +234,7 @@ enough - typically when collection elements are of primitive or String type.
 
 With that we have defined all the validation we need for given data structure. To perform the validation on an actual 
 object, we just need one call:
-```java
+```kotlin
 val diagnosis = validoctor.examine(product, nullityRules, validityRules)
 ```
 And that's it. Diagnosis object returned by our validoctor instance contains the result and all the Ailments found in 
@@ -233,8 +248,8 @@ None.
 * Add missing toString and equals/hashCode methods - DONE.
 * Return rule parameters and actual patient value in Ailment for easier result handling by clients - DONE.
 * Make Ailments found in elements of collection be mapped under jsonpath-compliant keys.
-* Add trait for multitheaded validation.
-* Write quick start guide. - DONE (example above).
+* Add trait for multithreaded validation.
+* Write quick start guide. - DONE (examples above).
 * Create develop branch. - DONE.
 * Building snapshots to bintray from master.
 * Convert to Kotlin.
