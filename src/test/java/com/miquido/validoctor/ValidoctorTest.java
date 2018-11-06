@@ -87,7 +87,7 @@ public class ValidoctorTest {
     for (int i = 0; i < 10; i++) {
       int patient = i;
       Future<Diagnosis> future = executor.submit(() -> {
-        System.out.println("Thread: " + Thread.currentThread().getId());
+        System.out.println("validoctor_multithreaded: Thread: " + Thread.currentThread().getId());
         return validoctor.examine(-patient, Rules.numberPositive());
       });
       futures.add(future);
@@ -99,7 +99,7 @@ public class ValidoctorTest {
           a.getName().equals(Rules.numberPositive().peekAilment().getName())).findFirst().orElse(null);
       assertNotNull(ailment);
       assertEquals(-i, ailment.getSpecs().get(SpecsKey.PATIENT_VALUE));
-      System.out.println(diagnosis);
+      System.out.println("validoctor_multithreaded: diagnosis for " + i + ": " + diagnosis);
     }
   }
 

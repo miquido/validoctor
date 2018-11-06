@@ -1,5 +1,6 @@
 package com.miquido.validoctor.rule;
 
+import com.miquido.validoctor.TestPatient;
 import com.miquido.validoctor.Validoctor;
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
@@ -169,6 +170,19 @@ public class SimpleRuleTest {
     assertOk(validoctor.examine(15, numberInRange(12, 16)));
     assertOk(validoctor.examine(15.000023d, numberInRange(15.000022d, 15.000024d)));
     assertOk(validoctor.examine(null, numberInRange(-100, 100)));
+  }
+
+  @Test
+  public void predefinedRule_valueIn() {
+    assertOk(validoctor.examine("a", valueIn("a", "b", "c")));
+    assertOk(validoctor.examine(null, valueIn(null, "a", "b", "c")));
+    assertOk(validoctor.examine(765, valueIn(5, 23, 765, 43)));
+    assertOk(validoctor.examine(new TestPatient(1, "a", "1", true),
+        valueIn(new TestPatient(2, "b", "2", false), new TestPatient(1, "a", "1", true))));
+    assertError(validoctor.examine("a", valueIn("b", "c", "d")));
+    assertError(validoctor.examine(null, valueIn()));
+    assertError(validoctor.examine(new TestPatient(1, "a", "1", true),
+        valueIn(new TestPatient(2, "a", "1", true), new TestPatient(1, "a", "1", false))));
   }
 
   @Test

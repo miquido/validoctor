@@ -4,7 +4,6 @@ import com.miquido.validoctor.TestPatient;
 import com.miquido.validoctor.Validoctor;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.multirule.MultiRule;
-import com.miquido.validoctor.rule.Rules;
 import org.junit.Test;
 
 import static com.miquido.validoctor.TestUtil.*;
@@ -75,16 +74,16 @@ public class ReducerRuleTest {
   @Test
   public void reducerRulesWithRule() {
     TestPatient patient = new TestPatient(1L, "Name", "+48123", 5L, true);
-    assertOk(validoctor.examineCombo(patient, Rules.notNull(), rule3, rule2));
+    assertOk(validoctor.examineCombo(patient, notNull(), rule3, rule2));
 
     patient = null;
-    Diagnosis diagnosis = validoctor.examineCombo(patient, Rules.notNull(), rule3, rule2);
+    Diagnosis diagnosis = validoctor.examineCombo(patient, notNull(), rule3, rule2);
     assertError(diagnosis);
     assertEquals(1, diagnosis.getAilments().size());
-    assertOnlyViolationForProperty(Rules.notNull(), diagnosis, null);
+    assertOnlyViolationForProperty(notNull(), diagnosis, null);
 
     patient = new TestPatient(1L, "Name", "+48", 8L, true);
-    diagnosis = validoctor.examineCombo(patient, Rules.notNull(), rule3, rule2);
+    diagnosis = validoctor.examineCombo(patient, notNull(), rule3, rule2);
     assertError(diagnosis);
     assertEquals(4, diagnosis.getAilments().size());
   }

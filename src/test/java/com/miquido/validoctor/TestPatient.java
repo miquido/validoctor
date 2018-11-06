@@ -1,5 +1,7 @@
 package com.miquido.validoctor;
 
+import java.util.Objects;
+
 public class TestPatient {
 
   private boolean idSet;
@@ -88,5 +90,23 @@ public class TestPatient {
 
   public boolean isRegistered() {
     return registered;
+  }
+
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof TestPatient)) return false;
+    TestPatient that = (TestPatient) o;
+    return registered == that.registered &&
+        Objects.equals(id, that.id) &&
+        Objects.equals(name, that.name) &&
+        Objects.equals(phone, that.phone) &&
+        Objects.equals(ordinal, that.ordinal);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, name, phone, ordinal, registered);
   }
 }
