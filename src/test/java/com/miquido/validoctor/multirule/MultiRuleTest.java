@@ -118,7 +118,7 @@ public class MultiRuleTest {
 
 
   @Test
-  public void sameForAll() {
+  public void sameForAll_primitives() {
     MultiRule<TestPatient> multiRule = MultiRule.<TestPatient>builder().reflexiveProperties(TestPatient.class)
         .addRulesForAll(String.class, stringMinLength(3), stringMaxLength(20))
         .addRulesForAll(boolean.class, notNull(), isTrue())
@@ -135,6 +135,45 @@ public class MultiRuleTest {
     assertError(diagnosis);
     assertEquals(1, diagnosis.getAilments().size());
     assertOnlyViolationForProperty(stringMinLength(3), diagnosis, "phone");
+  }
+
+  @Test
+  public void sameForAll_complex() {
+    MultiRule<Base1> base1MultiRule = MultiRule.<Base1>builder()
+        .reflexiveProperties(Base1.class)
+        .addRules("something", stringAlphabetic())
+        .build();
+
+    MultiRule<InheritanceTestPatient> multiRule = MultiRule.<InheritanceTestPatient>builder()
+        .reflexiveProperties(InheritanceTestPatient.class)
+        .addRulesForAll(Base1.class, base1MultiRule)
+        .build();
+
+    InheritanceTestPatient patient = new InheritanceTestPatient(new Inherited1("1"), new Inherited2("2"), new Base1("c"));
+    Diagnosis diagnosis = validoctor.examine(patient, multiRule);
+    assertError(diagnosis);
+    assertEquals(2, diagnosis.getAilments().size());
+    assertOnlyViolationForProperty(stringAlphabetic(), diagnosis, "inherited1.something");
+    assertOnlyViolationForProperty(stringAlphabetic(), diagnosis, "inherited2.something");
+  }
+
+  @Test
+  public void sameForAll_strictClassMatch() {
+    MultiRule<Base1> base1MultiRule = MultiRule.<Base1>builder()
+        .reflexiveProperties(Base1.class)
+        .addRules("something", stringAlphabetic())
+        .build();
+
+    MultiRule<InheritanceTestPatient> multiRule = MultiRule.<InheritanceTestPatient>builder()
+        .reflexiveProperties(InheritanceTestPatient.class)
+        .addRulesForAll(Inherited1.class, true, base1MultiRule)
+        .build();
+
+    InheritanceTestPatient patient = new InheritanceTestPatient(new Inherited1("1"), new Inherited2("2"), new Base1("c"));
+    Diagnosis diagnosis = validoctor.examine(patient, multiRule);
+    assertError(diagnosis);
+    assertEquals(1, diagnosis.getAilments().size());
+    assertOnlyViolationForProperty(stringAlphabetic(), diagnosis, "inherited1.something");
   }
 
   @Test
@@ -193,5 +232,56 @@ public class MultiRuleTest {
     diagnosis = validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2);
     assertError(diagnosis);
     assertOnlyViolationForProperty(notNull(), diagnosis, null);
+  }
+
+  @Test
+  public void nestedMultirules() {
+    Tier4 tier4 = new Tier4("something", 1);
+    Tier3 tier3 = new Tier3(tier4, "ahoo");
+    Tier2 tier2 = new Tier2(tier3, 2);
+    Tier1 patient = new Tier1(tier2, true);
+
+    MultiRule<Tier4> tier4Rule = MultiRule.<Tier4>builder()
+        .reflexiveProperties(Tier4.class)
+        .addRules("something", stringAlphabetic())
+        .addRules("number", numberPositive())
+        .build();
+
+    MultiRule<Tier3> tier3Rule = MultiRule.<Tier3>builder()
+        .reflexiveProperties(Tier3.class)
+        .addMultiRule("tier4", tier4Rule)
+        .addRules("ahoo", stringAlphanumeric())
+        .build();
+
+    MultiRule<Tier2> tier2Rule = MultiRule.<Tier2>builder()
+        .reflexiveProperties(Tier2.class)
+        .addMultiRule("tier3", tier3Rule)
+        .addRules("count", numberNonNegative())
+        .build();
+
+    MultiRule<Tier1> tier1Rule = MultiRule.<Tier1>builder()
+        .reflexiveProperties(Tier1.class)
+        .addMultiRule("tier2", tier2Rule)
+        .addRules("bleh", isTrue())
+        .build();
+
+    assertOk(validoctor.examine(patient, tier1Rule));
+
+    tier4.setSomething("1234");
+    Diagnosis diagnosis = validoctor.examine(patient, tier1Rule);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(stringAlphabetic(), diagnosis, "tier2.tier3.tier4.something");
+
+    tier4.setSomething("something");
+    tier3.setAhoo("#$%$");
+    diagnosis = validoctor.examine(patient, tier1Rule);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(stringAlphanumeric(), diagnosis, "tier2.tier3.ahoo");
+
+    tier3.setAhoo("ahoo");
+    tier2.setCount(-2);
+    diagnosis = validoctor.examine(patient, tier1Rule);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(numberNonNegative(), diagnosis, "tier2.count");
   }
 }

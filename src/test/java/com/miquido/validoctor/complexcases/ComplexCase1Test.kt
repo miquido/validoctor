@@ -11,15 +11,41 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.function.Predicate
 
-class ComplexCasesTest {
+
+enum class Tag {
+  MEAT, VEGETABLE, SOY, FRUIT, DOUGH
+}
+
+data class NutritionFacts(var kcal: Int?,
+                          var fibre: Double?,
+                          var protein: Double?,
+                          var fat: Double?)
+
+data class Comment(var authorId: Long?,
+                   var text: String?)
+
+data class Product(var name: String?,
+                   var skuId: String?,
+                   var description: String?,
+                   var weightG: Float?,
+                   var volumeMl: Float?,
+                   var nutritionFacts: NutritionFacts?,
+                   var glutenFree: Boolean?,
+                   var vegan: Boolean?,
+                   var tags: Set<Tag>?,
+                   var comments: List<Comment>?,
+                   var reviewScores: MutableList<Int>?)
+
+
+class ComplexCase1Test {
 
   val validoctor: Validoctor = Validoctor.builder().build()
   val product: Product by lazy { makeProduct() }
 
   private fun makeProduct() : Product {
     val tags = setOf(Tag.DOUGH, Tag.FRUIT, Tag.VEGETABLE)
-    val comments = listOf(Comment(1, "text1", listOf(2, 3, 4), listOf(5, 6)),
-        Comment(2, "text2", listOf(1, 2), listOf(3)), Comment(1, "text3", listOf(4, 5), listOf(2, 3)))
+    val comments = listOf(Comment(1, "text1"),
+        Comment(2, "text2"), Comment(1, "text3"))
     val nutritionFacts = NutritionFacts(287, 17.0, 32.5, 0.04)
     val reviewScores = mutableListOf(2, 3, 3, 4, 4, 4, 5, 5)
     return Product("name1", "sku1234567", "desc1", 200f, 312.56f, nutritionFacts, true, false, tags, comments, reviewScores)
@@ -66,25 +92,25 @@ class ComplexCasesTest {
     product.comments?.get(0)?.text = "text fucktext"
     val diagnosis1 = validoctor.examine(product, nullityRules, validityRules)
     assertWarn(diagnosis1)
-    assertTrue(diagnosis1.ailments["comments_element.text"]!!.any({ a -> a.name == "CENSORED_WORD" }))
+    assertTrue(diagnosis1.ailments["comments_element.text"]!!.any { a -> a.name == "CENSORED_WORD" })
 
     product.nutritionFacts?.fibre = 0.0
     val diagnosis2 = validoctor.examine(product, nullityRules, validityRules)
     assertError(diagnosis2)
     assertEquals(2, diagnosis2.ailments.size)
-    assertTrue(diagnosis2.ailments["nutritionFacts.fibre"]!!.any { a -> a.name == numberPositive().ailment.name })
+    assertTrue(diagnosis2.ailments["nutritionFacts.fibre"]!!.any { a -> a.name == numberPositive().peekAilment().name })
 
     product.name = null
     val diagnosis3 = validoctor.examine(product, nullityRules, validityRules)
     assertError(diagnosis3)
     assertEquals(3, diagnosis3.ailments.size)
-    assertTrue(diagnosis3.ailments["name"]!!.any { a -> a.name == notNull<Any>().ailment.name })
+    assertTrue(diagnosis3.ailments["name"]!!.any { a -> a.name == notNull<Any>().peekAilment().name })
 
     product.reviewScores!!.add(6)
     val diagnosis4 = validoctor.examine(product, nullityRules, validityRules)
     assertError(diagnosis4)
     assertEquals(4, diagnosis4.ailments.size)
-    assertTrue(diagnosis4.ailments["reviewScores"]!!.any { a -> a.name == numberInRange(1, 5).ailment.name })
+    assertTrue(diagnosis4.ailments["reviewScores"]!!.any { a -> a.name == numberInRange(1, 5).peekAilment().name })
   }
 
 }

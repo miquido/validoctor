@@ -4,7 +4,6 @@ import com.miquido.validoctor.TestPatient;
 import com.miquido.validoctor.Validoctor;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.multirule.MultiRule;
-import com.miquido.validoctor.rule.Rules;
 import org.junit.Test;
 
 import static com.miquido.validoctor.TestUtil.*;
@@ -25,6 +24,7 @@ public class ReducerRuleTest {
       .properties("phone", "name")
       .reducer(String::concat)
       .rule(stringMinLength(8))
+      .nullIgnoring()
       .build();
 
   private ReducerRule<TestPatient, Long> rule3 = ReducerRule.builder(TestPatient.class, Long.class)
@@ -74,16 +74,16 @@ public class ReducerRuleTest {
   @Test
   public void reducerRulesWithRule() {
     TestPatient patient = new TestPatient(1L, "Name", "+48123", 5L, true);
-    assertOk(validoctor.examineCombo(patient, Rules.notNull(), rule3, rule2));
+    assertOk(validoctor.examineCombo(patient, notNull(), rule3, rule2));
 
     patient = null;
-    Diagnosis diagnosis = validoctor.examineCombo(patient, Rules.notNull(), rule3, rule2);
+    Diagnosis diagnosis = validoctor.examineCombo(patient, notNull(), rule3, rule2);
     assertError(diagnosis);
     assertEquals(1, diagnosis.getAilments().size());
-    assertOnlyViolationForProperty(Rules.notNull(), diagnosis, null);
+    assertOnlyViolationForProperty(notNull(), diagnosis, null);
 
     patient = new TestPatient(1L, "Name", "+48", 8L, true);
-    diagnosis = validoctor.examineCombo(patient, Rules.notNull(), rule3, rule2);
+    diagnosis = validoctor.examineCombo(patient, notNull(), rule3, rule2);
     assertError(diagnosis);
     assertEquals(4, diagnosis.getAilments().size());
   }
@@ -114,6 +114,28 @@ public class ReducerRuleTest {
     diagnosis = validoctor.examineCombo(patient, rule1, multiRule1, multiRule2);
     assertError(diagnosis);
     assertOnlyViolationForProperty(numberNonNegative(), diagnosis, "ordinal");
+  }
+
+  @Test
+  public void reducerRuleWithNullValues() {
+    TestPatient patient = new TestPatient(1L, "Name", null, 5L, true);
+    assertError(validoctor.examine(patient, rule2)); //rule2 is nullIgnoring
+
+    ReducerRule<TestPatient, String> nonNullIgnoringRule = //but with null handling reducer
+        ReducerRule.builder(TestPatient.class, String.class)
+            .properties("phone", "name")
+            .reducer((s, s2) -> {
+              if (s == null) return s2;
+              else return s.concat(s2);
+            })
+            .rule(stringMinLength(8))
+            .build();
+
+    assertError(validoctor.examine(patient, nonNullIgnoringRule));
+
+    patient.setName("Name8888");
+    assertOk(validoctor.examine(patient, rule2));
+    assertOk(validoctor.examine(patient, nonNullIgnoringRule));
   }
 
 }

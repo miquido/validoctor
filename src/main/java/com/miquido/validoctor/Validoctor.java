@@ -132,9 +132,8 @@ public final class Validoctor {
     Severity severity = Severity.OK;
     Map<String, Set<Ailment>> ailments = new HashMap<>();
     for (PropertyRule<T> rule : rules) {
-      boolean valid = rule.test(patient);
-      if (!valid) {
-        Ailment ailment = rule.getAilment();
+      Ailment ailment = rule.apply(patient);
+      if (ailment != null) {
         if (ailment.getSeverity().isWorseThan(severity)) {
           severity = ailment.getSeverity();
         }
@@ -161,11 +160,26 @@ public final class Validoctor {
     private boolean pedantic = true;
     private boolean exceptional = false;
 
+    /**
+     * Sets whether this Validoctor will be pedantic or not. Defaults to true.
+     * <li>If true, will execute all passed rules, continuing even after encountering violations, and will return
+     * a diagnosis with all violations found.</li>
+     * <li>If false, will only execute rules until first violation, and will return a diagnosis with just this one.</li>
+     * @param pedantic
+     * @return this Builder
+     */
     public Builder pedantic(boolean pedantic) {
       this.pedantic = pedantic;
       return this;
     }
 
+    /**
+     * Sets whether this Validoctor will be exceptional or not. Defaults to false.
+     * <li>If true, will throw a {@link DiagnosisException} containing the Diagnosis.</li>
+     * <li>If false, will just return the Diagnosis.</li>
+     * @param exceptional
+     * @return this Builder
+     */
     public Builder exceptional(boolean exceptional) {
       this.exceptional = exceptional;
       return this;

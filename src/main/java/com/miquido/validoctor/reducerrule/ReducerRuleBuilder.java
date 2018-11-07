@@ -28,6 +28,7 @@ public class ReducerRuleBuilder<T, P> {
   private List<Function<T, P>> propertyGetters = new ArrayList<>(0);
   private Rule<? super P> rule;
   private BinaryOperator<P> reducer;
+  private boolean nullIgnoring = false;
 
   ReducerRuleBuilder(Class<T> subjectClass, Class<P> propertiesClass) {
     this.subjectClass = subjectClass;
@@ -72,11 +73,23 @@ public class ReducerRuleBuilder<T, P> {
   }
 
   /**
-   * @param reducer reduction operator used to reduce the properties into one value
+   * @param reducer reduction operator used to reduce the properties into one value. If null values are encountered,
+   *                it is by default expected that the reducer will handle them, or NullPointerException will be
+   *                thrown otherwise. To lift that responsibility from reducer and make the rule ignore nulls use
+   *                {@link ReducerRuleBuilder#nullIgnoring()}.
    * @return this builder for chaining
    */
   public ReducerRuleBuilder<T, P> reducer(BinaryOperator<P> reducer) {
     this.reducer = reducer;
+    return this;
+  }
+
+  /**
+   * Makes the resulting rule ignore nulls encountered during reduction.
+   * @return this builder for chaining
+   */
+  public ReducerRuleBuilder<T, P> nullIgnoring() {
+    nullIgnoring = true;
     return this;
   }
 
@@ -89,7 +102,7 @@ public class ReducerRuleBuilder<T, P> {
     if (!buildable()) {
       throw new IllegalStateException("Properties, rule and reducer must all be set before building");
     }
-    return new ReducerRule<>(propertyNames, propertyGetters, reducer, rule);
+    return new ReducerRule<>(propertyNames, propertyGetters, reducer, rule, nullIgnoring);
   }
 
 

@@ -1,5 +1,6 @@
 package com.miquido.validoctor.rule;
 
+import com.miquido.validoctor.TestPatient;
 import com.miquido.validoctor.Validoctor;
 import com.miquido.validoctor.ailment.Ailment;
 import com.miquido.validoctor.ailment.Severity;
@@ -172,6 +173,19 @@ public class SimpleRuleTest {
   }
 
   @Test
+  public void predefinedRule_valueIn() {
+    assertOk(validoctor.examine("a", valueIn("a", "b", "c")));
+    assertOk(validoctor.examine(null, valueIn(null, "a", "b", "c")));
+    assertOk(validoctor.examine(765, valueIn(5, 23, 765, 43)));
+    assertOk(validoctor.examine(new TestPatient(1, "a", "1", true),
+        valueIn(new TestPatient(2, "b", "2", false), new TestPatient(1, "a", "1", true))));
+    assertError(validoctor.examine("a", valueIn("b", "c", "d")));
+    assertError(validoctor.examine(null, valueIn()));
+    assertError(validoctor.examine(new TestPatient(1, "a", "1", true),
+        valueIn(new TestPatient(2, "a", "1", true), new TestPatient(1, "a", "1", false))));
+  }
+
+  @Test
   public void customRule() {
     SimpleRule<Long> is5Rule = new SimpleRule<>("IS_5", v -> v == 5);
     assertOk(validoctor.examine(5L, is5Rule));
@@ -189,8 +203,8 @@ public class SimpleRuleTest {
     assertError(diagnosis);
     Set<Ailment> objectAilments = diagnosis.getAilments().get(null);
     assertEquals(2, objectAilments.size());
-    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberNonNegative().getAilment().getName())));
-    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberInRange(-10, 10).getAilment().getName())));
+    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberNonNegative().peekAilment().getName())));
+    assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberInRange(-10, 10).peekAilment().getName())));
   }
 
 }

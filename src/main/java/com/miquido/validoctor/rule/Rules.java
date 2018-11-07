@@ -1,9 +1,12 @@
 package com.miquido.validoctor.rule;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
+
+import static com.miquido.validoctor.ailment.SpecsKey.*;
 
 public final class Rules {
 
@@ -103,7 +106,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or contains only letters and digits.
+   * Passed: patient is null or contains only letters and digits.<br/>
    * Violated: patient contains any character that is not letter or digit.
    */
   public static Rule<String> stringAlphanumeric() {
@@ -111,7 +114,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or contains only letters.
+   * Passed: patient is null or contains only letters.<br/>
    * Violated: patient contains any character that is not letter.
    */
   public static Rule<String> stringAlphabetic() {
@@ -123,7 +126,9 @@ public final class Rules {
    * Violated: patient is string with length lesser than specified {@code minLength}.
    */
   public static Rule<String> stringMinLength(int minLength) {
-    return new SimpleRule<>("STRING_MIN_LENGTH:" + minLength, str -> str == null || str.length() >= minLength);
+    Map<String, Object> params = new HashMap<>();
+    params.put(MIN_LENGTH, minLength);
+    return new SimpleRule<>("STRING_MIN_LENGTH:" + minLength, params, str -> str == null || str.length() >= minLength);
   }
 
   /**
@@ -131,7 +136,9 @@ public final class Rules {
    * Violated: patient is string with length greater than specified {@code maxLength}.
    */
   public static Rule<String> stringMaxLength(int maxLength) {
-    return new SimpleRule<>("STRING_MAX_LENGTH:" + maxLength, str -> str == null || str.length() <= maxLength);
+    Map<String, Object> params = new HashMap<>();
+    params.put(MAX_LENGTH, maxLength);
+    return new SimpleRule<>("STRING_MAX_LENGTH:" + maxLength, params, str -> str == null || str.length() <= maxLength);
   }
 
   /**
@@ -141,8 +148,11 @@ public final class Rules {
    * greater than specified {@code maxLength}.
    */
   public static Rule<String> stringLengthInRange(int minLength, int maxLength) {
-    return new SimpleRule<>("STRING_LENGTH_IN_RANGE:" + minLength + "-" + maxLength, str -> str == null
-        || str.length() >= minLength && str.length() <= maxLength);
+    Map<String, Object> params = new HashMap<>();
+    params.put(MIN_LENGTH, minLength);
+    params.put(MAX_LENGTH, maxLength);
+    return new SimpleRule<>("STRING_LENGTH_IN_RANGE:" + minLength + "-" + maxLength, params,
+        str -> str == null || str.length() >= minLength && str.length() <= maxLength);
   }
 
   /**
@@ -150,7 +160,9 @@ public final class Rules {
    * Violated: patient is string with length other than specified {@code exactLength}.
    */
   public static Rule<String> stringExactLength(int exactLength) {
-    return new SimpleRule<>("STRING_EXACT_LENGTH:" + exactLength, str -> str == null || str.length() == exactLength);
+    Map<String, Object> params = new HashMap<>();
+    params.put(REQUIRED_LENGTH, exactLength);
+    return new SimpleRule<>("STRING_EXACT_LENGTH:" + exactLength, params, str -> str == null || str.length() == exactLength);
   }
 
   /**
@@ -174,15 +186,29 @@ public final class Rules {
    * Violated: patient is number with value {@code < minRange} or {@code > maxRange}.
    */
   public static Rule<Number> numberInRange(Number minRange, Number maxRange) {
-    return new SimpleRule<>("NUMBER_IN_RANGE:" + minRange + "-" + maxRange, value -> value == null
+    Map<String, Object> params = new HashMap<>();
+    params.put(MIN_RANGE, minRange);
+    params.put(MAX_RANGE, maxRange);
+    return new SimpleRule<>("NUMBER_IN_RANGE:" + minRange + "-" + maxRange, params, value -> value == null
         || value.doubleValue() >= minRange.doubleValue() && value.doubleValue() <= maxRange.doubleValue());
+  }
+
+  /**
+   * Passed: patient is equal to at least one of values passed in allowedValues argument.</br>
+   * Violated: patient is not equal to any of the values passed in allowedValues.
+   */
+  public static Rule<Object> valueIn(Object... allowedValues) {
+    Map<String, Object> params = new HashMap<>();
+    params.put(ALLOWED_VALUES, allowedValues);
+    return new SimpleRule<>("VALUE_IN:" + Arrays.toString(allowedValues), params,
+        value -> Arrays.asList(allowedValues).contains(value));
   }
 
   /**
    * Builds a very simple wrapper rule for validating collections.
    */
   public static <T> Rule<Collection<T>> each(Rule<T> rule) {
-    return new SimpleRule<>(rule.getAilment().getName(),
-        col -> col == null || col.stream().allMatch(rule::test), rule.getAilment().getSeverity());
+    return new SimpleRule<>(rule.peekAilment().getName(), rule.getParams(),
+        col -> col == null || col.stream().allMatch(obj -> rule.apply(obj) == null), rule.peekAilment().getSeverity());
   }
 }

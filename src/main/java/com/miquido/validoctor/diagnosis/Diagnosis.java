@@ -29,6 +29,9 @@ public class Diagnosis {
     return severity;
   }
 
+  /**
+   * @return map of property to Set of Ailments. Ailments under null key are for the whole object, not any of the properties.
+   */
   public Map<String, Set<Ailment>> getAilments() {
     return ailments;
   }
