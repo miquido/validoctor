@@ -245,11 +245,7 @@ the object.
 None.
 
 # In next releases
-* Add missing toString and equals/hashCode methods - DONE.
-* Return rule parameters and actual patient value in Ailment for easier result handling by clients - DONE.
 * Make Ailments found in elements of collection be mapped under jsonpath-compliant keys.
 * Add trait for multithreaded validation.
-* Write quick start guide. - DONE (examples above).
-* Create develop branch. - DONE.
 * Building snapshots to bintray from master.
 * Convert to Kotlin.
