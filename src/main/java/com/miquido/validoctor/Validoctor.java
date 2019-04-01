@@ -116,6 +116,7 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examineCombo(T patient, ReducerRule<T, ?> preRule, MultiRule<T>... multiRules) {
+    //examine call here must be duplicated from method above due to static typing of MultiRule.of falling back to Rule
     Diagnosis preDiagnosis = examine(patient, preRule);
     return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
         : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));

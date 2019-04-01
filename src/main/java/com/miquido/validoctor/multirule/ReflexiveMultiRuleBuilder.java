@@ -145,7 +145,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
                                                                                     MultiRule<PropertyType>... rules) {
     Arrays.stream(subjectClass.getMethods())
         .filter(method -> Modifier.isPublic(method.getModifiers())
-            && (strictClassMatch ? method.getReturnType().equals(propertyClass) : propertyClass.isAssignableFrom(method.getReturnType()))
+            && classMatches(method.getReturnType(), propertyClass, strictClassMatch)
             && (method.getName().startsWith("get")))
         .forEach(getter -> {
           String propertyName = NameUtil.uncapitalize(getter.getName().substring(3));
@@ -174,7 +174,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
                                                                                     Rule<PropertyType>... rules) {
     Arrays.stream(subjectClass.getMethods())
         .filter(method -> Modifier.isPublic(method.getModifiers())
-            && (strictClassMatch ? method.getReturnType().equals(propertyClass) : propertyClass.isAssignableFrom(method.getReturnType()))
+            && classMatches(method.getReturnType(), propertyClass, strictClassMatch)
             && (method.getName().startsWith("get") || method.getName().startsWith("is")))
         .forEach(getter -> {
           boolean isIs = getter.getName().startsWith("is");
@@ -230,7 +230,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   private <T> boolean classMatches(Class<?> actualClass, Class<T> classToMatch, boolean strict) {
-    return strict ? actualClass.equals(classToMatch) : actualClass.isAssignableFrom(classToMatch);
+    return strict ? actualClass.equals(classToMatch) : classToMatch.isAssignableFrom(actualClass);
   }
 
 }
