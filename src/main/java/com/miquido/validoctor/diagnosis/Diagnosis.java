@@ -30,7 +30,8 @@ public class Diagnosis {
   }
 
   /**
-   * @return map of property to Set of Ailments. Ailments under null key are for the whole object, not any of the properties.
+   * @return map of property to Set of Ailments. Ailments under {@value Ailment#OBJECT_KEY} key are for the whole object,
+   * not any of the properties.
    */
   public Map<String, Set<Ailment>> getAilments() {
     return ailments;
@@ -45,7 +46,8 @@ public class Diagnosis {
   public Diagnosis and(Diagnosis other) {
     Severity severity = getSeverity().isWorseThan(other.getSeverity()) ? getSeverity() : other.getSeverity();
     Map<String, Set<Ailment>> ailments = new HashMap<>(getAilments());
-    other.getAilments().forEach((property, propertyAilments) -> ailments.computeIfAbsent(property, prop -> new HashSet<>()).addAll(propertyAilments));
+    other.getAilments().forEach((property, propertyAilments) ->
+        ailments.computeIfAbsent(property, prop -> new HashSet<>()).addAll(propertyAilments));
     return new Diagnosis(severity, ailments);
   }
 

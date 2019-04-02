@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.util.regex.Pattern;
 
 import static com.miquido.validoctor.TestUtil.*;
+import static com.miquido.validoctor.ailment.Ailment.*;
 import static com.miquido.validoctor.rule.Rules.*;
 import static org.junit.Assert.*;
 
@@ -231,7 +232,7 @@ public class MultiRuleTest {
     patient = null;
     diagnosis = validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2);
     assertError(diagnosis);
-    assertOnlyViolationForProperty(notNull(), diagnosis, null);
+    assertOnlyViolationForProperty(notNull(), diagnosis, OBJECT_KEY);
   }
 
   @Test

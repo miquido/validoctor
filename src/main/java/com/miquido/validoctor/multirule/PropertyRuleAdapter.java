@@ -15,7 +15,7 @@ class PropertyRuleAdapter<T> implements PropertyRule<T> {
 
   @Override
   public String getProperty() {
-    return null;
+    return Ailment.OBJECT_KEY;
   }
 
   @Override

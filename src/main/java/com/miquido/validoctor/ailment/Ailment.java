@@ -11,6 +11,9 @@ import java.util.Objects;
 public class Ailment {
 
 
+  public static final String OBJECT_KEY = "OBJECT";
+
+
   private static final int DEFAULT_SPECS_MAP_SIZE = 4;
 
 

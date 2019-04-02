@@ -5,6 +5,7 @@ import com.miquido.validoctor.ailment.Severity;
 import com.miquido.validoctor.rule.Rules;
 import org.junit.Test;
 
+import static com.miquido.validoctor.ailment.Ailment.*;
 import static org.junit.Assert.*;
 
 public class DiagnosisTest {
@@ -18,7 +19,7 @@ public class DiagnosisTest {
     Diagnosis d3 = d1.and(d2);
     System.out.println("sumErrorDiagnoses: resulting diagnosis: " + d3.toString());
     assertEquals(Severity.ERROR, d3.getSeverity());
-    assertEquals(2, d3.getAilments().get(null).size());
+    assertEquals(2, d3.getAilments().get(OBJECT_KEY).size());
   }
 
   @Test
@@ -28,7 +29,7 @@ public class DiagnosisTest {
     Diagnosis d3 = d1.and(d2);
     System.out.println("sumErrorAndOkDiagnoses: resulting diagnosis: " + d3.toString());
     assertEquals(Severity.ERROR, d3.getSeverity());
-    assertEquals(1, d3.getAilments().get(null).size());
+    assertEquals(1, d3.getAilments().get(OBJECT_KEY).size());
   }
 
   @Test

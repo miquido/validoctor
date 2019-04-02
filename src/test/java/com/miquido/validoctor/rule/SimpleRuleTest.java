@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static com.miquido.validoctor.TestUtil.*;
+import static com.miquido.validoctor.ailment.Ailment.*;
 import static com.miquido.validoctor.rule.Rules.*;
 import static org.junit.Assert.*;
 
@@ -201,7 +202,7 @@ public class SimpleRuleTest {
 
     Diagnosis diagnosis = validoctor.examine(-11, numberNonNegative(), numberInRange(-10, 10));
     assertError(diagnosis);
-    Set<Ailment> objectAilments = diagnosis.getAilments().get(null);
+    Set<Ailment> objectAilments = diagnosis.getAilments().get(OBJECT_KEY);
     assertEquals(2, objectAilments.size());
     assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberNonNegative().peekAilment().getName())));
     assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberInRange(-10, 10).peekAilment().getName())));

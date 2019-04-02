@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static com.miquido.validoctor.ailment.Ailment.*;
 import static org.junit.Assert.*;
 
 public class ValidoctorTest {
@@ -52,7 +53,7 @@ public class ValidoctorTest {
     Validoctor validoctor = Validoctor.builder().pedantic(true).build();
     Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
     assertEquals(Severity.ERROR, diagnosis.getSeverity());
-    assertEquals(2, diagnosis.getAilments().get(null).size());
+    assertEquals(2, diagnosis.getAilments().get(OBJECT_KEY).size());
   }
 
   @Test
@@ -60,14 +61,14 @@ public class ValidoctorTest {
     Validoctor validoctor = Validoctor.builder().pedantic(false).build();
     Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
     assertEquals(Severity.ERROR, diagnosis.getSeverity());
-    assertEquals(1, diagnosis.getAilments().get(null).size());
+    assertEquals(1, diagnosis.getAilments().get(OBJECT_KEY).size());
   }
 
   @Test
   public void validoctor_putsRuleParamsAndPatientValueInSpecs() {
     Validoctor validoctor = Validoctor.builder().build();
     Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
-    Set<Ailment> ailments = diagnosis.getAilments().get(null);
+    Set<Ailment> ailments = diagnosis.getAilments().get(OBJECT_KEY);
     Ailment ailment = ailments.stream().filter(a ->
         a.getName().equals(Rules.numberNonNegative().peekAilment().getName())).findFirst().orElse(null);
     assertNotNull(ailment);
@@ -94,7 +95,7 @@ public class ValidoctorTest {
     }
     for (int i = 0; i < 10; i++) {
       Diagnosis diagnosis = futures.get(i).get();
-      Set<Ailment> ailments = diagnosis.getAilments().get(null);
+      Set<Ailment> ailments = diagnosis.getAilments().get(OBJECT_KEY);
       Ailment ailment = ailments.stream().filter(a ->
           a.getName().equals(Rules.numberPositive().peekAilment().getName())).findFirst().orElse(null);
       assertNotNull(ailment);

@@ -21,7 +21,7 @@ repositories {
     jcenter()
 }
 dependencies {
-  compile 'com.miquido.validoctor:validoctor:1.1.2'
+  compile 'com.miquido.validoctor:validoctor:1.1.3'
 }
 ```
 Validoctor is a data validation library handling validations on complex data structures. It is designed to be 
