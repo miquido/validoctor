@@ -7,7 +7,9 @@ import com.miquido.validoctor.ailment.Severity;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static com.miquido.validoctor.TestUtil.*;
@@ -184,6 +186,31 @@ public class SimpleRuleTest {
     assertError(validoctor.examine(null, valueIn()));
     assertError(validoctor.examine(new TestPatient(1, "a", "1", true),
         valueIn(new TestPatient(2, "a", "1", true), new TestPatient(1, "a", "1", false))));
+  }
+
+  @Test
+  public void predefinedRule_valueIn_list() {
+    assertOk(validoctor.examine("a", valueIn(Arrays.asList("a", "b", "c"))));
+    assertOk(validoctor.examine(null, valueIn(Arrays.asList(null, "a", "b", "c"))));
+    assertOk(validoctor.examine(765, valueIn(Arrays.asList(5, 23, 765, 43))));
+    assertOk(validoctor.examine(new TestPatient(1, "a", "1", true),
+        valueIn(Arrays.asList(new TestPatient(2, "b", "2", false), new TestPatient(1, "a", "1", true)))));
+    assertError(validoctor.examine("a", valueIn(Arrays.asList("b", "c", "d"))));
+    assertError(validoctor.examine(null, valueIn(Collections.emptyList())));
+    assertError(validoctor.examine(new TestPatient(1, "a", "1", true),
+        valueIn(Arrays.asList(new TestPatient(2, "a", "1", true), new TestPatient(1, "a", "1", false)))));
+  }
+
+  @Test
+  public void predefinedRule_each() {
+    List<String> strings = Arrays.asList("a", "b", "c");
+
+    assertOk(validoctor.examine(Collections.singleton(1), each(notNull())));
+    assertOk(validoctor.examine(strings, each(stringAlphabetic())));
+    assertError(validoctor.examine(Arrays.asList("a", "b", "c", "2"), each(stringAlphabetic())));
+
+    assertOk(validoctor.examine(strings, collectionNotEmpty(), each(stringAlphabetic())));
+    assertError(validoctor.examine(strings, collectionNotEmpty(), each(stringAlphabetic()), each(stringMinLength(2))));
   }
 
   @Test
