@@ -195,21 +195,21 @@ public final class Rules {
    * Passed: patient is equal to at least one of values passed in allowedValues argument.</br>
    * Violated: patient is not equal to any of the values passed in allowedValues.
    */
-  public static Rule<Object> valueIn(Object... allowedValues) {
+  public static <T> Rule<T> valueIn(T... allowedValues) {
     Map<String, Object> params = new HashMap<>();
-    List<Object> list = Arrays.asList(allowedValues);
+    List<T> list = Arrays.asList(allowedValues);
     params.put(ALLOWED_VALUES, list);
-    return new SimpleRule<>("VALUE_IN:" + list.toString(), params, list::contains);
+    return new SimpleRule<>("VALUE_IN", params, list::contains);
   }
 
   /**
    * Passed: patient is equal to at least one element of list passed in allowedValues argument.</br>
    * Violated: patient is not equal to any element of the list passed in allowedValues.
    */
-  public static Rule<Object> valueIn(List<Object> allowedValues) {
+  public static <T> Rule<T> valueIn(List<T> allowedValues) {
     Map<String, Object> params = new HashMap<>();
     params.put(ALLOWED_VALUES, allowedValues);
-    return new SimpleRule<>("VALUE_IN:" + allowedValues.toString(), params, allowedValues::contains);
+    return new SimpleRule<>("VALUE_IN", params, allowedValues::contains);
   }
 
   /**

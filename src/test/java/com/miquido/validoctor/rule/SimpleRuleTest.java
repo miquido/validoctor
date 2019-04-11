@@ -203,12 +203,14 @@ public class SimpleRuleTest {
 
   @Test
   public void predefinedRule_each() {
-    List<String> strings = Arrays.asList("a", "b", "c");
-
     assertOk(validoctor.examine(Collections.singleton(1), each(notNull())));
-    assertOk(validoctor.examine(strings, each(stringAlphabetic())));
+    assertOk(validoctor.examine(Arrays.asList("a", "b", "c"), each(stringAlphabetic())));
     assertError(validoctor.examine(Arrays.asList("a", "b", "c", "2"), each(stringAlphabetic())));
+  }
 
+  @Test
+  public void predefinedRule_each_collectionNotEmpty() {
+    List<String> strings = Arrays.asList("a", "b", "c");
     assertOk(validoctor.examine(strings, collectionNotEmpty(), each(stringAlphabetic())));
     assertError(validoctor.examine(strings, collectionNotEmpty(), each(stringAlphabetic()), each(stringMinLength(2))));
   }
@@ -226,6 +228,7 @@ public class SimpleRuleTest {
   @Test
   public void multipleRules() {
     assertOk(validoctor.examine(10, numberPositive(), numberInRange(-10, 10)));
+    assertOk(validoctor.examine("10", stringAlphanumeric(), valueIn("9", "10", "11")));
 
     Diagnosis diagnosis = validoctor.examine(-11, numberNonNegative(), numberInRange(-10, 10));
     assertError(diagnosis);
