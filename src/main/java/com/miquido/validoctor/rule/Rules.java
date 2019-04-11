@@ -3,6 +3,7 @@ package com.miquido.validoctor.rule;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,9 +40,6 @@ public final class Rules {
 
   private static final Rule<Number> NUMBER_NON_NEGATIVE =
       new SimpleRule<>("NUMBER_NOT_NEGATIVE", value -> value == null || value.doubleValue() >= 0);
-
-  private static final Rule<Collection> COLLECTION_NOT_EMPTY =
-      new SimpleRule<>("COLLECTION_NOT_EMPTY", collection -> collection == null || !collection.isEmpty());
 
 
   private Rules() {
@@ -80,14 +78,6 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or not empty collection.<br/>
-   * Violated: patient is empty collection.
-   */
-  public static Rule<Collection> collectionNotEmpty() {
-    return COLLECTION_NOT_EMPTY;
-  }
-
-  /**
    * Passed: patient is null or not empty string.<br/>
    * Violated: patient is empty string.
    * @see Rules#stringTrimmedNotEmpty()
@@ -119,6 +109,14 @@ public final class Rules {
    */
   public static Rule<String> stringAlphabetic() {
     return STRING_ALPHABETIC;
+  }
+
+  /**
+   * Passed: patient is null or not empty collection.<br/>
+   * Violated: patient is empty collection.
+   */
+  public static <T> Rule<Collection<T>> collectionNotEmpty() {
+    return new SimpleRule<>("COLLECTION_NOT_EMPTY", collection -> collection == null || !collection.isEmpty());
   }
 
   /**
@@ -197,11 +195,21 @@ public final class Rules {
    * Passed: patient is equal to at least one of values passed in allowedValues argument.</br>
    * Violated: patient is not equal to any of the values passed in allowedValues.
    */
-  public static Rule<Object> valueIn(Object... allowedValues) {
+  public static <T> Rule<T> valueIn(T... allowedValues) {
+    Map<String, Object> params = new HashMap<>();
+    List<T> list = Arrays.asList(allowedValues);
+    params.put(ALLOWED_VALUES, list);
+    return new SimpleRule<>("VALUE_IN", params, list::contains);
+  }
+
+  /**
+   * Passed: patient is equal to at least one element of list passed in allowedValues argument.</br>
+   * Violated: patient is not equal to any element of the list passed in allowedValues.
+   */
+  public static <T> Rule<T> valueIn(List<T> allowedValues) {
     Map<String, Object> params = new HashMap<>();
     params.put(ALLOWED_VALUES, allowedValues);
-    return new SimpleRule<>("VALUE_IN:" + Arrays.toString(allowedValues), params,
-        value -> Arrays.asList(allowedValues).contains(value));
+    return new SimpleRule<>("VALUE_IN", params, allowedValues::contains);
   }
 
   /**

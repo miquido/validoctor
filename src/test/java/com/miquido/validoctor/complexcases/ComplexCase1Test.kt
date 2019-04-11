@@ -81,7 +81,7 @@ class ComplexCase1Test {
         .addRules("description", stringMaxLength(200))
         .addRulesForAll(Float::class.java, numberPositive())
         .addMultiRule({ p -> p.nutritionFacts != null }, "nutritionFacts", nutritionFactsRules)
-        .addRules("tags", collectionNotEmpty())
+        .addRules("tags", collectionNotEmpty<Tag>())
         .addMultiRuleForElements("comments", commentRules)
         .addRules("reviewScores", each(numberInRange(1, 5)))
         .build()
