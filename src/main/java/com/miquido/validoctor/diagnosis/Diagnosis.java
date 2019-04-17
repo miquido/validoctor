@@ -30,8 +30,8 @@ public class Diagnosis {
   }
 
   /**
-   * @return map of property to Set of Ailments. Ailments under {@value Ailment#OBJECT_KEY} key are for the whole object,
-   * not any of the properties.
+   * @return map of property to Set of Ailments.
+   * Ailments under key specified as object name in examine call are for the whole object, not any of the properties.
    */
   public Map<String, Set<Ailment>> getAilments() {
     return ailments;

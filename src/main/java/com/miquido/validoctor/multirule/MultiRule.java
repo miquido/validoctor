@@ -25,26 +25,27 @@ public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
 
   /**
    * For internal use. Creates a MultiRule out of passed Rules.<br/>
-   * Important: it adapts the rules as {@link PropertyRule}s with null property association.
-   * If these already were PropertyRules, their associations will be overridden with null, which is interpreted as
-   * association to whole object, not a property of it. This is usually undesired. If you need to perform both whole
+   * Important: it adapts the rules as {@link PropertyRule}s with {@param objectName} property association.
+   * If these already were PropertyRules, their associations will be overridden, erasing all
+   * mapping of rules to properties. This is usually undesired. If you need to perform both whole
    * object and properties validation in one call, use:<br/><br/>
    * {@code validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2)}.<br/>
+   * @param objectName name of the object to report the Ailments for
    * @param rules rules to put into new MultiRule. Non null.
    * @param <T> type of patient object
    * @return a new MultiRule
    */
   @SafeVarargs
-  public static <T> MultiRule<T> of(Rule<T>... rules) {
-    return MultiRule.of(Arrays.asList(rules));
+  public static <T> MultiRule<T> of(String objectName, Rule<T>... rules) {
+    return MultiRule.of(objectName, Arrays.asList(rules));
   }
 
   /**
-   * See {@link MultiRule#of(Rule[])}
+   * See {@link MultiRule#of(String, Rule[])}
    */
-  public static <T> MultiRule<T> of(List<? extends Rule<T>> list) {
+  public static <T> MultiRule<T> of(String objectName, List<? extends Rule<T>> list) {
     MultiRule<T> multiRule = new MultiRule<>(list.size());
-    list.forEach(rule -> multiRule.add(new PropertyRuleAdapter<>(rule)));
+    list.forEach(rule -> multiRule.add(new PropertyRuleAdapter<>(objectName, rule)));
     return multiRule;
   }
 
@@ -60,8 +61,8 @@ public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
   @SafeVarargs
   public static <T> MultiRule<T> of(ReducerRule<T, ?>... reducerRules) {
     int sumSizes = Stream.of(reducerRules)
-        .map(rule -> rule.getProperties().size())
-        .reduce((sumSize, size) -> sumSize + size).orElse(0);
+        .mapToInt(rule -> rule.getProperties().size())
+        .sum();
     MultiRule<T> multiRule = new MultiRule<>(sumSizes);
 
     Stream.of(reducerRules).forEach(rule -> {

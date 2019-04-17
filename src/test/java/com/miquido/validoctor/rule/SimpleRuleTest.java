@@ -230,9 +230,9 @@ public class SimpleRuleTest {
     assertOk(validoctor.examine(10, numberPositive(), numberInRange(-10, 10)));
     assertOk(validoctor.examine("10", stringAlphanumeric(), valueIn("9", "10", "11")));
 
-    Diagnosis diagnosis = validoctor.examine(-11, numberNonNegative(), numberInRange(-10, 10));
+    Diagnosis diagnosis = validoctor.examine(-11, "patient", numberNonNegative(), numberInRange(-10, 10));
     assertError(diagnosis);
-    Set<Ailment> objectAilments = diagnosis.getAilments().get(OBJECT_KEY);
+    Set<Ailment> objectAilments = diagnosis.getAilments().get("patient");
     assertEquals(2, objectAilments.size());
     assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberNonNegative().peekAilment().getName())));
     assertTrue(objectAilments.stream().anyMatch(ailment -> ailment.getName().equals(numberInRange(-10, 10).peekAilment().getName())));
