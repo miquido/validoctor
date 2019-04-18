@@ -24,6 +24,8 @@ public final class Validoctor {
     return new Builder();
   }
 
+  private static final String DEFAULT_NAME = "OBJECT";
+
 
   private final boolean pedantic;
   private final boolean exceptional;
@@ -34,15 +36,25 @@ public final class Validoctor {
   }
 
   /**
+   * Single value examination with default patientName == {@value DEFAULT_NAME}.
+   * See {@link Validoctor#examine(Object, String, Rule[])}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examine(T patient, Rule<T>... rules) {
+    return examine(patient, DEFAULT_NAME, rules);
+  }
+
+  /**
    * Single value examination.
    * @param patient value to validate
+   * @param patientName name of the validated value to be used in resulting Diagnosis
    * @param rules validation rules
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
   @SafeVarargs
-  public final <T> Diagnosis examine(T patient, Rule<T>... rules) {
-    return examine(patient, MultiRule.of(rules));
+  public final <T> Diagnosis examine(T patient, String patientName, Rule<T>... rules) {
+    return examine(patient, MultiRule.of(patientName, rules));
   }
 
   /**
@@ -75,16 +87,27 @@ public final class Validoctor {
    * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
    * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
    * {@code examineCombo(patient, Rules.notNull(), reducerRules)}<br/>
+   *
    * @param patient object to validate
+   * @param patientName name of the validated value to be used in resulting Diagnosis
    * @param preRule validation Rule applied to patient object as a whole before attempting to apply other rules
    * @param reducerRules validation ReducerRules for properties of patient
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
   @SafeVarargs
-  public final <T> Diagnosis examineCombo(T patient, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
-    Diagnosis preDiagnosis = examine(patient, preRule);
+  public final <T> Diagnosis examineCombo(T patient, String patientName, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
+    Diagnosis preDiagnosis = examine(patient, patientName, preRule);
     return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.of(reducerRules));
+  }
+
+  /**
+   * Object examination with ReducerRules, pre-examined with a single Rule, with default patientName == {@value DEFAULT_NAME}.
+   * See {@link Validoctor#examineCombo(Object, String, Rule, ReducerRule[])}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineCombo(T patient, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
+    return examineCombo(patient, DEFAULT_NAME, preRule, reducerRules);
   }
 
   /**
@@ -92,17 +115,28 @@ public final class Validoctor {
    * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
    * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
    * {@code examineCombo(patient, Rules.notNull(), multiRules)}<br/>
+   *
    * @param patient object to validate
+   * @param patientName name of the validated value to be used in resulting Diagnosis
    * @param preRule validation Rule applied to patient object as a whole before attempting to apply other rules
    * @param multiRules validation MultiRules for properties of patient
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
   @SafeVarargs
-  public final <T> Diagnosis examineCombo(T patient, Rule<T> preRule, MultiRule<T>... multiRules) {
-    Diagnosis preDiagnosis = examine(patient, preRule);
+  public final <T> Diagnosis examineCombo(T patient, String patientName, Rule<T> preRule, MultiRule<T>... multiRules) {
+    Diagnosis preDiagnosis = examine(patient, patientName, preRule);
     return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
         : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
+  }
+
+  /**
+   * Multi property object examination, pre-examined with a single Rule, with default patientName == {@value DEFAULT_NAME}.
+   * See {@link Validoctor#examineCombo(Object, String, Rule, MultiRule[])}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineCombo(T patient, Rule<T> preRule, MultiRule<T>... multiRules) {
+    return examineCombo(patient, DEFAULT_NAME, preRule, multiRules);
   }
 
   /**

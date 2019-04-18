@@ -51,24 +51,24 @@ public class ValidoctorTest {
   @Test
   public void pedanticValidoctor_testsAll() {
     Validoctor validoctor = Validoctor.builder().pedantic(true).build();
-    Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
+    Diagnosis diagnosis = validoctor.examine(-5, "a", Rules.numberNonNegative(), Rules.numberInRange(0, 5));
     assertEquals(Severity.ERROR, diagnosis.getSeverity());
-    assertEquals(2, diagnosis.getAilments().get(OBJECT_KEY).size());
+    assertEquals(2, diagnosis.getAilments().get("a").size());
   }
 
   @Test
   public void nonPedanticValidoctor_stopsOnFirstFail() {
     Validoctor validoctor = Validoctor.builder().pedantic(false).build();
-    Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
+    Diagnosis diagnosis = validoctor.examine(-5, "a", Rules.numberNonNegative(), Rules.numberInRange(0, 5));
     assertEquals(Severity.ERROR, diagnosis.getSeverity());
-    assertEquals(1, diagnosis.getAilments().get(OBJECT_KEY).size());
+    assertEquals(1, diagnosis.getAilments().get("a").size());
   }
 
   @Test
   public void validoctor_putsRuleParamsAndPatientValueInSpecs() {
     Validoctor validoctor = Validoctor.builder().build();
-    Diagnosis diagnosis = validoctor.examine(-5, Rules.numberNonNegative(), Rules.numberInRange(0, 5));
-    Set<Ailment> ailments = diagnosis.getAilments().get(OBJECT_KEY);
+    Diagnosis diagnosis = validoctor.examine(-5, "a", Rules.numberNonNegative(), Rules.numberInRange(0, 5));
+    Set<Ailment> ailments = diagnosis.getAilments().get("a");
     Ailment ailment = ailments.stream().filter(a ->
         a.getName().equals(Rules.numberNonNegative().peekAilment().getName())).findFirst().orElse(null);
     assertNotNull(ailment);
@@ -89,13 +89,13 @@ public class ValidoctorTest {
       int patient = i;
       Future<Diagnosis> future = executor.submit(() -> {
         System.out.println("validoctor_multithreaded: Thread: " + Thread.currentThread().getId());
-        return validoctor.examine(-patient, Rules.numberPositive());
+        return validoctor.examine(-patient, "a", Rules.numberPositive());
       });
       futures.add(future);
     }
     for (int i = 0; i < 10; i++) {
       Diagnosis diagnosis = futures.get(i).get();
-      Set<Ailment> ailments = diagnosis.getAilments().get(OBJECT_KEY);
+      Set<Ailment> ailments = diagnosis.getAilments().get("a");
       Ailment ailment = ailments.stream().filter(a ->
           a.getName().equals(Rules.numberPositive().peekAilment().getName())).findFirst().orElse(null);
       assertNotNull(ailment);

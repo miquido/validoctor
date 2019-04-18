@@ -19,17 +19,17 @@ public class DiagnosisTest {
     Diagnosis d3 = d1.and(d2);
     System.out.println("sumErrorDiagnoses: resulting diagnosis: " + d3.toString());
     assertEquals(Severity.ERROR, d3.getSeverity());
-    assertEquals(2, d3.getAilments().get(OBJECT_KEY).size());
+    assertEquals(2, d3.getAilments().get("OBJECT").size());
   }
 
   @Test
   public void sumErrorAndOkDiagnoses() {
-    Diagnosis d1 = validoctor.examine("test", Rules.stringMinLength(5));
-    Diagnosis d2 = validoctor.examine("test", Rules.stringMaxLength(5));
+    Diagnosis d1 = validoctor.examine("test", "a", Rules.stringMinLength(5));
+    Diagnosis d2 = validoctor.examine("test", "b", Rules.stringMaxLength(5));
     Diagnosis d3 = d1.and(d2);
     System.out.println("sumErrorAndOkDiagnoses: resulting diagnosis: " + d3.toString());
     assertEquals(Severity.ERROR, d3.getSeverity());
-    assertEquals(1, d3.getAilments().get(OBJECT_KEY).size());
+    assertEquals(1, d3.getAilments().get("a").size());
   }
 
   @Test

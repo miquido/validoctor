@@ -7,7 +7,6 @@ import com.miquido.validoctor.multirule.MultiRule;
 import org.junit.Test;
 
 import static com.miquido.validoctor.TestUtil.*;
-import static com.miquido.validoctor.ailment.Ailment.*;
 import static com.miquido.validoctor.rule.Rules.*;
 import static org.junit.Assert.*;
 
@@ -78,10 +77,10 @@ public class ReducerRuleTest {
     assertOk(validoctor.examineCombo(patient, notNull(), rule3, rule2));
 
     patient = null;
-    Diagnosis diagnosis = validoctor.examineCombo(patient, notNull(), rule3, rule2);
+    Diagnosis diagnosis = validoctor.examineCombo(patient, "object", notNull(), rule3, rule2);
     assertError(diagnosis);
     assertEquals(1, diagnosis.getAilments().size());
-    assertOnlyViolationForProperty(notNull(), diagnosis, OBJECT_KEY);
+    assertOnlyViolationForProperty(notNull(), diagnosis, "object");
 
     patient = new TestPatient(1L, "Name", "+48", 8L, true);
     diagnosis = validoctor.examineCombo(patient, notNull(), rule3, rule2);

@@ -7,15 +7,17 @@ import java.util.Map;
 
 class PropertyRuleAdapter<T> implements PropertyRule<T> {
 
+  private final String objectName;
   private final Rule<T> rule;
 
-  PropertyRuleAdapter(Rule<T> rule) {
+  PropertyRuleAdapter(String objectName, Rule<T> rule) {
+    this.objectName = objectName;
     this.rule = rule;
   }
 
   @Override
   public String getProperty() {
-    return Ailment.OBJECT_KEY;
+    return objectName;
   }
 
   @Override
