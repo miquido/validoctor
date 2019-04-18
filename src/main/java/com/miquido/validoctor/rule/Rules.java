@@ -1,5 +1,7 @@
 package com.miquido.validoctor.rule;
 
+import com.miquido.validoctor.ailment.Ailment;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -195,6 +197,7 @@ public final class Rules {
    * Passed: patient is equal to at least one of values passed in allowedValues argument.</br>
    * Violated: patient is not equal to any of the values passed in allowedValues.
    */
+  @SafeVarargs
   public static <T> Rule<T> valueIn(T... allowedValues) {
     Map<String, Object> params = new HashMap<>();
     List<T> list = Arrays.asList(allowedValues);
@@ -210,6 +213,16 @@ public final class Rules {
     Map<String, Object> params = new HashMap<>();
     params.put(ALLOWED_VALUES, allowedValues);
     return new SimpleRule<>("VALUE_IN", params, allowedValues::contains);
+  }
+
+  /**
+   * Creates a rule that negates the rule passed as argument. Result of applying this rule will be completely opposite
+   * than that of the original rule. "NOT_" string is prepended to the name of {@link Ailment} resulting from violation
+   * of this rule. Any {@link Rule#getParams() params} of the original Rule are copied untouched.
+   */
+  public static <T> Rule<T> not(Rule<T> rule) {
+    return new SimpleRule<>("NOT_" + rule.peekAilment().getName(), rule.getParams(),
+        obj -> rule.apply(obj) != null, rule.peekAilment().getSeverity());
   }
 
   /**
