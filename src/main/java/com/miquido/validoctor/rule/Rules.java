@@ -213,10 +213,21 @@ public final class Rules {
   }
 
   /**
-   * Builds a very simple wrapper rule for validating collections.
+   * Builds a very simple wrapper rule for validating all elements of a collection.
    */
   public static <T> Rule<Collection<T>> each(Rule<T> rule) {
     return new SimpleRule<>(rule.peekAilment().getName(), rule.getParams(),
         col -> col == null || col.stream().allMatch(obj -> rule.apply(obj) == null), rule.peekAilment().getSeverity());
+  }
+
+  /**
+   * Accepts any rule and creates an exactly the same rule with new name.
+   * This new name will be used in Ailment stated in case of violation.
+   * @param name name for the Rule and Ailment
+   * @param rule
+   * @return clone of the passed rule with the same predicate, params and severity, but new name
+   */
+  public static <T> Rule<T> named(String name, Rule<T> rule) {
+    return new SimpleRule<>(name, rule.getParams(), obj -> rule.apply(obj) == null, rule.peekAilment().getSeverity());
   }
 }

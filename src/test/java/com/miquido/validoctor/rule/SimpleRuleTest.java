@@ -216,6 +216,16 @@ public class SimpleRuleTest {
   }
 
   @Test
+  public void namedRule() {
+    String name = "custom_name";
+    Diagnosis diagnosis = validoctor.examine("a", "patient", named(name, stringMinLength(2)));
+    Set<Ailment> ailments = diagnosis.getAilments().get("patient");
+    assertTrue(ailments.stream().anyMatch(ailment -> ailment.getName().equals(name)));
+
+    assertOk(validoctor.examine("a", "patient", named(name, stringMaxLength(2))));
+  }
+
+  @Test
   public void customRule() {
     SimpleRule<Long> is5Rule = new SimpleRule<>("IS_5", v -> v == 5);
     assertOk(validoctor.examine(5L, is5Rule));
