@@ -216,6 +216,20 @@ public class SimpleRuleTest {
   }
 
   @Test
+  public void predefinedRule_not() {
+    assertOk(validoctor.examine(Collections.emptyList(), not(collectionNotEmpty())));
+    assertOk(validoctor.examine(Arrays.asList("a", "b", "c"), collectionNotEmpty(), not(each(stringMinLength(2)))));
+    assertOk(validoctor.examine(Arrays.asList("a", "b", "c"), collectionNotEmpty(), each(not(stringMinLength(2)))));
+    assertOk(validoctor.examine(-5, not(numberPositive()), not(numberNonNegative())));
+    assertOk(validoctor.examine(6, not(numberInRange(7, 10)), not(valueIn(7, 8, 9, 10))));
+    assertOk(validoctor.examine(null, not(notNull())));
+    assertError(validoctor.examine(null, not(isNull())));
+    assertError(validoctor.examine(false, not(isFalse())));
+    assertError(validoctor.examine(true, not(isTrue())));
+    assertError(validoctor.examine("  a  ", not(stringTrimmedNotEmpty()), not(stringAlphanumeric()), not(stringMaxLength(2))));
+  }
+
+  @Test
   public void customRule() {
     SimpleRule<Long> is5Rule = new SimpleRule<>("IS_5", v -> v == 5);
     assertOk(validoctor.examine(5L, is5Rule));
