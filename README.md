@@ -245,6 +245,7 @@ the object.
 None.
 
 # In next releases
+* Add convenient overloads to all rule creating methods in Rules for creating named Rules - shortcuts for using Rules.named().
 * Make Ailments found in elements of collection be mapped under jsonpath-compliant keys.
 * Add trait for multithreaded validation.
 * Building snapshots to bintray from master.

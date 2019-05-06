@@ -216,6 +216,16 @@ public class SimpleRuleTest {
   }
 
   @Test
+  public void namedRule() {
+    String name = "custom_name";
+    Diagnosis diagnosis = validoctor.examine("a", "patient", named(name, stringMinLength(2)));
+    Set<Ailment> ailments = diagnosis.getAilments().get("patient");
+    assertTrue(ailments.stream().anyMatch(ailment -> ailment.getName().equals(name)));
+
+    assertOk(validoctor.examine("a", "patient", named(name, stringMaxLength(2))));
+  }
+
+  @Test
   public void predefinedRule_not() {
     assertOk(validoctor.examine(Collections.emptyList(), not(collectionNotEmpty())));
     assertOk(validoctor.examine(Arrays.asList("a", "b", "c"), collectionNotEmpty(), not(each(stringMinLength(2)))));
