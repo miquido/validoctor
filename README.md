@@ -21,7 +21,7 @@ repositories {
     jcenter()
 }
 dependencies {
-  compile 'com.miquido.validoctor:validoctor:1.1.4'
+  compile 'com.miquido.validoctor:validoctor:1.1.5'
 }
 ```
 Validoctor is a data validation library handling validations on complex data structures. It is designed to be 
@@ -89,7 +89,7 @@ Validoctor's main strength lies in validating complex objects in one call using 
 be created with builders. For example this validates fields foo and bar of object Example with specified rules:
 ```java
 MultiRule<Example> exampleMultiRule = MultiRule.<Example>builder()
-        .reflexiveProperties(TestPatient.class)
+        .reflexiveProperties(Example.class)
         .addRules("foo", notNull(), numberPositive())
         .addRules("bar", stringMinLength(3), stringMaxLength(20))
         .build();
@@ -239,6 +239,23 @@ val diagnosis = validoctor.examine(product, nullityRules, validityRules)
 ```
 And that's it. Diagnosis object returned by our validoctor instance contains the result and all the Ailments found in 
 the object.
+
+# Usage with Spring's @ExceptionHandler
+Diagnosis objects are designed to be easily processable and readable by any client applications they are returned to. 
+Using Validoctor with exceptional trait you can make it throw DiagnosisException on Rule violations. Then, if you are 
+using Spring, you can intercept this exception and easily return Diagnosis as response body with whatever status code 
+you desire. Example ExceptionHandler could be defined like this:
+
+```kotlin
+@ControllerAdvice
+class ExceptionHandler: ResponseEntityExceptionHandler() {
+
+  @ExceptionHandler(DiagnosisException::class)
+  fun handleDiagnosisException(ex: DiagnosisException): ResponseEntity<Any> {
+    return ResponseEntity.unprocessableEntity().body(ex.diagnosis)
+  }
+}
+```
 
 
 # Dependencies
