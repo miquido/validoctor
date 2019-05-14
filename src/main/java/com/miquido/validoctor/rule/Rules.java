@@ -122,6 +122,32 @@ public final class Rules {
   }
 
   /**
+   * Passed: patient is null or a collection with size equal or greater than specified {@code minSize}.<br/>
+   * Violated: patient is a collection with size lesser than specified {@code minSize}.
+   */
+  public static <T> Rule<Collection<T>> collectionMinSize(int minSize) {
+    return new SimpleRule<>("COLLECTION_MIN_SIZE:" + minSize, collection -> collection == null || collection.size() >= minSize);
+  }
+
+  /**
+   * Passed: patient is null or a collection with size equal or lesser than specified {@code maxSize}.<br/>
+   * Violated: patient is a collection with size greater than specified {@code maxSize}.
+   */
+  public static <T> Rule<Collection<T>> collectionMaxSize(int maxSize) {
+    return new SimpleRule<>("COLLECTION_MAX_SIZE:" + maxSize, collection -> collection == null || collection.size() <= maxSize);
+  }
+
+  /**
+   * Passed: patient is null or a collection with size equal or greater than specified {@code minSize}
+   * and equal or lesser than specified {@code maxSize} .<br/>
+   * Violated: patient is a collection with size greater than specified {@code maxSize} or lesser than specified {@code minSize}.
+   */
+  public static <T> Rule<Collection<T>> collectionSizeIn(int minSize, int maxSize) {
+    return new SimpleRule<>("COLLECTION_MAX_SIZE:" + maxSize, collection -> collection == null
+        || (collection.size() <= maxSize && collection.size() >= minSize));
+  }
+
+  /**
    * Passed: patient is null or string with length greater than or equal to specified {@code minLength}.<br/>
    * Violated: patient is string with length lesser than specified {@code minLength}.
    */
