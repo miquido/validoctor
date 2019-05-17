@@ -23,6 +23,15 @@ public class SimpleRule<T> implements Rule<T> {
   private final AilmentFactory ailmentFactory;
 
   /**
+   * Constructs a new rule. This is the primary, and usually the only one needed, way of creating custom Rules.<br/>
+   * Example of SimpleRule checking if there are no duplicate users in collection of users:<br/>
+   * <pre>{@code
+   *   private val duplicateUsersRule =
+   *      SimpleRule<Collection<User>>("DUPLICATE_USERS")
+   *          { users -> users.distinctBy { it.userId }.size == users.size }
+   * }</pre>
+   * With no params argument passed, an empty default params are used, and without violationSeverity specified,
+   * default ERROR severity is used.
    * @param ruleName name of rule to be used in {@link Ailment} caused by violation
    * @param params map of parameters describing the rule, with no influence on actual validation. Will be copied into new immutable map.
    * @param predicate predicate determining violation
@@ -35,7 +44,7 @@ public class SimpleRule<T> implements Rule<T> {
   }
 
   /**
-   * Constructs a new rule with empty params.<br/>
+   * Constructs a new rule with empty params. Check See Also section for usage examples.<br/>
    * @see SimpleRule#SimpleRule(String, Map, Predicate, Severity)
    */
   public SimpleRule(String ruleName, Predicate<T> predicate, Severity violationSeverity) {
@@ -43,7 +52,8 @@ public class SimpleRule<T> implements Rule<T> {
   }
 
   /**
-   * Constructs a new rule with violationSeverity set to {@link Severity#ERROR ERROR}.<br/>
+   * Constructs a new rule with violationSeverity set to {@link Severity#ERROR ERROR}.
+   * Check See Also section for usage examples.<br/>
    * @see SimpleRule#SimpleRule(String, Map, Predicate, Severity)
    */
   public SimpleRule(String ruleName, Map<String, Object> params, Predicate<T> predicate) {
@@ -51,7 +61,8 @@ public class SimpleRule<T> implements Rule<T> {
   }
 
   /**
-   * Constructs a new rule with violationSeverity set to {@link Severity#ERROR ERROR} and empty params.<br/>
+   * Constructs a new rule with violationSeverity set to {@link Severity#ERROR ERROR} and empty params.
+   * Check See Also section for usage examples.<br/>
    * @see SimpleRule#SimpleRule(String, Map, Predicate, Severity)
    */
   public SimpleRule(String ruleName, Predicate<T> predicate) {
