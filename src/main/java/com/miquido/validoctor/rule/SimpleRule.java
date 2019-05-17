@@ -44,7 +44,7 @@ public class SimpleRule<T> implements Rule<T> {
   }
 
   /**
-   * Constructs a new rule with empty params. Check See Also section for usage examples.<br/>
+   * Constructs a new rule with empty params. Check See Also section for usage example.<br/>
    * @see SimpleRule#SimpleRule(String, Map, Predicate, Severity)
    */
   public SimpleRule(String ruleName, Predicate<T> predicate, Severity violationSeverity) {
@@ -53,7 +53,7 @@ public class SimpleRule<T> implements Rule<T> {
 
   /**
    * Constructs a new rule with violationSeverity set to {@link Severity#ERROR ERROR}.
-   * Check See Also section for usage examples.<br/>
+   * Check See Also section for usage example.<br/>
    * @see SimpleRule#SimpleRule(String, Map, Predicate, Severity)
    */
   public SimpleRule(String ruleName, Map<String, Object> params, Predicate<T> predicate) {
@@ -62,7 +62,7 @@ public class SimpleRule<T> implements Rule<T> {
 
   /**
    * Constructs a new rule with violationSeverity set to {@link Severity#ERROR ERROR} and empty params.
-   * Check See Also section for usage examples.<br/>
+   * Check See Also section for usage example.<br/>
    * @see SimpleRule#SimpleRule(String, Map, Predicate, Severity)
    */
   public SimpleRule(String ruleName, Predicate<T> predicate) {

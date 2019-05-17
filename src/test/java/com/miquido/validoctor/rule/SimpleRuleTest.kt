@@ -217,8 +217,10 @@ class SimpleRuleTest {
     assertOk(validoctor.examine(765, valueIn(listOf(5, 23, 765, 43))))
     assertOk(validoctor.examine(TestPatient(1, "a", "1", true),
         valueIn(listOf(TestPatient(2, "b", "2", false), TestPatient(1, "a", "1", true)))))
+    assertOk(validoctor.examine(null, valueIn(listOf<String?>(null))))
     assertError(validoctor.examine("a", valueIn(listOf("b", "c", "d"))))
     assertError(validoctor.examine(null, valueIn(emptyList())))
+    assertError(validoctor.examine("a", valueIn(listOf<String?>(null))))
     assertError(validoctor.examine(TestPatient(1, "a", "1", true),
         valueIn(listOf(TestPatient(2, "a", "1", true), TestPatient(1, "a", "1", false)))))
   }

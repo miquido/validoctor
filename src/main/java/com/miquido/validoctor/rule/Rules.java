@@ -220,8 +220,11 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is equal to at least one of values passed in allowedValues argument.</br>
-   * Violated: patient is not equal to any of the values passed in allowedValues.
+   * Passed: patient is equal to at least one of values passed in allowedValues argument.<br/>
+   * Violated: patient is not equal to any of the values passed in allowedValues.<br/><br/>
+   * Note: {@code valueIn(null)} is not directly supported. To check if patient is null use {@link Rules#isNull()}.
+   * To use valueIn with dynamic, nullable allowed value use {@code valueIn(listOf<TYPE>(null))} or
+   * {@code valueIn(Arrays.asList(null))}.
    */
   @SafeVarargs
   public static <T> Rule<T> valueIn(T... allowedValues) {
@@ -232,8 +235,11 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is equal to at least one element of list passed in allowedValues argument.</br>
-   * Violated: patient is not equal to any element of the list passed in allowedValues.
+   * Passed: patient is equal to at least one element of list passed in allowedValues argument.<br/>
+   * Violated: patient is not equal to any element of the list passed in allowedValues.<br/><br/>
+   * Note: {@code valueIn(null)} is not directly supported. To check if patient is null use {@link Rules#isNull()}.
+   * To use valueIn with dynamic, nullable allowed value use {@code valueIn(listOf<TYPE>(null))} or
+   * {@code valueIn(Arrays.asList(null))}.
    */
   public static <T> Rule<T> valueIn(List<T> allowedValues) {
     Map<String, Object> params = new HashMap<>();

@@ -85,7 +85,7 @@ public class ReducerRuleBuilder<T, P> {
   }
 
   /**
-   * Makes the resulting rule ignore nulls encountered during reduction.
+   * Makes the resulting rule ignore nulls encountered during reduction, so they are never sent to the reducer function.
    * @return this builder for chaining
    */
   public ReducerRuleBuilder<T, P> nullIgnoring() {
