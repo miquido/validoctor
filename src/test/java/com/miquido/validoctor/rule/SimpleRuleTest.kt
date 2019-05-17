@@ -4,6 +4,7 @@ import com.miquido.validoctor.TestPatient
 import com.miquido.validoctor.TestUtil.*
 import com.miquido.validoctor.Validoctor
 import com.miquido.validoctor.ailment.Severity
+import com.miquido.validoctor.ailment.SpecsKey
 import com.miquido.validoctor.rule.Rules.*
 import org.junit.Assert.*
 import org.junit.Test
@@ -252,9 +253,24 @@ class SimpleRuleTest {
     val name = "custom_name"
     val diagnosis = validoctor.examine("a", "patient", named(name, stringMinLength(2)))
     val ailments = diagnosis.ailments["patient"]
-    assertTrue(ailments!!.stream().anyMatch { ailment -> ailment.name == name })
+    assertTrue(ailments!!.any { ailment -> ailment.name == name })
 
     assertOk(validoctor.examine("a", "patient", named(name, stringMaxLength(2))))
+  }
+
+  @Test
+  fun confidentialRule() {
+    var diagnosis = validoctor.examine(7, "number", confidential(numberInRange(1, 5)))
+    assertError(diagnosis)
+    diagnosis.ailments["number"]!!.none { it.specs.containsKey(SpecsKey.PATIENT_VALUE) }
+
+    diagnosis = validoctor.examine(7, "number", confidential(not(numberPositive())))
+    assertError(diagnosis)
+    diagnosis.ailments["number"]!!.none { it.specs.containsKey(SpecsKey.PATIENT_VALUE) }
+
+    diagnosis = validoctor.examine(listOf("a", "b", null), "strings", each(confidential(notNull())))
+    assertError(diagnosis)
+    diagnosis.ailments["strings"]!!.none { it.specs.containsKey(SpecsKey.PATIENT_VALUE) }
   }
 
   @Test
@@ -290,7 +306,7 @@ class SimpleRuleTest {
     assertError(diagnosis)
     val objectAilments = diagnosis.ailments["patient"]
     assertEquals(2, objectAilments!!.size.toLong())
-    assertTrue(objectAilments.stream().anyMatch { ailment -> ailment.name == numberNonNegative().peekAilment().name })
-    assertTrue(objectAilments.stream().anyMatch { ailment -> ailment.name == numberInRange(-10, 10).peekAilment().name })
+    assertTrue(objectAilments.any { ailment -> ailment.name == numberNonNegative().peekAilment().name })
+    assertTrue(objectAilments.any { ailment -> ailment.name == numberInRange(-10, 10).peekAilment().name })
   }
 }

@@ -13,11 +13,9 @@ import java.util.Map;
 public interface Rule<T> {
 
   /**
-   * DEPRECATED. Use {@link Rule#apply(Object)} instead.
    * @param obj object to validate.
    * @return whether the object fulfills or violates this rule
    */
-  @Deprecated
   default boolean test(T obj) {
     return apply(obj) != null;
   }
