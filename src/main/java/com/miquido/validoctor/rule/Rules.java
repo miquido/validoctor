@@ -275,4 +275,15 @@ public final class Rules {
   public static <T> Rule<T> named(String name, Rule<T> rule) {
     return new SimpleRule<>(name, rule.getParams(), obj -> rule.apply(obj) == null, rule.peekAilment().getSeverity());
   }
+
+  /**
+   * Accepts any rule and creates an exactly the same rule that will not return patients original value in Ailment
+   * stated on violation.<br/><br/>
+   * Note: when combining with {@link Rules#each(Rule)} use {@code each(confidential())}, not {@code confidential(each())}.
+   * @param rule
+   * @return passed rule altered to not put patient original value in Ailment.
+   */
+  public static <T> Rule<T> confidential(Rule<T> rule) {
+    return new ConfidentialSimpleRule<>(rule);
+  }
 }
