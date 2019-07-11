@@ -49,6 +49,22 @@ public class ValidoctorTest {
   }
 
   @Test
+  public void exceptionalValidoctor_exceptionFactory() {
+    Validoctor validoctor = Validoctor.builder()
+        .exceptional(true)
+        .exceptionFactory(diagnosis -> new IllegalStateException())
+        .build();
+    try {
+      validoctor.examine("", Rules.stringNotEmpty());
+    } catch (IllegalStateException e) {
+      return;
+    } catch (RuntimeException e) {
+      fail("Wrong exception type thrown");
+    }
+    fail("Exception not thrown from exceptional validoctor");
+  }
+
+  @Test
   public void pedanticValidoctor_testsAll() {
     Validoctor validoctor = Validoctor.builder().pedantic(true).build();
     Diagnosis diagnosis = validoctor.examine(-5, "a", Rules.numberNonNegative(), Rules.numberInRange(0, 5));
