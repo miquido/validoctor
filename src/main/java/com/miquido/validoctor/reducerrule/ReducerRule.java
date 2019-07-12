@@ -1,6 +1,7 @@
 package com.miquido.validoctor.reducerrule;
 
 import com.miquido.validoctor.ailment.Ailment;
+import com.miquido.validoctor.ailment.SpecsKey;
 import com.miquido.validoctor.rule.Rule;
 
 import java.util.List;
@@ -61,7 +62,11 @@ public class ReducerRule<PatientType, PropertyType> implements Rule<PatientType>
         .map(getter -> getter.apply(obj))
         .filter(value -> !nullIgnoring || value != null)
         .reduce(reducer).orElse(null);
-    return rule.apply(sum);
+    Ailment ailment = rule.apply(sum);
+    if (ailment != null) {
+      ailment.getSpecs().put(SpecsKey.REDUCED_PROPS, properties);
+    }
+    return ailment;
   }
 
   @Override

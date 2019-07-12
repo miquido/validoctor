@@ -4,6 +4,7 @@ import com.miquido.validoctor.TestPatient;
 import com.miquido.validoctor.Validoctor;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.multirule.MultiRule;
+import com.miquido.validoctor.rule.SimpleRule;
 import org.junit.Test;
 
 import static com.miquido.validoctor.TestUtil.*;
@@ -81,11 +82,22 @@ public class ReducerRuleTest {
     assertError(diagnosis);
     assertEquals(1, diagnosis.getAilments().size());
     assertOnlyViolationForProperty(notNull(), diagnosis, "object");
+    diagnosis = validoctor.examineChain(patient, "object", notNull(), rule3, rule2);
+    assertError(diagnosis);
+    assertEquals(1, diagnosis.getAilments().size());
+    assertOnlyViolationForProperty(notNull(), diagnosis, "object");
 
     patient = new TestPatient(1L, "Name", "+48", 8L, true);
     diagnosis = validoctor.examineCombo(patient, notNull(), rule3, rule2);
     assertError(diagnosis);
     assertEquals(4, diagnosis.getAilments().size());
+    diagnosis = validoctor.examineChain(patient, notNull(), rule3, rule2);
+    assertError(diagnosis);
+    assertEquals(4, diagnosis.getAilments().size());
+
+    diagnosis = validoctor.examineJoin(patient, new SimpleRule<>("TEST", p -> p.getId() != 1L), rule2, rule3);
+    assertError(diagnosis);
+    assertEquals(5, diagnosis.getAilments().size());
   }
 
   @Test
@@ -103,9 +115,14 @@ public class ReducerRuleTest {
         .build();
 
     assertOk(validoctor.examineCombo(patient, rule1, multiRule1, multiRule2));
+    assertOk(validoctor.examineChain(patient, rule1, multiRule1, multiRule2));
 
     patient = new TestPatient(1L, "Name Length 15 ", "+48123", 5L, true);
     Diagnosis diagnosis = validoctor.examineCombo(patient, rule1, multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(rule1, diagnosis, "phone");
+    assertOnlyViolationForProperty(rule1, diagnosis, "name");
+    diagnosis = validoctor.examineChain(patient, rule1, multiRule1, multiRule2);
     assertError(diagnosis);
     assertOnlyViolationForProperty(rule1, diagnosis, "phone");
     assertOnlyViolationForProperty(rule1, diagnosis, "name");
@@ -113,6 +130,16 @@ public class ReducerRuleTest {
     patient = new TestPatient(1L, "Name", "+48123", -2L, true);
     diagnosis = validoctor.examineCombo(patient, rule1, multiRule1, multiRule2);
     assertError(diagnosis);
+    assertOnlyViolationForProperty(numberNonNegative(), diagnosis, "ordinal");
+    diagnosis = validoctor.examineChain(patient, rule1, multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(numberNonNegative(), diagnosis, "ordinal");
+
+    patient = new TestPatient(1L, "Name that is long", "+48123", -2L, true);
+    diagnosis = validoctor.examineJoin(patient, rule1, multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(stringMaxLength(20), diagnosis, "name");
+    assertOnlyViolationForProperty(stringMaxLength(20), diagnosis, "phone");
     assertOnlyViolationForProperty(numberNonNegative(), diagnosis, "ordinal");
   }
 

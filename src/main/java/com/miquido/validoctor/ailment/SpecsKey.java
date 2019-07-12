@@ -9,4 +9,6 @@ public class SpecsKey {
   public static final String ALLOWED_VALUES = "allowedValues";
 
   public static final String PATIENT_VALUE = "patientValue";
+
+  public static final String REDUCED_PROPS = "reducedProperties";
 }
