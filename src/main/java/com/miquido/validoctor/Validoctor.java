@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -29,10 +30,12 @@ public final class Validoctor {
 
   private final boolean pedantic;
   private final boolean exceptional;
+  private final Function<Diagnosis, RuntimeException> exceptionFactory;
 
-  private Validoctor(boolean pedantic, boolean exceptional) {
+  private Validoctor(boolean pedantic, boolean exceptional, Function<Diagnosis, RuntimeException> exceptionFactory) {
     this.pedantic = pedantic;
     this.exceptional = exceptional;
+    this.exceptionFactory = exceptionFactory;
   }
 
   /**
@@ -184,7 +187,11 @@ public final class Validoctor {
   private Diagnosis stateDiagnosis(Severity severity, Map<String, Set<Ailment>> ailments) {
     Diagnosis diagnosis = new Diagnosis(severity, ailments);
     if (exceptional && severity == Severity.ERROR) {
-      throw new DiagnosisException(diagnosis);
+      if (exceptionFactory == null) {
+        throw new DiagnosisException(diagnosis);
+      } else {
+        throw exceptionFactory.apply(diagnosis);
+      }
     }
     return diagnosis;
   }
@@ -194,13 +201,13 @@ public final class Validoctor {
 
     private boolean pedantic = true;
     private boolean exceptional = false;
+    private Function<Diagnosis, RuntimeException> exceptionFactory;
 
     /**
      * Sets whether this Validoctor will be pedantic or not. Defaults to true.
      * <li>If true, will execute all passed rules, continuing even after encountering violations, and will return
      * a diagnosis with all violations found.</li>
      * <li>If false, will only execute rules until first violation, and will return a diagnosis with just this one.</li>
-     * @param pedantic
      * @return this Builder
      */
     public Builder pedantic(boolean pedantic) {
@@ -210,9 +217,9 @@ public final class Validoctor {
 
     /**
      * Sets whether this Validoctor will be exceptional or not. Defaults to false.
-     * <li>If true, will throw a {@link DiagnosisException} containing the Diagnosis.</li>
+     * <li>If true, will throw an exception created using specified {@link Builder#exceptionFactory(Function) exceptionFactory}
+     * or {@link DiagnosisException} containing the Diagnosis if no exceptionFactory was specified.</li>
      * <li>If false, will just return the Diagnosis.</li>
-     * @param exceptional
      * @return this Builder
      */
     public Builder exceptional(boolean exceptional) {
@@ -220,8 +227,18 @@ public final class Validoctor {
       return this;
     }
 
+    /**
+     * Sets function used to create exceptions thrown by {@link Builder#exceptional(boolean) exceptional} Validoctor.
+     * If no function is set, exceptional Validoctor will throw {@link DiagnosisException}s wrapping stated {@link Diagnosis}.
+     * @return this Builder
+     */
+    public Builder exceptionFactory(Function<Diagnosis, RuntimeException> factory) {
+      this.exceptionFactory = factory;
+      return this;
+    }
+
     public Validoctor build() {
-      return new Validoctor(pedantic, exceptional);
+      return new Validoctor(pedantic, exceptional, exceptionFactory);
     }
   }
 
