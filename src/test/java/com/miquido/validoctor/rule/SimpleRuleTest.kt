@@ -159,6 +159,23 @@ class SimpleRuleTest {
   }
 
   @Test
+  fun predefinedRule_stringContains() {
+    assertError(validoctor.examine("aaaaa", stringContains("b")))
+    assertError(validoctor.examine("", stringContains("b")))
+    assertError(validoctor.examine("aa", stringContains("aaa")))
+    assertOk(validoctor.examine("aaa", stringContains("aaa")))
+    assertOk(validoctor.examine(null, stringContains("aaa")))
+  }
+
+  @Test
+  fun predefinedRule_stringMatches() {
+    assertError(validoctor.examine("abc1", stringMatches("[a-z]*")))
+    assertError(validoctor.examine("9-09-2009", stringMatches("[0-9]{2}-[0-9]{2}-[0-9]{4}")))
+    assertOk(validoctor.examine("abc", stringMatches("[a-z]*")))
+    assertOk(validoctor.examine("10-10-2010", stringMatches("[0-9]{2}-[0-9]{2}-[0-9]{4}")))
+  }
+
+  @Test
   fun predefinedRule_numberPositive() {
     assertError(validoctor.examine(-1, numberPositive()))
     assertError(validoctor.examine(-0.00001, numberPositive()))
@@ -224,6 +241,18 @@ class SimpleRuleTest {
     assertError(validoctor.examine("a", valueIn(listOf<String?>(null))))
     assertError(validoctor.examine(TestPatient(1, "a", "1", true),
         valueIn(listOf(TestPatient(2, "a", "1", true), TestPatient(1, "a", "1", false)))))
+  }
+
+  @Test
+  fun predefinedRule_equalTo() {
+    assertOk(validoctor.examine("a", equalTo("a")))
+    assertOk(validoctor.examine(7, equalTo(7)))
+    assertOk(validoctor.examine(null, equalTo(null)))
+    assertOk(validoctor.examine(TestPatient(1, "a", "1", false), equalTo(TestPatient(1, "a", "1", false))))
+    assertError(validoctor.examine(7.0, equalTo(7.000001)))
+    assertError(validoctor.examine("", equalTo(null)))
+    assertError(validoctor.examine("123", equalTo("12")))
+    assertError(validoctor.examine(TestPatient(1, "a", "1", false), equalTo(TestPatient(1, "a", "2", false))))
   }
 
   @Test

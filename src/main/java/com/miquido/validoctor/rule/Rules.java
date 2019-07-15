@@ -192,6 +192,26 @@ public final class Rules {
   }
 
   /**
+   * Passed: patient is null or string that contains specified {@code text}.<br/>
+   * Violated: patient is string not containing specified {@code text}.
+   */
+  public static Rule<String> stringContains(String text) {
+    Map<String, Object> params = new HashMap<>();
+    params.put(TEXT, text);
+    return new SimpleRule<>("STRING_CONTAINS:" + text, params, str -> str == null || str.contains(text));
+  }
+
+  /**
+   * Passed: patient is null or string that matches specified {@code regex}.<br/>
+   * Violated: patient is string not matching specified {@code regex}.
+   */
+  public static Rule<String> stringMatches(String regex) {
+    Map<String, Object> params = new HashMap<>();
+    params.put(REGEX, regex);
+    return new SimpleRule<>("STRING_MATCHES:" + regex, params, str -> str == null || str.matches(regex));
+  }
+
+  /**
    * Passed: patient is null or number with value greater than 0.<br/>
    * Violated: patient is number with value lesser than or equal to 0.
    */
@@ -245,6 +265,16 @@ public final class Rules {
     Map<String, Object> params = new HashMap<>();
     params.put(ALLOWED_VALUES, allowedValues);
     return new SimpleRule<>("VALUE_IN", params, allowedValues::contains);
+  }
+
+  /**
+   * Passed: patient is null or equal to specified expectedValue.<br/>
+   * Violated: patient is not equal to specified expectedValue.
+   */
+  public static Rule<Object> equalTo(Object expectedValue) {
+    Map<String, Object> params = new HashMap<>();
+    params.put(ALLOWED_VALUES, expectedValue);
+    return new SimpleRule<>("EQUAL", params, obj -> obj == null || obj.equals(expectedValue));
   }
 
   /**
