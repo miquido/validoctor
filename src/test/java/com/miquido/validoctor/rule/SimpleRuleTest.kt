@@ -168,6 +168,14 @@ class SimpleRuleTest {
   }
 
   @Test
+  fun predefinedRule_stringMatches() {
+    assertError(validoctor.examine("abc1", stringMatches("[a-z]*")))
+    assertError(validoctor.examine("9-09-2009", stringMatches("[0-9]{2}-[0-9]{2}-[0-9]{4}")))
+    assertOk(validoctor.examine("abc", stringMatches("[a-z]*")))
+    assertOk(validoctor.examine("10-10-2010", stringMatches("[0-9]{2}-[0-9]{2}-[0-9]{4}")))
+  }
+
+  @Test
   fun predefinedRule_numberPositive() {
     assertError(validoctor.examine(-1, numberPositive()))
     assertError(validoctor.examine(-0.00001, numberPositive()))

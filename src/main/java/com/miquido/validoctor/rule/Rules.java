@@ -202,6 +202,16 @@ public final class Rules {
   }
 
   /**
+   * Passed: patient is null or string that matches specified {@code regex}.<br/>
+   * Violated: patient is string not matching specified {@code regex}.
+   */
+  public static Rule<String> stringMatches(String regex) {
+    Map<String, Object> params = new HashMap<>();
+    params.put(REGEX, regex);
+    return new SimpleRule<>("STRING_MATCHES:" + regex, params, str -> str == null || str.matches(regex));
+  }
+
+  /**
    * Passed: patient is null or number with value greater than 0.<br/>
    * Violated: patient is number with value lesser than or equal to 0.
    */
