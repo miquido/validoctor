@@ -53,7 +53,8 @@ public final class Validoctor {
    * @param patientName name of the validated value to be used in resulting Diagnosis
    * @param rules validation rules
    * @return diagnosis detailing validity of patient
-   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
    */
   @SafeVarargs
   public final <T> Diagnosis examine(T patient, String patientName, Rule<T>... rules) {
@@ -65,7 +66,8 @@ public final class Validoctor {
    * @param patient object to validate
    * @param multiRules validation MultiRules for properties of patient
    * @return diagnosis detailing validity of patient
-   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
    */
   @SafeVarargs
   public final <T> Diagnosis examine(T patient, MultiRule<T>... multiRules) {
@@ -78,7 +80,8 @@ public final class Validoctor {
    * @param patient object to validate
    * @param reducerRules validation ReducerRules for properties of patient
    * @return diagnosis detailing validity of patient
-   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
    */
   @SafeVarargs
   public final <T> Diagnosis examine(T patient, ReducerRule<T, ?>... reducerRules) {
@@ -86,6 +89,166 @@ public final class Validoctor {
   }
 
   /**
+   * Multi property object examination, pre-examined with a single Rule. If the preRule examination results in
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
+   * This method does not provide any safeguard against null patient, so a NullPointerException may occur in case of one,
+   * depending on exact Rules used.
+   * Checking for non-null patient before attempting validation of its properties is a typical use case for this method:
+   * <br/><br/>{@code examineCombo(patient, Rules.notNull(), multiRules)}<br/>
+   *
+   * @param patient object to validate
+   * @param patientName name of the validated value to be used in resulting Diagnosis
+   * @param preRule Rule applied to patient object as a whole before attempting to apply other rules
+   * @param multiRules MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineChain(T patient, String patientName, Rule<T> preRule, MultiRule<T>... multiRules) {
+    Diagnosis preDiagnosis = examine(patient, patientName, preRule);
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
+        : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
+  }
+
+  /**
+   * Multi property object examination, pre-examined with a single Rule, with default patientName == {@value DEFAULT_NAME}.
+   * See {@link Validoctor#examineChain(Object, String, Rule, MultiRule[])}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineChain(T patient, Rule<T> preRule, MultiRule<T>... multiRules) {
+    return examineChain(patient, DEFAULT_NAME, preRule, multiRules);
+  }
+
+  /**
+   * Object examination with ReducerRules, pre-examined with a single Rule. If the preRule examination results in
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
+   * This method does not provide any safeguard against null patient, so a NullPointerException may occur in case of one,
+   * depending on exact Rules used.
+   * Checking for non-null patient before attempting validation of its properties is a typical use case for this method:
+   * <br/><br/>{@code examineCombo(patient, Rules.notNull(), reducerRules)}<br/>
+   *
+   * @param patient object to validate
+   * @param patientName name of the validated value to be used in resulting Diagnosis
+   * @param preRule Rule applied to patient object as a whole before attempting to apply other rules
+   * @param reducerRules ReducerRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineChain(T patient, String patientName, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
+    Diagnosis preDiagnosis = examine(patient, patientName, preRule);
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.of(reducerRules));
+  }
+
+  /**
+   * Object examination with ReducerRules, pre-examined with a single Rule, with default patientName == {@value DEFAULT_NAME}.
+   * See {@link Validoctor#examineChain(Object, String, Rule, ReducerRule[])}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineChain(T patient, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
+    return examineChain(patient, DEFAULT_NAME, preRule, reducerRules);
+  }
+
+  /**
+   * Multi property object examination, pre-examined with a single ReducerRule. If the preRule examination results in
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.
+   * This method does not provide any safeguard against null patient, so a NullPointerException may occur in case of one,
+   * depending on exact Rules used.
+   * @param patient object to validate
+   * @param preRule ReducerRule applied to patient object as a whole before attempting to apply other rules
+   * @param multiRules MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineChain(T patient, ReducerRule<T, ?> preRule, MultiRule<T>... multiRules) {
+    //examine call here must be duplicated from method above due to static typing of MultiRule.of falling back to Rule
+    Diagnosis preDiagnosis = examine(patient, preRule);
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
+        : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
+  }
+
+  /**
+   * Multi property object examination joined with a single Rule examination. Both the single Rule and all MultiRules
+   * are always applied. Resulting Diagnosis contains all Ailments from all violated Rules.
+   * This method does not provide any safeguard against null patient, so a NullPointerException may occur in case of one,
+   * depending on exact Rules used.
+   * @param patient object to validate
+   * @param patientName name of the validated value to be used in resulting Diagnosis
+   * @param rule Rule applied to patient object as a whole
+   * @param multiRules MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineJoin(T patient, String patientName, Rule<T> rule, MultiRule<T>... multiRules) {
+    MultiRule<T> multiRule = Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens"));
+    return examine(patient, MultiRule.of(patientName, rule).and(multiRule));
+  }
+
+  /**
+   * Multi property object examination joined with a single Rule examination, with default patientName == {@value DEFAULT_NAME}.
+   * See {@link Validoctor#examineJoin(Object, String, Rule, MultiRule[])}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineJoin(T patient, Rule<T> rule, MultiRule<T>... multiRules) {
+    return examineJoin(patient, DEFAULT_NAME, rule, multiRules);
+  }
+
+  /**
+   * Object examination with ReducerRules joined with a single Rule examination. Both the single Rule and all ReducerRules
+   * are always applied. Resulting Diagnosis contains all Ailments from all violated Rules.
+   * This method does not provide any safeguard against null patient, so a NullPointerException may occur in case of one,
+   * depending on exact Rules used.
+   * @param patient object to validate
+   * @param patientName name of the validated value to be used in resulting Diagnosis
+   * @param rule Rule applied to patient object as a whole before attempting to apply other rules
+   * @param reducerRules ReducerRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineJoin(T patient, String patientName, Rule<T> rule, ReducerRule<T, ?>... reducerRules) {
+    return examine(patient, MultiRule.of(patientName, rule).and(MultiRule.of(reducerRules)));
+  }
+
+  /**
+   * Object examination with ReducerRules joined with a single Rule examination, with default patientName == {@value DEFAULT_NAME}.
+   * See {@link Validoctor#examineJoin(Object, String, Rule, ReducerRule[])}
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineJoin(T patient, Rule<T> rule, ReducerRule<T, ?>... reducerRules) {
+    return examineJoin(patient, DEFAULT_NAME, rule, reducerRules);
+  }
+
+  /**
+   * Multi property object examination joined with a single ReducerRule examination. Both the ReducerRule and all MultiRules
+   * are always applied. Resulting Diagnosis contains all Ailments from all violated Rules.
+   * This method does not provide any safeguard against null patient, so a NullPointerException may occur in case of one,
+   * depending on exact Rules used.
+   * @param patient object to validate
+   * @param reducerRule ReducerRule applied to patient object as a whole
+   * @param multiRules MultiRules for properties of patient
+   * @return diagnosis detailing validity of patient
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
+   */
+  @SafeVarargs
+  public final <T> Diagnosis examineJoin(T patient, ReducerRule<T, ?> reducerRule, MultiRule<T>... multiRules) {
+    MultiRule<T> multiRule = Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens"));
+    return examine(patient, MultiRule.of(reducerRule).and(multiRule));
+  }
+
+  // ---------------- DEPRECATED BELOW ------------------
+
+  /**
+   * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, String, Rule, ReducerRule[])} instead.
+   *
    * Object examination with ReducerRules, pre-examined with a single Rule. If the preRule examination results in
    * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
    * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
@@ -98,6 +261,7 @@ public final class Validoctor {
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
+  @Deprecated
   @SafeVarargs
   public final <T> Diagnosis examineCombo(T patient, String patientName, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
     Diagnosis preDiagnosis = examine(patient, patientName, preRule);
@@ -105,9 +269,12 @@ public final class Validoctor {
   }
 
   /**
+   * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, Rule, ReducerRule[])} instead.
+   *
    * Object examination with ReducerRules, pre-examined with a single Rule, with default patientName == {@value DEFAULT_NAME}.
    * See {@link Validoctor#examineCombo(Object, String, Rule, ReducerRule[])}
    */
+  @Deprecated
   @SafeVarargs
   public final <T> Diagnosis examineCombo(T patient, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
     return examineCombo(patient, DEFAULT_NAME, preRule, reducerRules);
@@ -126,6 +293,7 @@ public final class Validoctor {
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
+  @Deprecated
   @SafeVarargs
   public final <T> Diagnosis examineCombo(T patient, String patientName, Rule<T> preRule, MultiRule<T>... multiRules) {
     Diagnosis preDiagnosis = examine(patient, patientName, preRule);
@@ -134,15 +302,20 @@ public final class Validoctor {
   }
 
   /**
+   * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, String, Rule, MultiRule[])} instead.
+   *
    * Multi property object examination, pre-examined with a single Rule, with default patientName == {@value DEFAULT_NAME}.
    * See {@link Validoctor#examineCombo(Object, String, Rule, MultiRule[])}
    */
+  @Deprecated
   @SafeVarargs
   public final <T> Diagnosis examineCombo(T patient, Rule<T> preRule, MultiRule<T>... multiRules) {
     return examineCombo(patient, DEFAULT_NAME, preRule, multiRules);
   }
 
   /**
+   * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, ReducerRule, MultiRule[])} instead.
+   *
    * Multi property object examination, pre-examined with a single ReducerRule. If the preRule examination results in
    * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.
    * @param patient object to validate
@@ -151,6 +324,7 @@ public final class Validoctor {
    * @return diagnosis detailing validity of patient
    * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
    */
+  @Deprecated
   @SafeVarargs
   public final <T> Diagnosis examineCombo(T patient, ReducerRule<T, ?> preRule, MultiRule<T>... multiRules) {
     //examine call here must be duplicated from method above due to static typing of MultiRule.of falling back to Rule
@@ -159,12 +333,15 @@ public final class Validoctor {
         : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
   }
 
+  // ---------------- DEPRECATED ABOVE ------------------
+
   /**
    * Multi property object examination.
    * @param patient object to validate
    * @param rules validation MultiRule for properties of patient
    * @return diagnosis detailing validity of patient
-   * @throws DiagnosisException if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}
+   * @throws DiagnosisException or exception created with exceptionFactory specified when building this Validoctor.
+   * Only if this Validoctor is exceptional and resulting diagnosis is {@link Severity#ERROR}.
    */
   public final <T> Diagnosis examine(T patient, MultiRule<T> rules) {
     Severity severity = Severity.OK;

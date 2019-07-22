@@ -222,14 +222,33 @@ public class MultiRuleTest {
     TestPatient patient = new TestPatient(1L, "Name10long", "+48.123123123", true);
     Diagnosis diagnosis = validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2);
     assertOk(diagnosis);
+    diagnosis = validoctor.examineChain(patient, notNull(), multiRule1, multiRule2);
+    assertOk(diagnosis);
+    diagnosis = validoctor.examineJoin(patient, notNull(), multiRule1, multiRule2);
+    assertOk(diagnosis);
 
     patient = new TestPatient(1L, "Name9long", "+48.123123123", true);
     diagnosis = validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2);
     assertError(diagnosis);
     assertOnlyViolationForProperty(stringExactLength(10), diagnosis, "name");
+    diagnosis = validoctor.examineChain(patient, notNull(), multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(stringExactLength(10), diagnosis, "name");
+    diagnosis = validoctor.examineJoin(patient, notNull(), multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(stringExactLength(10), diagnosis, "name");
+
+    patient = new TestPatient(1L, "ab", "+48.123123123", true);
+    diagnosis = validoctor.examineJoin(patient, notNull(), multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertPropertyViolates(stringMinLength(3), diagnosis, "name");
+    assertPropertyViolates(stringExactLength(10), diagnosis, "name");
 
     patient = null;
     diagnosis = validoctor.examineCombo(patient, "object", notNull(), multiRule1, multiRule2);
+    assertError(diagnosis);
+    assertOnlyViolationForProperty(notNull(), diagnosis, "object");
+    diagnosis = validoctor.examineChain(patient, "object", notNull(), multiRule1, multiRule2);
     assertError(diagnosis);
     assertOnlyViolationForProperty(notNull(), diagnosis, "object");
   }
