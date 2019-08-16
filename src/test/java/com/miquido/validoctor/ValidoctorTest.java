@@ -107,7 +107,7 @@ public class ValidoctorTest {
         System.out.println("validoctor_multithreaded: Thread: " + Thread.currentThread().getId());
         return validoctor.examine(-patient, "a", Rules.numberPositive());
       });
-      futures.add(future);
+      futures.add(futures.size(), future);
     }
     for (int i = 0; i < 10; i++) {
       Diagnosis diagnosis = futures.get(i).get();
