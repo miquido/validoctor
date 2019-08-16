@@ -118,10 +118,12 @@ All Rules are stateless and can be reused for multiple validations.
 
 # Production grade example
 This is a description of slightly simplified ComplexCase1Test class as it shows and tests validation of 
-production-grade complexity.
+production-grade complexity. This class exists in tests code in both Kotlin and Java version. Code snippets below are 
+from Kotlin one. For Java counterparts, look at ComplexCase1JavaTest class.
 
 Imagine you need to validate an instance of a Product defined like this:
 ```kotlin
+//Those are Kotlin data classes, for pure Java people out there it is the same as annotating a class with Lombok's @Data
 data class NutritionFacts(var kcal: Int?, 
                           var fibre: Double?, 
                           var protein: Double?, 
