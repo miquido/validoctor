@@ -229,14 +229,16 @@ class SimpleRuleTest {
   }
 
   @Test
-  fun predefinedRule_valueIn_list() {
+  fun predefinedRule_valueIn_collection() {
     assertOk(validoctor.examine("a", valueIn(listOf("a", "b", "c"))))
+    assertOk(validoctor.examine("a", valueIn(setOf("a", "b", "c"))))
     assertOk(validoctor.examine(null, valueIn(listOf(null, "a", "b", "c"))))
     assertOk(validoctor.examine(765, valueIn(listOf(5, 23, 765, 43))))
     assertOk(validoctor.examine(TestPatient(1, "a", "1", true),
         valueIn(listOf(TestPatient(2, "b", "2", false), TestPatient(1, "a", "1", true)))))
     assertOk(validoctor.examine(null, valueIn(listOf<String?>(null))))
     assertError(validoctor.examine("a", valueIn(listOf("b", "c", "d"))))
+    assertError(validoctor.examine("a", valueIn(setOf("b", "c", "d"))))
     assertError(validoctor.examine(null, valueIn(emptyList())))
     assertError(validoctor.examine("a", valueIn(listOf<String?>(null))))
     assertError(validoctor.examine(TestPatient(1, "a", "1", true),
