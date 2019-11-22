@@ -6,6 +6,7 @@ import com.miquido.validoctor.rule.Rule;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 /**
@@ -13,6 +14,31 @@ import java.util.stream.Stream;
  * @param <T> type of object validated with these rules
  */
 public class MultiRule<T> extends ArrayList<PropertyRule<T>> {
+
+  /**
+   * Creates a collector to use in stream operations on MultiRule objects.
+   * @param <T> type of patient object
+   * @return collector to be used in stream operations
+   */
+  public static <T> Collector<PropertyRule<T>, MultiRule<T>, MultiRule<T>> collector() {
+    return Collector.of(
+        MultiRule::new,
+        ArrayList::add,
+        MultiRule::and,
+        Collector.Characteristics.UNORDERED
+    );
+  }
+
+  /**
+   * Flattens a collection of MultiRules into one MultiRule.
+   * @param multiRules multiRules to flatten into one
+   * @param <T> type of patient object
+   * @return flattened multiRule containing all rules from passed multiRules
+   */
+  @SafeVarargs
+  public static <T> MultiRule<T> flatten(MultiRule<T>...multiRules) {
+    return Stream.of(multiRules).flatMap(List::stream).collect(MultiRule.collector());
+  }
 
   /**
    * Creates an instance builder which is a recommended way to construct a MultiRule.
