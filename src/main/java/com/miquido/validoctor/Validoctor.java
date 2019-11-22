@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Good Morning! Patients please stand in line, I'll be calling you one by one.
@@ -71,8 +70,7 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examine(T patient, MultiRule<T>... multiRules) {
-    return examine(patient, Stream.of(multiRules).reduce(MultiRule::and)
-        .orElseThrow(() -> new RuntimeException("Never happens")));
+    return examine(patient, MultiRule.flatten(multiRules));
   }
 
   /**
@@ -107,8 +105,7 @@ public final class Validoctor {
   @SafeVarargs
   public final <T> Diagnosis examineChain(T patient, String patientName, Rule<T> preRule, MultiRule<T>... multiRules) {
     Diagnosis preDiagnosis = examine(patient, patientName, preRule);
-    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
-        : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.flatten(multiRules));
   }
 
   /**
@@ -165,10 +162,8 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examineChain(T patient, ReducerRule<T, ?> preRule, MultiRule<T>... multiRules) {
-    //examine call here must be duplicated from method above due to static typing of MultiRule.of falling back to Rule
     Diagnosis preDiagnosis = examine(patient, preRule);
-    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
-        : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.flatten(multiRules));
   }
 
   /**
@@ -186,7 +181,7 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examineJoin(T patient, String patientName, Rule<T> rule, MultiRule<T>... multiRules) {
-    MultiRule<T> multiRule = Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens"));
+    MultiRule<T> multiRule = MultiRule.flatten(multiRules);
     return examine(patient, MultiRule.of(patientName, rule).and(multiRule));
   }
 
@@ -240,7 +235,7 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examineJoin(T patient, ReducerRule<T, ?> reducerRule, MultiRule<T>... multiRules) {
-    MultiRule<T> multiRule = Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens"));
+    MultiRule<T> multiRule = MultiRule.flatten(multiRules);
     return examine(patient, MultiRule.of(reducerRule).and(multiRule));
   }
 
@@ -297,8 +292,7 @@ public final class Validoctor {
   @SafeVarargs
   public final <T> Diagnosis examineCombo(T patient, String patientName, Rule<T> preRule, MultiRule<T>... multiRules) {
     Diagnosis preDiagnosis = examine(patient, patientName, preRule);
-    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
-        : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.flatten(multiRules));
   }
 
   /**
@@ -329,8 +323,7 @@ public final class Validoctor {
   public final <T> Diagnosis examineCombo(T patient, ReducerRule<T, ?> preRule, MultiRule<T>... multiRules) {
     //examine call here must be duplicated from method above due to static typing of MultiRule.of falling back to Rule
     Diagnosis preDiagnosis = examine(patient, preRule);
-    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis
-        : examine(patient, Stream.of(multiRules).reduce(MultiRule::and).orElseThrow(() -> new RuntimeException("Never happens")));
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.flatten(multiRules));
   }
 
   // ---------------- DEPRECATED ABOVE ------------------

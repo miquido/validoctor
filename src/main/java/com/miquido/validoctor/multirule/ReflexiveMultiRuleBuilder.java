@@ -11,7 +11,6 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class ReflexiveMultiRuleBuilder<PatientType> {
 
@@ -149,9 +148,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
             && (method.getName().startsWith("get")))
         .forEach(getter -> {
           String propertyName = NameUtil.uncapitalize(getter.getName().substring(3));
-          Stream.of(rules).reduce(MultiRule::and).ifPresent(
-              multiRule -> multiRuleBuilder.addMultiRule(propertyName, getterFunction(getter), multiRule)
-          );
+          multiRuleBuilder.addMultiRule(propertyName, getterFunction(getter), MultiRule.flatten(rules));
         });
     return this;
   }
