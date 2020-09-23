@@ -147,7 +147,7 @@ data class Product(var name: String?,
 ```
 
 Let's start with thinking about what we want to validate. Thinking on a per-class basis is the recommended approach 
-for using Validoctor. So, starting with NutritionFacts class, we surely want all of the values to be positive. 
+for using Validoctor. So, starting with NutritionFacts class, we surely want all the values to be positive. 
 We write a simple MultiRule for that:
 ```kotlin
 val nutritionFactsRules: MultiRule<NutritionFacts> =
@@ -172,7 +172,7 @@ In case when there is no appropriate predefined rule available in Rules class, w
 Using SimpleRule constructor should cover 99.99% cases, so if you find yourself wanting to do something more complicated 
 it might be a sign that you are trying to over-engineer. What we did here is we specified a name of our custom rule, 
 passed a predicate that will be applied to patients to determine whether they are valid or not, and specified severity 
-of violation of this rule. We decided on just WARN and not ERROR as we assume Comments reported to violate this rule 
+of violation of this rule. We decided on just WARN and not ERROR as we assume Comments reported violating this rule 
 will need to be reviewed by moderators and not just plain rejected.
 
 Now, we are ready to create a MultiRule for Comment object that will specify all validations we need:

@@ -148,6 +148,15 @@ public final class Rules {
   }
 
   /**
+   * Passed: patient is null or a collection containing element equal to specified {@code element}.<br/>
+   * Violated: patient is a collection not containing element equal to specified {@code element}.
+   */
+  public static <T> Rule<Collection<T>> collectionContains(T element) {
+    return new SimpleRule<>("COLLECTION_CONTAINS", collection -> collection == null
+        || collection.contains(element));
+  }
+
+  /**
    * Passed: patient is null or string with length greater than or equal to specified {@code minLength}.<br/>
    * Violated: patient is string with length lesser than specified {@code minLength}.
    */

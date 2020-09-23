@@ -84,6 +84,18 @@ class SimpleRuleTest {
   }
 
   @Test
+  fun predefinedRule_collectionContains() {
+    assertError(validoctor.examine(emptyList<String>(), collectionContains("")))
+    assertError(validoctor.examine(listOf(1, 2, 3, 4), collectionContains(5)))
+    assertError(validoctor.examine(listOf("a", "b", "c", "d"), collectionContains("e")))
+    assertError(validoctor.examine(listOf("a", "b", "c", "d"), collectionContains("e")))
+    assertError(validoctor.examine(listOf(TestPatient(1, "a", "1", false)), collectionContains(TestPatient(1, "b", "1", false))))
+    assertOk(validoctor.examine(listOf(TestPatient(1, "a", "1", false)), collectionContains(TestPatient(1, "a", "1", false))))
+    assertOk(validoctor.examine(listOf("a", "b", "c", "d"), collectionContains("d")))
+    assertOk(validoctor.examine(null, collectionContains(1)))
+  }
+
+  @Test
   fun predefinedRule_stringNotEmpty() {
     assertError(validoctor.examine("", stringNotEmpty()))
     assertOk(validoctor.examine("   ", stringNotEmpty()))
