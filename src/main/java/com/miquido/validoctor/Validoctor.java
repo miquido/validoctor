@@ -5,6 +5,7 @@ import com.miquido.validoctor.ailment.Severity;
 import com.miquido.validoctor.diagnosis.Diagnosis;
 import com.miquido.validoctor.diagnosis.DiagnosisException;
 import com.miquido.validoctor.multirule.MultiRule;
+import com.miquido.validoctor.multirule._InternalMultiRuleMappings;
 import com.miquido.validoctor.multirule.PropertyRule;
 import com.miquido.validoctor.reducerrule.ReducerRule;
 import com.miquido.validoctor.rule.Rule;
@@ -57,7 +58,7 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examine(T patient, String patientName, Rule<T>... rules) {
-    return examine(patient, MultiRule.of(patientName, rules));
+    return examine(patient, _InternalMultiRuleMappings.of(patientName, rules));
   }
 
   /**
@@ -83,7 +84,7 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examine(T patient, ReducerRule<T, ?>... reducerRules) {
-    return examine(patient, MultiRule.of(reducerRules));
+    return examine(patient, _InternalMultiRuleMappings.of(reducerRules));
   }
 
   /**
@@ -136,7 +137,7 @@ public final class Validoctor {
   @SafeVarargs
   public final <T> Diagnosis examineChain(T patient, String patientName, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
     Diagnosis preDiagnosis = examine(patient, patientName, preRule);
-    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.of(reducerRules));
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, _InternalMultiRuleMappings.of(reducerRules));
   }
 
   /**
@@ -182,7 +183,7 @@ public final class Validoctor {
   @SafeVarargs
   public final <T> Diagnosis examineJoin(T patient, String patientName, Rule<T> rule, MultiRule<T>... multiRules) {
     MultiRule<T> multiRule = MultiRule.flatten(multiRules);
-    return examine(patient, MultiRule.of(patientName, rule).and(multiRule));
+    return examine(patient, _InternalMultiRuleMappings.of(patientName, rule).and(multiRule));
   }
 
   /**
@@ -209,7 +210,7 @@ public final class Validoctor {
    */
   @SafeVarargs
   public final <T> Diagnosis examineJoin(T patient, String patientName, Rule<T> rule, ReducerRule<T, ?>... reducerRules) {
-    return examine(patient, MultiRule.of(patientName, rule).and(MultiRule.of(reducerRules)));
+    return examine(patient, _InternalMultiRuleMappings.of(patientName, rule).and(_InternalMultiRuleMappings.of(reducerRules)));
   }
 
   /**
@@ -236,7 +237,7 @@ public final class Validoctor {
   @SafeVarargs
   public final <T> Diagnosis examineJoin(T patient, ReducerRule<T, ?> reducerRule, MultiRule<T>... multiRules) {
     MultiRule<T> multiRule = MultiRule.flatten(multiRules);
-    return examine(patient, MultiRule.of(reducerRule).and(multiRule));
+    return examine(patient, _InternalMultiRuleMappings.of(reducerRule).and(multiRule));
   }
 
   // ---------------- DEPRECATED BELOW ------------------
@@ -260,7 +261,7 @@ public final class Validoctor {
   @SafeVarargs
   public final <T> Diagnosis examineCombo(T patient, String patientName, Rule<T> preRule, ReducerRule<T, ?>... reducerRules) {
     Diagnosis preDiagnosis = examine(patient, patientName, preRule);
-    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, MultiRule.of(reducerRules));
+    return preDiagnosis.getSeverity() == Severity.ERROR ? preDiagnosis : examine(patient, _InternalMultiRuleMappings.of(reducerRules));
   }
 
   /**
@@ -276,6 +277,8 @@ public final class Validoctor {
   }
 
   /**
+   * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, String, Rule, MultiRule[])} instead.
+   *
    * Multi property object examination, pre-examined with a single Rule. If the preRule examination results in
    * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
    * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
@@ -296,7 +299,7 @@ public final class Validoctor {
   }
 
   /**
-   * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, String, Rule, MultiRule[])} instead.
+   * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, Rule, MultiRule[])} instead.
    *
    * Multi property object examination, pre-examined with a single Rule, with default patientName == {@value DEFAULT_NAME}.
    * See {@link Validoctor#examineCombo(Object, String, Rule, MultiRule[])}
