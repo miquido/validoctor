@@ -1,4 +1,4 @@
-![Java CI with Gradle](https://github.com/miquido/validoctor/workflows/Java%20CI%20with%20Gradle/badge.svg?branch=develop)
+![Tests](https://github.com/miquido/validoctor/workflows/Tests/badge.svg?branch=develop)
 
 Validoctor is an all-purpose data validator for backend java and kotlin projects. It performs validation basing on rules 
 passed along with object to be validated. It can operate depending on several traits and on various kinds of rules in an 
