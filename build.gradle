@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.4.32'
+    ext.kotlin_version = '1.6.10'
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -14,15 +14,14 @@ plugins {
 }
 
 group 'com.miquido'
-version '1.1.7'
+version '2.0.0-rc1'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile "org.jetbrains.kotlin:kotlin-stdlib-jre8:1.2.71"
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 test {
@@ -113,3 +112,6 @@ publishing {
 signing {
     sign publishing.publications
 }
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
