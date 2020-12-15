@@ -19,7 +19,7 @@ public class FieldRuleExecution<T, P> extends RuleExecution<T, P> {
         .flatMap(p ->
             rule.apply(p).stream()
                 .map(ailment -> {
-                  String fieldName  = target.getFieldNames().get(0);
+                  String fieldName = target.getFieldNames().get(0);
                   if (ailment.field != null) {
                     fieldName += "." + ailment.field;
                   }

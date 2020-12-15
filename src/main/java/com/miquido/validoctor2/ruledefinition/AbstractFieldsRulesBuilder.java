@@ -3,7 +3,9 @@ package com.miquido.validoctor2.ruledefinition;
 import com.miquido.validoctor2.ruleexecution.RuleExecution;
 import com.miquido.validoctor2.ruleexecution.RuleExecutionBranch;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.BinaryOperator;
 
 public class AbstractFieldsRulesBuilder<T> {
   protected final RuleBuilder<T> ruleBuilder;
@@ -29,8 +31,8 @@ public class AbstractFieldsRulesBuilder<T> {
     return new TypeFieldsRulesBuilder<>(clazz, false, ruleBuilder);
   }
 
-  public <P> TwoFieldsRulesBuilder<T, P> fields(String field1, String field2) {
-    return new TwoFieldsRulesBuilder<>(ruleBuilder);
+  public <P> ReducedFieldsRulesBuilder<T, P> fields(String field1, String field2, BinaryOperator<P> reducer) {
+    return new ReducedFieldsRulesBuilder<>(ruleBuilder, Arrays.asList(field1, field2), reducer);
   }
 
   public ExaminationDefinition<T> build() {

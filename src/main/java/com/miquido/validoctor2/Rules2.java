@@ -14,7 +14,11 @@ public class Rules2 {
   }
 
   public static Rule2<String> stringMinLength(int length) {
-    return new SimpleRule2<>("STRING_WRONG_LENGTH", str -> str == null || str.length() > length);
+    return new SimpleRule2<>("STRING_TOO_SHORT", str -> str == null || str.length() > length);
+  }
+
+  public static Rule2<String> stringMaxLength(int length) {
+    return new SimpleRule2<>("STRING_TOO_LONG", str -> str == null || str.length() <= length);
   }
 
   public static <T> Rule2<T> notNull() {
