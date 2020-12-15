@@ -83,12 +83,12 @@ public class V2ApiTest {
       //^ Root and child branch for all floats (but not Floats)
       .allAssignable(Number.class).rules(numberNonNegative())
       //^ Root branch all fields assignable from Number
-      .fields("weightKg", "volumeL")
-      //^ Multifield validation for relations between fields or reductions of the fields
+      .fields("name", "description", String::concat).rules(stringMaxLength(10))
+      //^ Root branch for reduced value of two fields
       .build();
 
   @Test
-  public void test() {
+  public void test1() {
     Diagnosis2 stringDiagnosis = Validoctor2.examine("  ", "string", notNull(), stringTrimmedNotEmpty());
 
     TestInsideClass insidePatient = new TestInsideClass("", 0.0);
@@ -98,6 +98,19 @@ public class V2ApiTest {
     List<TestInsideClass> insideList = new ArrayList<>();
     insideList.add(insidePatient);
     TestClass patient = new TestClass("", null, "", null, -2.0f, 0, insidePatient, intSet, insideList);
+    Diagnosis2 diagnosis2 = Validoctor2.examine(patient, rule);
+    System.out.println(diagnosis2);
+  }
+
+  @Test
+  public void test2() {
+    TestInsideClass insidePatient = new TestInsideClass("", 0.0);
+    Set<Integer> intSet = new HashSet<>();
+    intSet.add(1);
+    intSet.add(-3);
+    List<TestInsideClass> insideList = new ArrayList<>();
+    insideList.add(insidePatient);
+    TestClass patient = new TestClass("namename", null, "description", null, -2.0f, 0, insidePatient, intSet, insideList);
     Diagnosis2 diagnosis2 = Validoctor2.examine(patient, rule);
     System.out.println(diagnosis2);
   }
