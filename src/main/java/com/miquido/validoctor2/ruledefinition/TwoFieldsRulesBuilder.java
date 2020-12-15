@@ -1,8 +1,8 @@
 package com.miquido.validoctor2.ruledefinition;
 
-public class TwoFieldsRulesBuilder<T> extends AbstractFieldsRulesBuilder<T> {
+public class TwoFieldsRulesBuilder<T, P> extends AbstractFieldsRulesBuilder<T> {
 
-  protected TwoFieldsRulesBuilder(ObjectRuleBuilder<T> objectRuleBuilder) {
-    super(objectRuleBuilder);
+  protected TwoFieldsRulesBuilder(RuleBuilder<T> ruleBuilder) {
+    super(ruleBuilder);
   }
 }

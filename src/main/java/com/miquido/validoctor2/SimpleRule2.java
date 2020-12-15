@@ -15,17 +15,13 @@ public class SimpleRule2<T> implements Rule2<T> {
   }
 
   @Override
-  public Set<Violation> test(T patient) {
+  public Set<Ailment2> apply(T patient) {
     if (!predicate.test(patient)) {
-      //TODO this is always a singleton set, can we avoid creating those sets somehow?
-      return Collections.singleton(new Violation("", patient, violationMessage));
+      //TODO 1. this is always a singleton set, can we avoid creating those sets somehow?
+      //TODO 2. is returning the patient value useful?
+      return Collections.singleton(new Ailment2(null, patient, violationMessage));
     } else {
       return Collections.emptySet();
     }
-  }
-
-  @Override
-  public String getViolationMessage() {
-    return violationMessage;
   }
 }

@@ -32,10 +32,4 @@ public class Rules2 {
   public static <T> Rule2<Collection<T>> collectionNotEmpty() {
     return new SimpleRule2<>("COLLECTION_EMPTY", collection -> collection == null || !collection.isEmpty());
   }
-
-  public static <T> Rule2<Collection<T>> each(Rule2<T> rule) {
-    return new SimpleRule2<>(rule.getViolationMessage(),
-        col -> col == null || col.stream().allMatch(obj -> rule.test(obj).isEmpty()));
-  }
-
 }
