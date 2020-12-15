@@ -2,7 +2,9 @@ package com.miquido.validoctor.complexcases;
 
 import com.miquido.validoctor2.Diagnosis2;
 import com.miquido.validoctor2.Rule2;
+import com.miquido.validoctor2.Rules2;
 import com.miquido.validoctor2.Validoctor2;
+import com.miquido.validoctor2.ruledefinition.ExaminationDefinition;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -52,41 +54,43 @@ public class V2ApiTest {
 
 
   Rule2<TestInsideClass> insideRule = Validoctor2.rulesFor(TestInsideClass.class)
-      .field("name").rules(notNull(), stringTrimmedNotEmpty())
-      .field("score").rules(notNull(), numberPositive())
+      .<String>field("name").rules(notNull(), stringTrimmedNotEmpty())
+      .<Number>field("score").rules(notNull(), numberPositive())
       .build();
 
 
   Rule2<TestClass> rule = Validoctor2.rulesFor(TestClass.class)
-      .field("name").rules(stringTrimmedNotEmpty())
-      .field("skuId").rules(notNull()).rules(stringExactLength(10))
-      //^ Each consecutive rules() call adds a layer. Layer 0 and then 1. 1 will only execute if 0 is valid
-      .field("description").rules(notNull())
-      .field("description").rules(stringTrimmedNotEmpty())
-      //^ Both layer 0, as they are defined separately
-      .field("description").rules(stringMinLength(100)).rules(stringExactLength(100))
-      //^ Another layer 0, and then layer 1. Layer 1 will only execute if all layer 0 are valid, including ones
-      // defined separately above. Usage like this will be discouraged
-      .field("inside").rules(notNull(), insideRule)
+      .<String>field("name").rules(stringTrimmedNotEmpty())
+      .<String>field("skuId").rules(notNull()).rules(stringExactLength(10))
+      //^ Each consecutive rules() call adds a branch. Further branches only execute if their parent branches succeed
+      .<String>field("description").rules(notNull())
+      .<String>field("description").rules(stringTrimmedNotEmpty())
+      //^ Both independent root branches, as they are defined separately
+      .<String>field("description").rules(stringMinLength(100)).rules(stringExactLength(100))
+      //^ Root branch and then child branch that will only execute if this root branch succeeds
+      .<TestInsideClass>field("inside").rules(notNull(), insideRule)
       //^ Adding object rule is same as adding simple rule and they are interoperable
-//      .collectionField("intSet").rules(notNull(), collectionNotEmpty()).elementsRules(numberNonNegative())
-      //^ Layer 0 on collection field, then layer 1 on its elements
-//      .collectionField("intSet").elementsRules(notNull(), numberNonNegative())
-      //^ Two layer 0 rules on elements of collection
-//      .collectionField("insideList").elementsRules(notNull()).elementsRules(insideRule)
-      //^ Layer 0 and then layer 1 on elements of collection
+      .<Number>collectionField("intSet").rules(notNull(), collectionNotEmpty()).elementsRules(numberNonNegative())
+      //^ Collection fields also use a single root branch, so rules on elements will only be executed if
+      //root rules() on field succeed
+      .<Number>collectionField("intSet").elementsRules(notNull(), numberNonNegative())
+      //^ Root branch on elements of collection
+      .<TestInsideClass>collectionField("insideList").elementsRules(notNull()).elementsRules(insideRule)
+      //^ Root branch and then child branch on elements of collection
       .allTyped(Float.class).rules(notNull()).rules(numberNonNegative())
-      //^ Layer 0 and then layer 1 for all Floats (but not floats)
+      //^ Root branch for all Floats (but not floats)
       .allTyped(float.class).rules(notNull()).rules(numberPositive())
-      //^ Layer 0 and then layer 1 for all floats (but not Floats)
+      //^ Root and child branch for all floats (but not Floats)
       .allAssignable(Number.class).rules(numberNonNegative())
-      //^ Layer 0 for all fields assignable from Number. This will add to layer 0 rules for Floats defined above
+      //^ Root branch all fields assignable from Number
       .fields("weightKg", "volumeL")
       //^ Multifield validation for relations between fields or reductions of the fields
       .build();
 
   @Test
   public void test() {
+    Diagnosis2 stringDiagnosis = Validoctor2.examine("  ", "string", notNull(), stringTrimmedNotEmpty());
+
     TestInsideClass insidePatient = new TestInsideClass("", 0.0);
     Set<Integer> intSet = new HashSet<>();
     intSet.add(1);

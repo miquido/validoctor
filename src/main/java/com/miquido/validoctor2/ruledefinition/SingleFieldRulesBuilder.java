@@ -1,34 +1,29 @@
 package com.miquido.validoctor2.ruledefinition;
 
-import com.miquido.validoctor2.ObjectRule.FieldRules;
 import com.miquido.validoctor2.Rule2;
+import com.miquido.validoctor2.ruleexecution.FieldRuleExecution;
+import com.miquido.validoctor2.ruleexecution.RuleExecution;
+import com.miquido.validoctor2.ruletarget.FieldRuleTarget;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class SingleFieldRulesBuilder<T> extends AbstractFieldsRulesBuilder<T> {
+public class SingleFieldRulesBuilder<T, P> extends AbstractFieldsRulesBuilder<T> {
 
-  protected final String field;
-  protected int layer = 0;
+  private final FieldRuleTarget<T, P> target;
 
-  SingleFieldRulesBuilder(String field, ObjectRuleBuilder<T> objectRuleBuilder) {
-    super(objectRuleBuilder);
-    this.field = field;
+  SingleFieldRulesBuilder(String field, RuleBuilder<T> ruleBuilder) {
+    super(ruleBuilder);
+    target = new FieldRuleTarget<>(field, ruleBuilder.objectClass);
   }
 
   @SafeVarargs
-  public final <P> SingleFieldRulesBuilder<T> rules(Rule2<P>... rules) {
-    Optional<FieldRules> existingFieldRule = objectRuleBuilder.rule.fieldsRules.stream()
-        .filter(fr -> fr.fieldName.equals(field) && fr.layer == layer)
-        .findFirst(); //keep one fieldRule per field and layer combination
-    if (existingFieldRule.isPresent()) {
-      existingFieldRule.get().rules.addAll(Arrays.asList(rules));
-    } else {
-      FieldRules fieldRules = new FieldRules(field, layer, new ArrayList<>(Arrays.asList(rules)));
-      objectRuleBuilder.rule.fieldsRules.add(fieldRules);
-    }
-    layer++;
+  public final SingleFieldRulesBuilder<T, P> rules(Rule2<P>... rules) {
+    List<RuleExecution<T, ?>> ruleExecutions = Arrays.stream(rules)
+        .map(rule -> new FieldRuleExecution<>(target, rule))
+        .collect(Collectors.toList());
+    updateBranch(ruleExecutions);
     return this;
   }
 }

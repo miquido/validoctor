@@ -9,7 +9,7 @@ public class Diagnosis2 {
   private boolean valid = true;
   private Map<String, Set<String>> ailments = new HashMap<>();
 
-  public Diagnosis2(Set<Violation> results) {
+  public Diagnosis2(Set<Ailment2> results) {
     results.forEach(result -> {
       Set<String> resultAilments = result.ailments;
       if (!resultAilments.isEmpty()) {
