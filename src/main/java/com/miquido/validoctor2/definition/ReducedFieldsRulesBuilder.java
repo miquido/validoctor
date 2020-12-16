@@ -1,9 +1,9 @@
-package com.miquido.validoctor2.ruledefinition;
+package com.miquido.validoctor2.definition;
 
-import com.miquido.validoctor2.Rule2;
-import com.miquido.validoctor2.ruleexecution.ReducedFieldsRuleExecution;
-import com.miquido.validoctor2.ruleexecution.RuleExecution;
-import com.miquido.validoctor2.ruletarget.ReducedFieldsRuleTarget;
+import com.miquido.validoctor2.rule.Rule2;
+import com.miquido.validoctor2.execution.ReducedFieldsRuleExecution;
+import com.miquido.validoctor2.execution.RuleExecution;
+import com.miquido.validoctor2.target.ReducedFieldsRuleTarget;
 
 import java.util.Arrays;
 import java.util.List;

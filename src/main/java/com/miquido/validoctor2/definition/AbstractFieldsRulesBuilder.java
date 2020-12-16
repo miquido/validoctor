@@ -1,7 +1,8 @@
-package com.miquido.validoctor2.ruledefinition;
+package com.miquido.validoctor2.definition;
 
-import com.miquido.validoctor2.ruleexecution.RuleExecution;
-import com.miquido.validoctor2.ruleexecution.RuleExecutionBranch;
+import com.miquido.validoctor2.execution.RuleExecution;
+import com.miquido.validoctor2.execution.RuleExecutionBranch;
+import com.miquido.validoctor2.rule.Rule2;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,11 +32,15 @@ public class AbstractFieldsRulesBuilder<T> {
     return new TypeFieldsRulesBuilder<>(clazz, false, ruleBuilder);
   }
 
+  public TypeFieldsRulesBuilder<T, Object> all() {
+    return new TypeFieldsRulesBuilder<>(Object.class, false, ruleBuilder);
+  }
+
   public <P> ReducedFieldsRulesBuilder<T, P> fields(String field1, String field2, BinaryOperator<P> reducer) {
     return new ReducedFieldsRulesBuilder<>(ruleBuilder, Arrays.asList(field1, field2), reducer);
   }
 
-  public ExaminationDefinition<T> build() {
+  public Rule2<T> build() {
     return ruleBuilder.build();
   }
 

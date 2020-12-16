@@ -1,4 +1,6 @@
-package com.miquido.validoctor2;
+package com.miquido.validoctor2.rule;
+
+import com.miquido.validoctor2.result.Ailment2;
 
 import java.util.Collections;
 import java.util.Set;

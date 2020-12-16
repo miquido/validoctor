@@ -1,8 +1,8 @@
-package com.miquido.validoctor2.ruledefinition;
+package com.miquido.validoctor2.definition;
 
-import com.miquido.validoctor2.Ailment2;
-import com.miquido.validoctor2.Rule2;
-import com.miquido.validoctor2.ruleexecution.RuleExecutionBranch;
+import com.miquido.validoctor2.result.Ailment2;
+import com.miquido.validoctor2.rule.Rule2;
+import com.miquido.validoctor2.execution.RuleExecutionBranch;
 
 import java.util.List;
 import java.util.Set;

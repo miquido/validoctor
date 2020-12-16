@@ -1,4 +1,4 @@
-package com.miquido.validoctor2.ruletarget;
+package com.miquido.validoctor2.target;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;

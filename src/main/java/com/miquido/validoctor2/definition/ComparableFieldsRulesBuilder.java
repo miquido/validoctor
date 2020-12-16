@@ -1,4 +1,4 @@
-package com.miquido.validoctor2.ruledefinition;
+package com.miquido.validoctor2.definition;
 
 import java.util.Comparator;
 import java.util.List;

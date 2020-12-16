@@ -1,4 +1,4 @@
-package com.miquido.validoctor2.ruletarget;
+package com.miquido.validoctor2.target;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package com.miquido.validoctor2;
+package com.miquido.validoctor2.result;
 
 import java.util.HashSet;
 import java.util.Set;
