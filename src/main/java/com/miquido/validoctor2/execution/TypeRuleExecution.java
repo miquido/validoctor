@@ -1,8 +1,8 @@
-package com.miquido.validoctor2.ruleexecution;
+package com.miquido.validoctor2.execution;
 
-import com.miquido.validoctor2.Ailment2;
-import com.miquido.validoctor2.Rule2;
-import com.miquido.validoctor2.ruletarget.TypeRuleTarget;
+import com.miquido.validoctor2.result.Ailment2;
+import com.miquido.validoctor2.rule.Rule2;
+import com.miquido.validoctor2.target.TypeRuleTarget;
 
 import java.util.List;
 import java.util.Set;

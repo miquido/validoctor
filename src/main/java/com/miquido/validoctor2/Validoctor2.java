@@ -1,12 +1,22 @@
 package com.miquido.validoctor2;
 
-import com.miquido.validoctor2.ruledefinition.RuleBuilder;
+import com.miquido.validoctor2.result.Ailment2;
+import com.miquido.validoctor2.result.Diagnosis2;
+import com.miquido.validoctor2.result.DiagnosisException2;
+import com.miquido.validoctor2.rule.Rule2;
+import com.miquido.validoctor2.definition.RuleBuilder;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Validoctor2 {
+
+  private static boolean throwing = false;
+
+  public static void setThrowing(boolean throwing) {
+    Validoctor2.throwing = throwing;
+  }
 
   public static <Patient> RuleBuilder<Patient> rulesFor(Class<Patient> clazz) {
     return new RuleBuilder<>(clazz);
@@ -32,6 +42,11 @@ public class Validoctor2 {
                 })
         )
         .collect(Collectors.toSet());
-    return new Diagnosis2(ailments);
+    Diagnosis2 diagnosis = new Diagnosis2(ailments);
+    if (throwing) {
+      throw new DiagnosisException2(diagnosis);
+    } else {
+      return diagnosis;
+    }
   }
 }
