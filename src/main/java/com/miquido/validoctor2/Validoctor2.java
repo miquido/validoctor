@@ -8,14 +8,20 @@ import com.miquido.validoctor2.definition.RuleBuilder;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Validoctor2 {
 
   private static boolean throwing = false;
+  private static Function<Diagnosis2, RuntimeException> exceptionFactory = DiagnosisException2::new;
 
   public static void setThrowing(boolean throwing) {
     Validoctor2.throwing = throwing;
+  }
+
+  public static void setExceptionFactory(Function<Diagnosis2, RuntimeException> factory) {
+    exceptionFactory = factory;
   }
 
   public static <Patient> RuleBuilder<Patient> rulesFor(Class<Patient> clazz) {
@@ -44,7 +50,7 @@ public class Validoctor2 {
         .collect(Collectors.toSet());
     Diagnosis2 diagnosis = new Diagnosis2(ailments);
     if (throwing) {
-      throw new DiagnosisException2(diagnosis);
+      throw exceptionFactory.apply(diagnosis);
     } else {
       return diagnosis;
     }
