@@ -10,7 +10,7 @@ import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 /**
- * Class containing internally used mapping methods from other Rule types to MultiRule.</br>
+ * Class containing internally used mapping methods from other Rule types to MultiRule.<br>
  * Usually not suitable for client code needs.
  */
 public class _InternalMultiRuleMappings {
@@ -32,12 +32,12 @@ public class _InternalMultiRuleMappings {
   }
 
   /**
-   * For internal use. Creates a MultiRule out of passed Rules.<br/>
-   * Important: it adapts the rules as {@link PropertyRule}s with {@param objectName} property association.
+   * For internal use. Creates a MultiRule out of passed Rules.<br>
+   * Important: it adapts the rules as {@link PropertyRule}s with <strong>objectName</strong> property association.
    * If these already were PropertyRules, their associations will be overridden, erasing all
    * mapping of rules to properties. This is usually undesired. If you need to perform both whole
-   * object and properties validation in one call, use:<br/><br/>
-   * {@code validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2)}.<br/>
+   * object and properties validation in one call, use:<br><br>
+   * {@code validoctor.examineCombo(patient, notNull(), multiRule1, multiRule2)}.<br>
    * @param objectName name of the object to report the Ailments for
    * @param rules rules to put into new MultiRule. Non null.
    * @param <T> type of patient object

@@ -48,7 +48,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is not null.<br/>
+   * Passed: patient is not null.<br>
    * Violated: patient is null.
    */
   public static <T> Rule<T> notNull() {
@@ -56,7 +56,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null.<br/>
+   * Passed: patient is null.<br>
    * Violated: patient is not null.
    */
   public static <T> Rule<T> isNull() {
@@ -64,7 +64,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or false.<br/>
+   * Passed: patient is null or false.<br>
    * Violated: patient is true.
    */
   public static Rule<Boolean> isFalse() {
@@ -72,7 +72,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null of true.<br/>
+   * Passed: patient is null of true.<br>
    * Violated: patient is false.
    */
   public static Rule<Boolean> isTrue() {
@@ -80,7 +80,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or not empty string.<br/>
+   * Passed: patient is null or not empty string.<br>
    * Violated: patient is empty string.
    * @see Rules#stringTrimmedNotEmpty()
    */
@@ -89,7 +89,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null, not empty and not all-whitespace string.<br/>
+   * Passed: patient is null, not empty and not all-whitespace string.<br>
    * Violated: patient is empty or all-whitespace string.
    * @see Rules#stringNotEmpty()
    */
@@ -98,7 +98,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or contains only letters and digits.<br/>
+   * Passed: patient is null or contains only letters and digits.<br>
    * Violated: patient contains any character that is not letter or digit.
    */
   public static Rule<String> stringAlphanumeric() {
@@ -106,7 +106,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or contains only letters.<br/>
+   * Passed: patient is null or contains only letters.<br>
    * Violated: patient contains any character that is not letter.
    */
   public static Rule<String> stringAlphabetic() {
@@ -114,7 +114,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or not empty collection.<br/>
+   * Passed: patient is null or not empty collection.<br>
    * Violated: patient is empty collection.
    */
   public static <T> Rule<Collection<T>> collectionNotEmpty() {
@@ -122,7 +122,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or a collection with size equal or greater than specified {@code minSize}.<br/>
+   * Passed: patient is null or a collection with size equal or greater than specified {@code minSize}.<br>
    * Violated: patient is a collection with size lesser than specified {@code minSize}.
    */
   public static <T> Rule<Collection<T>> collectionMinSize(int minSize) {
@@ -130,7 +130,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or a collection with size equal or lesser than specified {@code maxSize}.<br/>
+   * Passed: patient is null or a collection with size equal or lesser than specified {@code maxSize}.<br>
    * Violated: patient is a collection with size greater than specified {@code maxSize}.
    */
   public static <T> Rule<Collection<T>> collectionMaxSize(int maxSize) {
@@ -139,7 +139,7 @@ public final class Rules {
 
   /**
    * Passed: patient is null or a collection with size equal or greater than specified {@code minSize}
-   * and equal or lesser than specified {@code maxSize} .<br/>
+   * and equal or lesser than specified {@code maxSize} .<br>
    * Violated: patient is a collection with size greater than specified {@code maxSize} or lesser than specified {@code minSize}.
    */
   public static <T> Rule<Collection<T>> collectionSizeIn(int minSize, int maxSize) {
@@ -148,7 +148,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or a collection containing element equal to specified {@code element}.<br/>
+   * Passed: patient is null or a collection containing element equal to specified {@code element}.<br>
    * Violated: patient is a collection not containing element equal to specified {@code element}.
    */
   public static <T> Rule<Collection<T>> collectionContains(T element) {
@@ -157,7 +157,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or string with length greater than or equal to specified {@code minLength}.<br/>
+   * Passed: patient is null or string with length greater than or equal to specified {@code minLength}.<br>
    * Violated: patient is string with length lesser than specified {@code minLength}.
    */
   public static Rule<String> stringMinLength(int minLength) {
@@ -167,7 +167,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or string with length lesser than or equal to specified {@code maxLength}.<br/>
+   * Passed: patient is null or string with length lesser than or equal to specified {@code maxLength}.<br>
    * Violated: patient is string with length greater than specified {@code maxLength}.
    */
   public static Rule<String> stringMaxLength(int maxLength) {
@@ -178,7 +178,7 @@ public final class Rules {
 
   /**
    * Passed: patient is null or string with length greater than or equal to specified {@code minLength} and
-   * lesser than or equal to specified {@code maxLength}.<br/>
+   * lesser than or equal to specified {@code maxLength}.<br>
    * Violated: patient is string with length lesser than or equal to specified {@code minLength} or
    * greater than specified {@code maxLength}.
    */
@@ -191,7 +191,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or string with length equal to specified {@code exactLength}.<br/>
+   * Passed: patient is null or string with length equal to specified {@code exactLength}.<br>
    * Violated: patient is string with length other than specified {@code exactLength}.
    */
   public static Rule<String> stringExactLength(int exactLength) {
@@ -201,7 +201,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or string that contains specified {@code text}.<br/>
+   * Passed: patient is null or string that contains specified {@code text}.<br>
    * Violated: patient is string not containing specified {@code text}.
    */
   public static Rule<String> stringContains(String text) {
@@ -211,7 +211,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or string that matches specified {@code regex}.<br/>
+   * Passed: patient is null or string that matches specified {@code regex}.<br>
    * Violated: patient is string not matching specified {@code regex}.
    */
   public static Rule<String> stringMatches(String regex) {
@@ -221,7 +221,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or number with value greater than 0.<br/>
+   * Passed: patient is null or number with value greater than 0.<br>
    * Violated: patient is number with value lesser than or equal to 0.
    */
   public static Rule<Number> numberPositive() {
@@ -229,7 +229,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or number with value greater than or equal to 0.<br/>
+   * Passed: patient is null or number with value greater than or equal to 0.<br>
    * Violated: patient is number with value lesser than 0.
    */
   public static Rule<Number> numberNonNegative() {
@@ -237,7 +237,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or number with value {@code >= minRange} and {@code <= maxRange}.<br/>
+   * Passed: patient is null or number with value {@code >= minRange} and {@code <= maxRange}.<br>
    * Violated: patient is number with value {@code < minRange} or {@code > maxRange}.
    */
   public static Rule<Number> numberInRange(Number minRange, Number maxRange) {
@@ -249,8 +249,8 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is equal to at least one of values passed in allowedValues argument.<br/>
-   * Violated: patient is not equal to any of the values passed in allowedValues.<br/><br/>
+   * Passed: patient is equal to at least one of values passed in allowedValues argument.<br>
+   * Violated: patient is not equal to any of the values passed in allowedValues.<br><br>
    * Note: {@code valueIn(null)} is not directly supported. To check if patient is null use {@link Rules#isNull()}.
    * To use valueIn with dynamic, nullable allowed value use {@code valueIn(listOf<TYPE>(null))} or
    * {@code valueIn(Arrays.asList(null))}.
@@ -264,8 +264,8 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is equal to at least one element of collection passed in allowedValues argument.<br/>
-   * Violated: patient is not equal to any element of the collection passed in allowedValues.<br/><br/>
+   * Passed: patient is equal to at least one element of collection passed in allowedValues argument.<br>
+   * Violated: patient is not equal to any element of the collection passed in allowedValues.<br><br>
    * Note: {@code valueIn(null)} is not directly supported. To check if patient is null use {@link Rules#isNull()}.
    * To use valueIn with dynamic, nullable allowed value use {@code valueIn(listOf<TYPE>(null))} or
    * {@code valueIn(Arrays.asList(null))}.
@@ -277,7 +277,7 @@ public final class Rules {
   }
 
   /**
-   * Passed: patient is null or equal to specified expectedValue.<br/>
+   * Passed: patient is null or equal to specified expectedValue.<br>
    * Violated: patient is not equal to specified expectedValue.
    */
   public static Rule<Object> equalTo(Object expectedValue) {
@@ -317,7 +317,7 @@ public final class Rules {
 
   /**
    * Accepts any rule and creates an exactly the same rule that will not return patients original value in Ailment
-   * stated on violation.<br/><br/>
+   * stated on violation.<br><br>
    * Note: when combining with {@link Rules#each(Rule)} use {@code each(confidential())}, not {@code confidential(each())}.
    * @param rule
    * @return passed rule altered to not put patient original value in Ailment.

@@ -39,7 +39,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   /**
-   * Adds a multiRule for validating an object that is a property of patient.</br>
+   * Adds a multiRule for validating an object that is a property of patient.<br>
    * If property getter is not found within the object or can not be called at runtime,
    * {@link PropertyAccessException} is thrown.
    *
@@ -54,7 +54,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   /**
-   * Adds a multiRule for validating a collection of objects that is a property of patient.</br>
+   * Adds a multiRule for validating a collection of objects that is a property of patient.<br>
    * If property getter is not found within the object or can not be called at runtime,
    * {@link PropertyAccessException} is thrown.
    *
@@ -87,7 +87,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   /**
-   * Adds a multiRule for validating an object that is a property of patient.</br>
+   * Adds a multiRule for validating an object that is a property of patient.<br>
    * If property getter is not found within the object or can not be called at runtime,
    * {@link PropertyAccessException} is thrown.
    *
@@ -107,7 +107,7 @@ public class ReflexiveMultiRuleBuilder<PatientType> {
   }
 
   /**
-   * Adds a multiRule for validating a collection of objects that is a property of patient.</br>
+   * Adds a multiRule for validating a collection of objects that is a property of patient.<br>
    * If property getter is not found within the object or can not be called at runtime,
    * {@link PropertyAccessException} is thrown.
    *

@@ -23,9 +23,9 @@ public class MultiRuleBuilder<T> {
 
   /**
    * Will use reflection to get properties. Failure to find or call property getters will cause validation fail.
-   * <br/><b>Contract:</b><br/>
-   * - Subject class must contain a getter for each property that is to be validated.<br/>
-   * - Subject class may contain getters for boolean properties that start with "is".<br/>
+   * <br><b>Contract:</b><br>
+   * - Subject class must contain a getter for each property that is to be validated.<br>
+   * - Subject class may contain getters for boolean properties that start with "is".<br>
    */
   public ReflexiveMultiRuleBuilder<T> reflexiveProperties(Class<T> subjectClass) {
     return new ReflexiveMultiRuleBuilder<>(this, subjectClass);

@@ -89,11 +89,11 @@ public final class Validoctor {
 
   /**
    * Multi property object examination, pre-examined with a single Rule. If the preRule examination results in
-   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br>
    * This method does not provide any safeguard against null patient, so a NullPointerException may occur in case of one,
    * depending on exact Rules used.
    * Checking for non-null patient before attempting validation of its properties is a typical use case for this method:
-   * <br/><br/>{@code examineCombo(patient, Rules.notNull(), multiRules)}<br/>
+   * <br><br>{@code examineCombo(patient, Rules.notNull(), multiRules)}<br>
    *
    * @param patient object to validate
    * @param patientName name of the validated value to be used in resulting Diagnosis
@@ -120,11 +120,11 @@ public final class Validoctor {
 
   /**
    * Object examination with ReducerRules, pre-examined with a single Rule. If the preRule examination results in
-   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br>
    * This method does not provide any safeguard against null patient, so a NullPointerException may occur in case of one,
    * depending on exact Rules used.
    * Checking for non-null patient before attempting validation of its properties is a typical use case for this method:
-   * <br/><br/>{@code examineCombo(patient, Rules.notNull(), reducerRules)}<br/>
+   * <br><br>{@code examineCombo(patient, Rules.notNull(), reducerRules)}<br>
    *
    * @param patient object to validate
    * @param patientName name of the validated value to be used in resulting Diagnosis
@@ -246,9 +246,9 @@ public final class Validoctor {
    * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, String, Rule, ReducerRule[])} instead.
    *
    * Object examination with ReducerRules, pre-examined with a single Rule. If the preRule examination results in
-   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
-   * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
-   * {@code examineCombo(patient, Rules.notNull(), reducerRules)}<br/>
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br>
+   * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br><br>
+   * {@code examineCombo(patient, Rules.notNull(), reducerRules)}<br>
    *
    * @param patient object to validate
    * @param patientName name of the validated value to be used in resulting Diagnosis
@@ -280,9 +280,9 @@ public final class Validoctor {
    * DEPRECATED. Will be removed in 1.2.0. Use {@link Validoctor#examineChain(Object, String, Rule, MultiRule[])} instead.
    *
    * Multi property object examination, pre-examined with a single Rule. If the preRule examination results in
-   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br/>
-   * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br/><br/>
-   * {@code examineCombo(patient, Rules.notNull(), multiRules)}<br/>
+   * {@link Severity#ERROR} diagnosis, it is returned and rest of the rules are not applied.<br>
+   * Typical use case for this method is to check for non-null patient before attempting validation of its properties:<br><br>
+   * {@code examineCombo(patient, Rules.notNull(), multiRules)}<br>
    *
    * @param patient object to validate
    * @param patientName name of the validated value to be used in resulting Diagnosis
@@ -378,9 +378,9 @@ public final class Validoctor {
 
     /**
      * Sets whether this Validoctor will be pedantic or not. Defaults to true.
-     * <li>If true, will execute all passed rules, continuing even after encountering violations, and will return
+     * <ul><li>If true, will execute all passed rules, continuing even after encountering violations, and will return
      * a diagnosis with all violations found.</li>
-     * <li>If false, will only execute rules until first violation, and will return a diagnosis with just this one.</li>
+     * <li>If false, will only execute rules until first violation, and will return a diagnosis with just this one.</li></ul>
      * @return this Builder
      */
     public Builder pedantic(boolean pedantic) {
@@ -390,9 +390,9 @@ public final class Validoctor {
 
     /**
      * Sets whether this Validoctor will be exceptional or not. Defaults to false.
-     * <li>If true, will throw an exception created using specified {@link Builder#exceptionFactory(Function) exceptionFactory}
+     * <ul><li>If true, will throw an exception created using specified {@link Builder#exceptionFactory(Function) exceptionFactory}
      * or {@link DiagnosisException} containing the Diagnosis if no exceptionFactory was specified.</li>
-     * <li>If false, will just return the Diagnosis.</li>
+     * <li>If false, will just return the Diagnosis.</li></ul>
      * @return this Builder
      */
     public Builder exceptional(boolean exceptional) {
