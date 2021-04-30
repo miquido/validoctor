@@ -20,10 +20,10 @@ split it into several steps if you feel like it, process results however you wan
 To add validoctor to your project:
 ```groovy
 repositories {
-    jcenter()
+    mavenCentral()
 }
 dependencies {
-  compile 'com.miquido.validoctor:validoctor:1.1.7'
+  implementation "com.miquido:validoctor:1.1.7"
 }
 ```
 Validoctor is a data validation library handling validations on complex data structures. It is designed to be 
