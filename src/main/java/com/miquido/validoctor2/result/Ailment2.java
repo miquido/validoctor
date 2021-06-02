@@ -5,19 +5,16 @@ import java.util.Set;
 
 public class Ailment2 {
   public String field;
-  public Object value;
   public Set<String> ailments;
 
-  public Ailment2(String field, Object value, String ailment) {
+  public Ailment2(String field, String ailment) {
     this.field = field;
-    this.value = value;
     ailments = new HashSet<>(1);
     ailments.add(ailment);
   }
 
-  public Ailment2(String field, Object value, Set<String> ailments) {
+  public Ailment2(String field, Set<String> ailments) {
     this.field = field;
-    this.value = value;
     this.ailments = ailments;
   }
 }

@@ -1,9 +1,10 @@
-package com.miquido.validoctor2.rule;
+package com.miquido.validoctor2.definition;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 public final class Rules2 {
 
@@ -21,6 +22,10 @@ public final class Rules2 {
   private static final Rule2<String> STRING_ALPHABETIC =
       new SimpleRule2<>("ALPHABETIC_REQUIRED", str -> str == null || str.chars().allMatch(Character::isLetter));
 
+  private static final Rule2<String> STRING_NO_SPACE_PADDING =
+      new SimpleRule2<>("NO_WHITESPACE_PADDING_REQUIRED",
+          str -> str == null || str.trim().equals(str));
+
   private static final Rule2<Object> NULL =
       new SimpleRule2<>("NULL_REQUIRED", Objects::isNull);
 
@@ -33,11 +38,6 @@ public final class Rules2 {
   private static final Rule2<Boolean> TRUE =
       new SimpleRule2<>("TRUE_REQUIRED", value -> value == null || value);
 
-  private static final Rule2<Number> NUMBER_POSITIVE =
-      new SimpleRule2<>("POSITIVE_REQUIRED", value -> value == null || value.doubleValue() > 0);
-
-  private static final Rule2<Number> NUMBER_NON_NEGATIVE =
-      new SimpleRule2<>("NON_NEGATIVE_REQUIRED", value -> value == null || value.doubleValue() >= 0);
 
   /**
    * Passed: patient is not null.<br/>
@@ -106,33 +106,41 @@ public final class Rules2 {
   }
 
   /**
+   * Passed: patient is null or does not have any leading or trailing spaces.<br/>
+   * Violated: patient contains leading or trailing space(s).
+   */
+  public static Rule2<String> stringNoSpacePadding() {
+    return STRING_NO_SPACE_PADDING;
+  }
+
+  /**
    * Passed: patient is null or number with value greater than or equal to 0.<br/>
    * Violated: patient is number with value lesser than 0.
    */
-  public static Rule2<Number> numberNonNegative() {
-    return NUMBER_NON_NEGATIVE;
+  public static <T extends Number> Rule2<T> numberNonNegative() {
+    return new SimpleRule2<>("NON_NEGATIVE_REQUIRED", value -> value == null || value.doubleValue() >= 0);
   }
 
   /**
    * Passed: patient is null or number with value greater than 0.<br/>
    * Violated: patient is number with value lesser than or equal to 0.
    */
-  public static Rule2<Number> numberPositive() {
-    return NUMBER_POSITIVE;
+  public static <T extends Number> Rule2<T> numberPositive() {
+    return new SimpleRule2<>("POSITIVE_REQUIRED", value -> value == null || value.doubleValue() > 0);
   }
 
   /**
    * Passed: patient is null or not empty collection.<br/>
    * Violated: patient is empty collection.
    */
-  public static <T> Rule2<Collection<T>> collectionNotEmpty() {
+  public static Rule2<Collection<?>> collectionNotEmpty() {
     return new SimpleRule2<>("NOT_EMPTY_REQUIRED", collection -> collection == null || !collection.isEmpty());
   }
   /**
    * Passed: patient is null or a collection with size equal or greater than specified {@code minSize}.<br/>
    * Violated: patient is a collection with size lesser than specified {@code minSize}.
    */
-  public static <T> Rule2<Collection<T>> collectionMinSize(int minSize) {
+  public static Rule2<Collection<?>> collectionMinSize(int minSize) {
     return new SimpleRule2<>("SIZE_TOO_LITTLE", collection -> collection == null || collection.size() >= minSize);
   }
 
@@ -140,7 +148,7 @@ public final class Rules2 {
    * Passed: patient is null or a collection with size equal or lesser than specified {@code maxSize}.<br/>
    * Violated: patient is a collection with size greater than specified {@code maxSize}.
    */
-  public static <T> Rule2<Collection<T>> collectionMaxSize(int maxSize) {
+  public static Rule2<Collection<?>> collectionMaxSize(int maxSize) {
     return new SimpleRule2<>("SIZE_TOO_LARGE", collection -> collection == null || collection.size() <= maxSize);
   }
 
@@ -149,7 +157,7 @@ public final class Rules2 {
    * and equal or lesser than specified {@code maxSize} .<br/>
    * Violated: patient is a collection with size greater than specified {@code maxSize} or lesser than specified {@code minSize}.
    */
-  public static <T> Rule2<Collection<T>> collectionSizeIn(int minSize, int maxSize) {
+  public static Rule2<Collection<?>> collectionSizeIn(int minSize, int maxSize) {
     return new SimpleRule2<>("INVALID_SIZE", collection -> collection == null
         || (collection.size() <= maxSize && collection.size() >= minSize));
   }
@@ -217,7 +225,7 @@ public final class Rules2 {
    * Passed: patient is null or number with value {@code >= minRange} and {@code <= maxRange}.<br/>
    * Violated: patient is number with value {@code < minRange} or {@code > maxRange}.
    */
-  public static Rule2<Number> numberInRange(Number minRange, Number maxRange) {
+  public static <T extends Number> Rule2<T> numberInRange(Number minRange, Number maxRange) {
     return new SimpleRule2<>("TOO_LOW_OR_TOO_HIGH", value -> value == null
         || value.doubleValue() >= minRange.doubleValue() && value.doubleValue() <= maxRange.doubleValue());
   }
@@ -252,5 +260,54 @@ public final class Rules2 {
    */
   public static Rule2<Object> equalTo(Object expectedValue) {
     return new SimpleRule2<>("VALUE_NOT_ALLOWED", obj -> obj == null || obj.equals(expectedValue));
+  }
+
+
+  /**
+   * Creates a new Rule identical to passed one, except it only tests its predicate if specified condition is true.
+   * Always passes otherwise.
+   * @param condition condition to meet for predicate test to occur
+   * @param rule rule
+   * @param <T> patient type
+   * @return new Rule with conditional predicate test
+   */
+  public static <T> Rule2<T> conditional(Predicate<T> condition, Rule2<T> rule) {
+    return rule.withCondition(condition);
+  }
+
+  /**
+   * Creates new Rules identical to passed ones, except they only test their predicate if specified condition is true.
+   * They always pass otherwise.
+   * @param condition condition to meet for predicate test to occur
+   * @param rules rules
+   * @param <T> patient type
+   * @return array of new Rules with conditional predicate test
+   */
+  @SafeVarargs
+  public static <T> Rule2<T>[] conditional(Predicate<T> condition, Rule2<T>... rules) {
+    return Arrays.stream(rules).map(rule -> rule.withCondition(condition)).toArray(Rule2[]::new);
+  }
+
+  /**
+   * Creates a new Rule that sequentially executes specified Rules. If any of the Rules fails,
+   * none of the following ones will test their predicate.
+   * @param rules rules to sequentially test during examination
+   * @param <T> patient type
+   * @return new Rule that will sequentially test all passed Rules
+   */
+  @SafeVarargs
+  public static <T> Rule2<T> chained(Rule2<T>... rules) {
+    return Arrays.stream(rules).reduce((rule1, rule2) -> rule2.withDependency(rule1)).orElse(null);
+  }
+
+  /**
+   * Creates a new Rule that is identical to specified rule but has the specified violationMessage.
+   * @param violationMessage violationMessage to use
+   * @param rule rule
+   * @param <T> patient type
+   * @return new Rule with specified violationMessage
+   */
+  public static <T> Rule2<T> named(String violationMessage, Rule2<T> rule) {
+    return rule.withViolationMessage(violationMessage);
   }
 }

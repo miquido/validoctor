@@ -24,6 +24,9 @@ public class Diagnosis2 {
     return valid;
   }
 
+  /**
+   * @return map of field names to sets of ailment (rule violation) names found in them
+   */
   public Map<String, Set<String>> getAilments() {
     return ailments;
   }

@@ -1,7 +1,7 @@
 package com.miquido.validoctor2.execution;
 
 import com.miquido.validoctor2.result.Ailment2;
-import com.miquido.validoctor2.rule.Rule2;
+import com.miquido.validoctor2.definition.Rule2;
 import com.miquido.validoctor2.target.TypeRuleTarget;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class TypeRuleExecution<T, P> extends RuleExecution<T, P> {
     return IntStream.range(0, patients.size())
         .mapToObj(index ->
             rule.apply(patients.get(index)).stream()
-                .map(ailment -> new Ailment2(fieldNames.get(index), ailment.value, ailment.ailments))
+                .map(ailment -> new Ailment2(fieldNames.get(index), ailment.ailments))
         )
         .flatMap(Function.identity())
         .collect(Collectors.toSet());

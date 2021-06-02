@@ -1,8 +1,8 @@
 package com.miquido.validoctor2.execution;
 
-import com.miquido.validoctor2.result.Ailment2;
 import com.miquido.validoctor2.definition.Rule2;
-import com.miquido.validoctor2.target.CollectionFieldRuleTarget;
+import com.miquido.validoctor2.result.Ailment2;
+import com.miquido.validoctor2.target.MultipleFieldsRuleTarget;
 
 import java.util.List;
 import java.util.Set;
@@ -10,20 +10,21 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class CollectionFieldRuleExecution<T, P> extends RuleExecution<T, P> {
+public class MultipleFieldsRuleExecution<T, P> extends RuleExecution<T, P> {
 
-  public CollectionFieldRuleExecution(CollectionFieldRuleTarget<T, P> target, Rule2<P> rule) {
+  public MultipleFieldsRuleExecution(MultipleFieldsRuleTarget<T, P> target, Rule2<P> rule) {
     super(target, rule);
   }
 
+  @Override
   public Set<Ailment2> perform(T patient) {
-    final String fieldName = target.getFieldNames().get(0);
+    List<String> fieldNames = target.getFieldNames();
     List<P> patients = target.getPatients(patient);
     return IntStream.range(0, patients.size())
         .mapToObj(index ->
             rule.apply(patients.get(index)).stream()
                 .map(ailment -> {
-                  String field = fieldName + "[" + index + "]";
+                  String field = fieldNames.get(index);
                   if (ailment.field != null) {
                     field += "." + ailment.field;
                   }

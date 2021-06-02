@@ -1,7 +1,7 @@
 package com.miquido.validoctor2.execution;
 
 import com.miquido.validoctor2.result.Ailment2;
-import com.miquido.validoctor2.rule.Rule2;
+import com.miquido.validoctor2.definition.Rule2;
 import com.miquido.validoctor2.target.ReducedFieldsRuleTarget;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class ReducedFieldsRuleExecution<T, P> extends RuleExecution<T, P> {
                 fieldName += "." + ailment.field;
                 //TODO improve this, as currently its not clear the ailment comes from reduced value
               }
-              return new Ailment2(fieldName, ailment.value, ailment.ailments);
+              return new Ailment2(fieldName, ailment.ailments);
             })
         )
         .collect(Collectors.toSet());

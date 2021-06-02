@@ -6,4 +6,8 @@ public class DiagnosisException2 extends RuntimeException {
   public DiagnosisException2(Diagnosis2 diagnosis) {
     this.diagnosis = diagnosis;
   }
+
+  public Diagnosis2 getDiagnosis() {
+    return diagnosis;
+  }
 }
