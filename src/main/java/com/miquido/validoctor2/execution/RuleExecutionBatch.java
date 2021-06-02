@@ -6,25 +6,25 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class RuleExecutionBranch<T> {
+public class RuleExecutionBatch<T> {
 
   private final List<RuleExecution<T, ?>> ruleExecutions;
-  private RuleExecutionBranch<T> nextBranch;
+  private RuleExecutionBatch<T> nextBatch;
 
-  public RuleExecutionBranch(List<RuleExecution<T, ?>> ruleExecutions) {
+  public RuleExecutionBatch(List<RuleExecution<T, ?>> ruleExecutions) {
     this.ruleExecutions = ruleExecutions;
   }
 
-  public void setNextBranch(RuleExecutionBranch<T> nextBranch) {
-    this.nextBranch = nextBranch;
+  public void setNextBatch(RuleExecutionBatch<T> nextBatch) {
+    this.nextBatch = nextBatch;
   }
 
   public Set<Ailment2> perform(T patient) {
     Set<Ailment2> ailments = ruleExecutions.stream()
         .flatMap(re -> re.perform(patient).stream())
         .collect(Collectors.toSet());
-    if (nextBranch != null && ailments.isEmpty()) {
-      ailments.addAll(nextBranch.perform(patient));
+    if (nextBatch != null && ailments.isEmpty()) {
+      ailments.addAll(nextBatch.perform(patient));
     }
     return ailments;
   }

@@ -6,6 +6,13 @@ import com.miquido.validoctor2.target.RuleTarget;
 
 import java.util.Set;
 
+/**
+ * Abstract base class for definition of how the rule should be executed.<br>
+ * It holds {@link RuleTarget} that provides patient objects for the rule extracted from the enclosing patient passed
+ * in <b>perform</b> method, and the rule itself.
+ * @param <T> type of enclosing patient class
+ * @param <P> type of the actual rule patient class
+ */
 public abstract class RuleExecution<T, P> {
   protected final RuleTarget<T, P> target;
   protected final Rule2<P> rule;

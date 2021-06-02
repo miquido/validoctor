@@ -20,12 +20,20 @@ public class ReducedFieldsRulesBuilder<T, P> extends AbstractFieldsRulesBuilder<
     this.target = new ReducedFieldsRuleTarget<>(fieldNames, ruleBuilder.objectClass, reducer);
   }
 
+  /**
+   * Add a batch of rules for reduced value.<br>
+   * Multiple rules stated in one call of this method will all execute independently of each others' success.<br>
+   * Multiple calls of this method can be chained. Each chained call adds a rules batch that will only be executed
+   * if its preceding batch fully succeeds (no violations).
+   * @param rules vararg list of rules for reduced value
+   * @return this builder for chaining
+   */
   @SafeVarargs
   public final ReducedFieldsRulesBuilder<T, P> rules(Rule2<P>... rules) {
     List<RuleExecution<T, ?>> ruleExecutions = Arrays.stream(rules)
         .map(rule -> new ReducedFieldsRuleExecution<>(target, rule))
         .collect(Collectors.toList());
-    updateBranch(ruleExecutions);
+    updateBatch(ruleExecutions);
     return this;
   }
 }
