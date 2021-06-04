@@ -85,7 +85,7 @@ public class Validoctor2 {
         )
         .collect(Collectors.toSet());
     Diagnosis2 diagnosis = new Diagnosis2(ailments);
-    if (throwing) {
+    if (throwing && !diagnosis.isValid()) {
       throw exceptionFactory.apply(diagnosis);
     } else {
       return diagnosis;

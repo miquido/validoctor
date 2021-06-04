@@ -1,8 +1,10 @@
 package com.miquido.validoctor2;
 
 import com.miquido.validoctor2.result.Diagnosis2;
+import com.miquido.validoctor2.result.DiagnosisException2;
 import com.miquido.validoctor2.rule.Rule2;
 import org.junit.Test;
+import org.junit.Before;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +51,12 @@ public class V2ApiTest {
       .fields("name", "description", String::concat).rules(stringMaxLength(10))
       //^ Root batch for reduced value of two fields
       .build();
+
+  @Before
+  public void beforeEachTest() {
+    //making sure to restore the default state of throwing property
+    Validoctor2.setThrowing(false);
+  }
 
   @Test
   public void singleValueExamination() {
@@ -149,5 +157,29 @@ public class V2ApiTest {
     diagnosis = Validoctor2.examine(patient, rule);
     assertEquals("POSITIVE_REQUIRED", diagnosis.getAilments().get("insideList[0].score").stream().findFirst().get());
     assertEquals("NOT_EMPTY_NOR_WHITESPACE_ONLY_REQUIRED", diagnosis.getAilments().get("insideList[1].name").stream().findFirst().get());
+  }
+
+  @Test
+  public void shouldNotThrowExceptionWithoutErrors() {
+    Validoctor2.setThrowing(true);
+    //create empty rules
+    Rule2<TestClass> rule = Validoctor2.rulesFor(TestClass.class)
+      .build();
+    TestClass patient = new TestClass(null, null, null, null, 0, null, null, null, null);
+    Validoctor2.examine(patient, rule);
+  }
+
+  @Test
+  public void shouldThrowException() {
+    Validoctor2.setThrowing(true);
+    try {
+      Rule2<TestClass> rule = Validoctor2.rulesFor(TestClass.class)
+        .all().rules(notNull())
+        .build();
+      TestClass patient = new TestClass(null, null, null, null, 0, null, null, null, null);
+      Validoctor2.examine(patient, rule);
+    } catch (DiagnosisException2 ex) {
+      assertEquals("NOT_NULL_REQUIRED", ex.getDiagnosis().getAilments().get("name").stream().findFirst().get());
+    }
   }
 }
