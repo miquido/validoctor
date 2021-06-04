@@ -2,7 +2,7 @@ package com.miquido.validoctor2;
 
 import com.miquido.validoctor2.result.Diagnosis2;
 import com.miquido.validoctor2.rule.Rule2;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
