@@ -1,8 +1,7 @@
 ![Tests](https://github.com/miquido/validoctor/workflows/Tests/badge.svg?branch=develop)
 
 Validoctor is an all-purpose data validator for backend java and kotlin projects. It performs validation basing on rules 
-passed along with object to be validated. It can operate depending on several traits and on various kinds of rules in an 
-effort to cater to specific needs of all projects. Specially designed for simple validation of complex structures.
+passed along with object to be validated. Specially designed for simple validation of complex structures.
 
 # Motivation
 Validoctor is a tool that allows defining and performing validations in a clean, simple, deterministic, zero-magic way. 
@@ -23,7 +22,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-  implementation "com.miquido:validoctor:1.1.7"
+  implementation "com.miquido:validoctor:2.0.0"
 }
 ```
 Validoctor is a data validation library handling validations on complex data structures. It is designed to be 
@@ -34,221 +33,169 @@ Basic concepts and a production-grade example are shown below. For more specific
 When in doubt about how something should be used, answer is usually easily found there.
 
 # Vocabulary
-* Ailment - like a single violation of a Rule. It carries a meaningful name and may have additional parameters.
+* Ailment - like a single violation of a Rule. It carries a violator's name (typically a field name) and a violation message.
 * Diagnosis - validation report stating whether object is valid or not and containing all Ailments discovered in it. 
 It is structured to be useful for any client code that may want to read it, so it may be used directly as, for example, 
 a response body.
 
-# Traits
-Validoctor instance can be created using a builder:
-
-```java
-Validoctor validoctor = Validoctor.builder().pedantic(true).exceptional(false).build();
-```
-
-For now, there are two traits.
-
-* Pedantic Validoctor will go through all rules to the end and return a complete Diagnosis with all violations. 
-One who is not pedantic will stop on first violation encountered and return this one only.
-* Exceptional Validoctor will throw an exception containing a Diagnosis instead of returning it, if it finds any violations.
-
-Pedantic and non-exceptional Validoctor is the default obtained by calling build() without specifying any traits.
-
-# Rules
-Each rule provides two things: definition of how validity is tested and Ailment that should be stated upon violation of the rule.
-There are 3 types of rules, calling validation with each type is the same:
-
-```java
-Diagnosis diagnosis = validoctor.examine(patient, RULE_1, RULE_2);
-```
-
-examine() method accepts any number of rules of given type. There also are examineCombo methods that allow passing some 
-permutations of rules of several kinds:
-
-```java
-Diagnosis diagnosis = validoctor.examineCombo(patient, Rules.notNull(), multiRule1, multiRule2);
-```
-
-Types are:
-
-* Just Rule - simple interface used to define validations of one value
-* MultiRule - rule sets that allow defining validations for whole data structures on per property basis
-* ReducerRules - rules that are applied to a set of properties of the same type that is reduced to one value
-
 # Quick start examples
-Create instance of Validoctor. Unless you need different reporting of errors for different cases 
-(exceptions or just returned Diagnoses, all violations, or just the first one), you will only need one instance of Validoctor.
+Main class to use is Validoctor. All its methods are static. You can set global behavior in cases of failed validations 
+using `setThrowing(boolean)` and `setExceptionFactory(Function<Diagnosis, RuntimeException>)` methods.
 ```java
-Validoctor validoctor = Validoctor.builder().build();
+Validoctor.setThrowing(false); //will return Diagnosis objects after validating
+Validoctor.setThrowing(true): //will throw DiagnosisExceptions on failed validations
+Validoctor.setExceptionFactory(diagnosis -> new CustomException(diagnosis)); //will throw CustomExceptions instead, if setThrowing is true
 ```
-For validating primitive or String values, just use SimpleRules. Most commonly used ones are supplied in Rules class.
+For validating primitive or String values, just use `SimpleRule`s. Most commonly used ones are supplied in Rules class.
 ```java
-Diagnosis diagnosis = validoctor.examine(stringToValidate, Rules.notNull(), Rules.stringAlphabetic(), Rules.stringTrimmedNotEmpty());
+Diagnosis diagnosis = Validoctor.examine(stringToValidate, notNull(), stringAlphabetic(), stringTrimmedNotEmpty());
 ```
-This will check if stringToValidate is not null, not empty or whitespace only and only containing letters.
+This will check if `stringToValidate` is not null, not empty or whitespace only and only containing letters.
 
-Validoctor's main strength lies in validating complex objects in one call using MultiRules or ReducerRules. Those need to 
-be created with builders. For example this validates fields foo and bar of object Example with specified rules:
+Validoctor's main strength lies in validating complex objects in one call. For this, a special `RuleBuilder` is used. 
+For example this validates fields foo and bar of object `Example` with specified rules:
 ```java
-MultiRule<Example> exampleMultiRule = MultiRule.<Example>builder()
-        .reflexiveProperties(Example.class)
-        .addRules("foo", notNull(), numberPositive())
-        .addRules("bar", stringMinLength(3), stringMaxLength(20))
+Rule<Example> exampleRule = Validoctor.rulesFor(Example.class)
+        .field("foo", notNull(), numberPositive())
+        .field("bar", stringMinLength(3), stringMaxLength(20))
         .build();
 ```
-It is then passed for Validoctor's examination the same way as SimpleRules:
+It is then passed for Validoctor's examination the same way as `SimpleRule`s:
 ```java
-Diagnosis diagnosis = validoctor.examine(exampleObject, exampleMultiRule);
+Diagnosis diagnosis = Validoctor.examine(exampleObject, exampleRule);
 ```
-It can also accept several MultiRules just as it could accept several SimpleRules.
-
-ReducerRules are useful when you need to validate some properties of an object as a group. For example when you have 
-a firstName and a lastName, and want their concatenation to be no longer than 40 characters you can do:
-```java
-ReducerRule<TestPatient, String> reducerRule = ReducerRule.builder(TestPatient.class, String.class)
-      .properties("firstName", "lastName")
-      .reducer(String::concat)
-      .rule(stringMaxLength(40))
-      .nullIgnoring()
-      .build();
-```
-This will get listed properties of specified type and reduce them to one value with given function, then validate it 
-with passed rules. nullIgnoring() lifts responsibility of handling nulls form reducer function. Validation is called 
-exactly the same as with MultiRules and SimpleRules. 
+It can also accept several rules just as it could accept several `SimpleRule`s.
+You will find that builder returned by `rulesFor` class provides a multitude of other options for attaching rules to fields. 
+It is possible to attach rule sets to multiple fields at once, to all fields of same type, to reductions of two fields,
+to elements of collection that is a field in the object etc. Rules can also be made conditional and dependent on success 
+of other rules.
 
 All Rules are stateless and can be reused for multiple validations.
 
 # Production grade example
-This is a description of slightly simplified ComplexCase1Test class as it shows and tests validation of 
-production-grade complexity. This class exists in tests code in both Kotlin and Java version. Code snippets below are 
-from Kotlin one. For Java counterparts, look at ComplexCase1JavaTest class.
-
-Imagine you need to validate an instance of a Product defined like this:
+Imagine you need to validate an instance of a `Product` defined like this:
 ```kotlin
 //Those are Kotlin data classes, for pure Java people out there it is the same as annotating a class with Lombok's @Data
-data class NutritionFacts(var kcal: Int?, 
-                          var fibre: Double?, 
-                          var protein: Double?, 
-                          var fat: Double?)
+data class NutritionFacts(val kcal: Int?, 
+                          val fibre: Double?, 
+                          val protein: Double?, 
+                          val fat: Double?)
 
-data class Comment(var authorId: Long?, 
-                   var text: String?, 
-                   var upVotedUsersIds: List<Long>?, 
-                   var downVotedUsersIds: List<Long>?)
+data class Comment(val authorId: Long?, 
+                   val text: String?)
 
-data class Product(var name: String?, 
-                   var skuId: String?, 
-                   var description: String?, 
-                   var weightG: Float?, 
-                   var volumeMl: Float?,
-                   var nutritionFacts: NutritionFacts?, 
-                   var glutenFree: Boolean?, 
-                   var vegan: Boolean?,
-                   var comments: List<Comment>?, 
-                   var reviewScores: MutableList<Int>?)
+data class Product(val name: String?, 
+                   val skuId: String?, 
+                   val description: String?, 
+                   val weightG: Float?, 
+                   val volumeMl: Float?,
+                   val nutritionFacts: NutritionFacts?, 
+                   val glutenFree: Boolean?, 
+                   val vegan: Boolean?,
+                   val comments: List<Comment>?, 
+                   val reviewScores: List<Int>?)
 ```
 
 Let's start with thinking about what we want to validate. Thinking on a per-class basis is the recommended approach 
-for using Validoctor. So, starting with NutritionFacts class, we surely want all the values to be positive. 
-We write a simple MultiRule for that:
+for using Validoctor. So, starting with `NutritionFacts` class, we surely want all the values to be positive. 
+We write a simple rule for that:
 ```kotlin
-val nutritionFactsRules: MultiRule<NutritionFacts> =
-        MultiRule.builder<NutritionFacts>().reflexiveProperties(NutritionFacts::class.java)
-            .addRulesForAll(Number::class.java, numberPositive())
-            .build()
+val nutritionFactsRule =
+  Validoctor.rulesFor(NutritionFacts::class.java)
+    .allAssignable(Number::class.java, numberPositive())
+    .build()
 ```
-What we did here? MultiRule is a list of rules that are applied to specified fields of the validated object. 
-By using reflexiveProperties method on MultiRuleBuilder we allowed the resulting MultiRule to use reflection to find the 
-values of the fields to apply the rules to. Then, we used addRulesForAll to tell the rule that we want it to read all 
-fields of type Number (or its subtypes) and apply the numberPositive rule to each of them. It is a predefined rule 
-available in Rules class that just checks if number is larger than 0.
+`Validoctor.rulesFor` defines a list of rules that are applied to specified fields of the validated object. 
+Validoctor uses reflection to find the values of the fields to apply the rules to. 
+We used `allAssignable` to tell the rule that we want it to read all fields of type `Number` (or its subtypes) and apply 
+the `numberPositive` rule to each of them. It is a predefined rule available in `Rules` class that just checks if number is 
+larger than 0.
 
-Ok, so that is what we want to validate in NutritionFacts. Let's move on to Comment class. We certainly need a valid, 
-non-null authorId and we want the text of the comment to be not empty, not longer that certain characters count and not 
+Ok, so that is what we want to validate in `NutritionFacts`. Let's move on to `Comment` class. We certainly need a valid, 
+non-null `authorId`, and we want the `text` of the comment to be not empty, not longer that certain characters count and not 
 contain any inappropriate words. For that, we will first need to define our own custom censor rule like this:
 ```kotlin
 val stringCensorRule: SimpleRule<String> =
-        SimpleRule("CENSORED_WORD", Predicate { str -> str == null || !str.contains("fuck", true) }, Severity.WARN)
+  SimpleRule("CENSORED_WORD") { str -> str == null || !str.contains("fuck", true) }
 ```
-In case when there is no appropriate predefined rule available in Rules class, we can create our own rules as shown above. 
+In case when there is no appropriate predefined rule available in `Rules` class, we can create our own rules as shown above. 
 Using SimpleRule constructor should cover 99.99% cases, so if you find yourself wanting to do something more complicated 
-it might be a sign that you are trying to over-engineer. What we did here is we specified a name of our custom rule, 
-passed a predicate that will be applied to patients to determine whether they are valid or not, and specified severity 
-of violation of this rule. We decided on just WARN and not ERROR as we assume Comments reported violating this rule 
-will need to be reviewed by moderators and not just plain rejected.
+it might be a sign that you are trying to over-engineer. What we did here is we specified a violation message to show when 
+rule fails, and a predicate that will be applied to patients to determine whether they are valid or not.
 
-Now, we are ready to create a MultiRule for Comment object that will specify all validations we need:
+Now, we are ready to create a rule for Comment object that will specify all validations we need:
 ```kotlin
-val commentRules: MultiRule<Comment> = 
-        MultiRule.builder<Comment>().reflexiveProperties(Comment::class.java)
-            .addRules("authorId", notNull(), numberPositive())
-            .addRules("text", notNull(), stringTrimmedNotEmpty(), stringMaxLength(500), stringCensorRule)
-            .build()
+val commentRules =
+  Validoctor.rulesFor(Comment::class.java)
+    .field("authorId", notNull(), numberPositive())
+    .field("text", notNull(), stringTrimmedNotEmpty(), stringMaxLength(500), stringCensorRule)
+    .build()
 ```
-We used MultiRuleBuilder just like for NutritionFacts. This time though, we specify fields we want the rules to be 
-applied to one by one, by their name. If we did not use reflexiveProperties, we would need to also specify the getters 
-for these fields. Each addRules call will make resulting MultiRule apply all the specified rules to given field. So here, 
-authorId will be checked if it is not null and then if it is a positive number, and text will be checked for nullity, 
+We used `Validoctor.rulesFor` just like for `NutritionFacts`. This time though, we specify fields we want the rules to be 
+applied to one by one, by their name. Each `field` call will make resulting rule apply all the specified rules to given field. 
+So here, `authorId` will be checked if it is not null and then if it is a positive number, and `text` will be checked for nullity, 
 not emptiness, max allowed length and inappropriate words with our custom censor rule.
 
-And now, for the biggest task: we need to apply a series of various validations to fields of Product class. For better 
-readability, we can decide to split validations of such complex classes into a few MultiRules. Let's do that here and 
-first specify rules that deal exclusively with nullity of Product's fields:
+And now, for the biggest task: we need to apply a series of various validations to fields of `Product` class. For better 
+readability, we can decide to split validations of such complex classes into a few separate rules. Let's do that here and 
+first specify rules that deal exclusively with nullity of `Product`'s fields:
 ```kotlin
-val nullityRules: MultiRule<Product> = 
-        MultiRule.builder<Product>().reflexiveProperties(Product::class.java)
-            .addRulesForAll(Boolean::class.java, notNull())
-            .addRulesForAll(Float::class.java, notNull())
-            .addRules("name", notNull<String>())
-            .addRules(Predicate { p -> p.skuId != null }, "nutritionFacts", notNull<NutritionFacts>())
-            .addRules(Predicate { p -> p.skuId == null }, "nutritionFacts", isNull<NutritionFacts>())
-            .build()
+fun nullityRules(p: Product) =
+  Validoctor.rulesFor(Product::class.java)
+    .allTyped(Boolean::class.java, notNull())
+    .allTyped(Float::class.java, notNull())
+    .field("name", notNull<String>())
+    .field("nutritionFacts", conditional({ p.skuId != null }, notNull<NutritionFacts>()))
+    .field("nutritionFacts", conditional({ p.skuId == null }, isNull<NutritionFacts>()))
+    .build()
 ```
-What we did here is we required all Booleans (glutenFree and vegan fields) and all Floats (weightG, volumeMl) to be not 
-null. Then, we also specified that we need name field to not be null (notNull predefined rule needs a type parameter 
-in Kotlin if there are no other rules passed that allow inferring the type of field). Last two calls to addRules deal 
-with nutritionFacts fields, and differ from what we have seen so far in that they accept an additional Predicate as 
-first argument. Those are conditional rules, that will only be applied if that predicate is fulfilled. This allows us 
-to require the nutrition facts are present only if we also have the skuId of the product, and are null otherwise.
+What we did here is we required all `Booleans` (`glutenFree` and `vegan` fields) and all `Floats` (`weightG`, `volumeMl`)
+to be not null. `allTyped` used here differs from `allAssignable` we have seen in `nutritionFactsRule` in that it will 
+only match fields strictly of specified types, and not their subtypes.
+Next, we specified that we need `name` field to not be null (`notNull` predefined rule needs a type 
+parameter in Kotlin if there are no other rules passed that allow inferring the type of field). 
+Last two `field` calls deal with `nutritionFacts` field, and differ from what we have seen so far in that the rules passed  
+are wrapped in `conditional` accepting an additional `Predicate`. Those rules will only be applied if that predicate is 
+fulfilled. This allows us to require the nutrition facts are present only if we also have the `skuId` of the product, 
+and are null otherwise. This is also the reason why we defined this Rule in a function and not in a field - we read the 
+`Product` argument to be able to dynamically determine `nutritionFacts` nullity rules.
 
-Now, we also need to validate a bunch of other stuff on Product object. Let's look at the last MultiRule we need:
+Now, we also need to validate a bunch of other stuff on `Product` object. Let's look at the last rule we need:
 ```kotlin
-val validityRules: MultiRule<Product> = 
-        MultiRule.builder<Product>().reflexiveProperties(Product::class.java)
-            .addRules("name", stringTrimmedNotEmpty(), stringMaxLength(40))
-            .addRules("skuId", stringExactLength(10), stringAlphanumeric())
-            .addRules("description", stringMaxLength(200))
-            .addRulesForAll(Float::class.java, numberPositive())
-            .addMultiRule({ p -> p.nutritionFacts != null }, "nutritionFacts", nutritionFactsRules)
-            .addRules("tags", collectionNotEmpty())
-            .addMultiRuleForElements("comments", commentRules)
-            .addRules("reviewScores", each(numberInRange(1, 5)))
-            .build()
+fun validityRules(p: Product) =
+  Validoctor.rulesFor(Product::class.java)
+    .field("name", stringTrimmedNotEmpty(), stringMaxLength(40))
+    .field("skuId", stringExactLength(10), stringAlphanumeric())
+    .field("description", stringMaxLength(200))
+    .allTyped(Float::class.java, numberPositive())
+    .field("nutritionFacts", conditional({ p.nutritionFacts != null }, nutritionFactsRule))
+    .elements("comments", commentRules)
+    .elements("reviewScores", chained(notNull(), numberInRange(1, 5)))
+    .build()
 ```
-AddRules and addRulesForAll usages here are nothing new at this point, they just use some more predefined rules that can 
-be found in Rules class. New hot stuff is addMultiRule method. It specifies that nutritionFacts field will be validated 
-with the MultiRule we created for NutritionFacts objects at the beginning of this example. You can nest MultiRules for 
-fields of complex types like this, down to hierarchies of unlimited depth. In this case, validation of the 
-nutritionFactsRule is also conditional, only applied if the nutritionFacts field is not null. Another important case here 
-is addMultiRuleForElements we used for list of Comment objects in Product. This method allows us to apply the MultiRule 
-we defined above for Comment to each element of the list. The final thing to note is the last addRules call that has a 
-Rule built using each() passed. Rules.each() allows us to achieve validation for individual elements of collection same 
-as addMultiRuleForElements, it is just easier to use when we do not need a MultiRule for that, and just SimpleRules are 
-enough - typically when collection elements are of primitive or String type.
+Top `field` and `allTyped` calls are nothing new at this point. New hot stuff is `nutritionFacts` rule definition. 
+It specifies that `nutritionFacts` field will be validated with the Rule we created for `NutritionFacts` objects at the 
+beginning of this example. You can nest Rules for fields of complex types like this, down to hierarchies of unlimited depth. 
+In this case, validation of the `nutritionFactsRule` is also conditional, only applied if the `nutritionFacts` field is not null. 
+Another important case here is `elements` method we used for `comments` and `reviewScores`. This method allows us to apply 
+Rules to each element of the collection field instead of field itself. So we attached the Rule we defined above for `Comment` 
+to each element of `comments` list. Similarly, we attached a Rule to each element in `reviewScores` collection, but this time, 
+we also used a `chained` wrapper. It accepts any number of Rules that will be executed sequentially - if any of these Rules 
+fails, none of the ones coming after it will be executed. `chained` is compatible with `conditional`, and you can mix and 
+match any and all Rules in one call.
 
 With that we have defined all the validation we need for given data structure. To perform the validation on an actual 
 object, we just need one call:
 ```kotlin
-val diagnosis = validoctor.examine(product, nullityRules, validityRules)
+val diagnosis = Validoctor.examine(product, nullityRules, validityRules)
 ```
-And that's it. Diagnosis object returned by our validoctor instance contains the result and all the Ailments found in 
-the object.
+And that's it. Diagnosis object returned by Validoctor contains the result and all the Ailments found in the object.
 
 # Usage with Spring's @ExceptionHandler
 Diagnosis objects are designed to be easily processable and readable by any client applications they are returned to. 
-Using Validoctor with exceptional trait you can make it throw DiagnosisException on Rule violations. Then, if you are 
-using Spring, you can intercept this exception and easily return Diagnosis as response body with whatever status code 
-you desire. Example ExceptionHandler could be defined like this:
+Using Validoctor with `setThrowing(true)` you can make it throw `DiagnosisException` on Rule violations. Then, if you are 
+using Spring, you can intercept this exception and easily return `Diagnosis` as response body with whatever status code 
+you desire. Example `ExceptionHandler` could be defined like this:
 
 ```kotlin
 @ControllerAdvice
@@ -264,10 +211,3 @@ class ExceptionHandler: ResponseEntityExceptionHandler() {
 
 # Dependencies
 None.
-
-# In next releases
-* Add convenient overloads to all rule creating methods in Rules for creating named Rules - shortcuts for using Rules.named().
-* Make Ailments found in elements of collection be mapped under jsonpath-compliant keys.
-* Add trait for multithreaded validation.
-* Building snapshots to bintray from master.
-* Convert to Kotlin.
