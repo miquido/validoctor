@@ -27,7 +27,7 @@ public class Validoctor {
   }
 
   /**
-   * Set exception factory to use when creating an exception in case of examination finding any violations.</br>
+   * Set exception factory to use when creating an exception in case of examination finding any violations.<br>
    * Note that exceptions are only ever thrown if Validoctor is set to {@link Validoctor#setThrowing(boolean) throwing}.
    */
   public static void setExceptionFactory(Function<Diagnosis, RuntimeException> factory) {
@@ -37,7 +37,7 @@ public class Validoctor {
   /**
    * Starts rules building for given Patient class.<br>
    * After rules for patient and its fields are defined in the builder call {@link RuleBuilder#build()}
-   * to get a Rule ready to use in {@link Validoctor#examine(Object, Rule[])} calls.</br>
+   * to get a Rule ready to use in {@link Validoctor#examine(Object, Rule[])} calls.<br>
    * Rules are stateless, immutable and reusable.
    * @param clazz class of patient
    * @param <Patient> type of patient
