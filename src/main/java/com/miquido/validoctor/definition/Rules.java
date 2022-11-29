@@ -255,11 +255,37 @@ public final class Rules {
   }
 
   /**
+   * Passed: patient is not equal to any of the values passed in allowedValues.<br>
+   * Violated: patient is equal to at least one of values passed in allowedValues argument.<br><br>
+   */
+  @SafeVarargs
+  public static <T> Rule<T> valueNotIn(T... disallowedValues) {
+    List<T> list = Arrays.asList(disallowedValues);
+    return new SimpleRule<>("VALUE_NOT_ALLOWED", obj -> !list.contains(obj));
+  }
+
+  /**
+   * Passed: patient is not equal to any element of the collection passed in disallowedValues.<br>
+   * Violated: patient is equal to at least one element of collection passed in disallowedValues argument.<br><br>
+   */
+  public static <T> Rule<T> valueNotIn(Collection<T> disallowedValues) {
+    return new SimpleRule<>("VALUE_NOT_ALLOWED", obj -> !disallowedValues.contains(obj));
+  }
+
+  /**
    * Passed: patient is null or equal to specified expectedValue.<br>
    * Violated: patient is not equal to specified expectedValue.
    */
   public static Rule<Object> equalTo(Object expectedValue) {
     return new SimpleRule<>("VALUE_NOT_ALLOWED", obj -> obj == null || obj.equals(expectedValue));
+  }
+
+  /**
+   * Passed: patient is null or not equal to specified unexpectedValue.<br>
+   * Violated: patient is equal to specified unexpectedValue.
+   */
+  public static Rule<Object> notEqualTo(Object unexpectedValue) {
+    return new SimpleRule<>("VALUE_NOT_ALLOWED", obj -> obj == null || !obj.equals(unexpectedValue));
   }
 
 

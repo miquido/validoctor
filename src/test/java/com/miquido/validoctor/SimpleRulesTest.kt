@@ -11,6 +11,7 @@ import com.miquido.validoctor.definition.Rules.isFalse
 import com.miquido.validoctor.definition.Rules.isNull
 import com.miquido.validoctor.definition.Rules.isTrue
 import com.miquido.validoctor.definition.Rules.named
+import com.miquido.validoctor.definition.Rules.notEqualTo
 import com.miquido.validoctor.definition.Rules.notNull
 import com.miquido.validoctor.definition.Rules.numberInRange
 import com.miquido.validoctor.definition.Rules.numberNonNegative
@@ -27,6 +28,7 @@ import com.miquido.validoctor.definition.Rules.stringNoSpacePadding
 import com.miquido.validoctor.definition.Rules.stringNotEmpty
 import com.miquido.validoctor.definition.Rules.stringTrimmedNotEmpty
 import com.miquido.validoctor.definition.Rules.valueIn
+import com.miquido.validoctor.definition.Rules.valueNotIn
 import com.miquido.validoctor.definition.SimpleRule
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -34,6 +36,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.lang.Boolean
+import java.time.DayOfWeek
+import java.time.Month
 import kotlin.Any
 import kotlin.Long
 import kotlin.String
@@ -279,11 +283,13 @@ class SimpleRulesTest {
       Validoctor.examine(
         SimpleTestClass(1, "a", "1", true),
         valueIn(SimpleTestClass(2, "b", "2", false), SimpleTestClass(1, "a", "1", true))).isValid)
+    assertTrue(Validoctor.examine(DayOfWeek.FRIDAY, valueIn(*DayOfWeek.values())).isValid)
     assertFalse(Validoctor.examine("a", valueIn("b", "c", "d")).isValid)
     assertFalse(Validoctor.examine(null, valueIn()).isValid)
     assertFalse(
       Validoctor.examine(SimpleTestClass(1, "a", "1", true),
         valueIn(SimpleTestClass(2, "a", "1", true), SimpleTestClass(1, "a", "1", false))).isValid)
+    assertFalse(Validoctor.examine(Month.APRIL, valueIn(*DayOfWeek.values())).isValid)
   }
 
   @Test
@@ -306,6 +312,43 @@ class SimpleRulesTest {
   }
 
   @Test
+  fun predefinedRule_valueNotIn() {
+    assertTrue(Validoctor.examine("a", valueNotIn("b", "c", "d")).isValid)
+    assertTrue(Validoctor.examine(null, valueNotIn()).isValid)
+    assertTrue(
+      Validoctor.examine(SimpleTestClass(1, "a", "1", true),
+        valueNotIn(SimpleTestClass(2, "a", "1", true), SimpleTestClass(1, "a", "1", false))).isValid)
+    assertTrue(Validoctor.examine(Month.APRIL, valueNotIn(*DayOfWeek.values())).isValid)
+    assertFalse(Validoctor.examine("a", valueNotIn("a", "b", "c")).isValid)
+    assertFalse(Validoctor.examine(null, valueNotIn(null, "a", "b", "c")).isValid)
+    assertFalse(Validoctor.examine(765, valueNotIn(5, 23, 765, 43)).isValid)
+    assertFalse(
+      Validoctor.examine(
+        SimpleTestClass(1, "a", "1", true),
+        valueNotIn(SimpleTestClass(2, "b", "2", false), SimpleTestClass(1, "a", "1", true))).isValid)
+    assertFalse(Validoctor.examine(DayOfWeek.FRIDAY, valueNotIn(*DayOfWeek.values())).isValid)
+  }
+
+  @Test
+  fun predefinedRule_valueNotIn_collection() {
+    assertTrue(Validoctor.examine("a", valueNotIn(listOf("b", "c", "d"))).isValid)
+    assertTrue(Validoctor.examine("a", valueNotIn(setOf("b", "c", "d"))).isValid)
+    assertTrue(Validoctor.examine(null, valueNotIn(emptyList())).isValid)
+    assertTrue(Validoctor.examine("a", valueNotIn(listOf<String?>(null))).isValid)
+    assertTrue(
+      Validoctor.examine(SimpleTestClass(1, "a", "1", true),
+        valueNotIn(listOf(SimpleTestClass(2, "a", "1", true), SimpleTestClass(1, "a", "1", false)))).isValid)
+    assertFalse(Validoctor.examine("a", valueNotIn(listOf("a", "b", "c"))).isValid)
+    assertFalse(Validoctor.examine("a", valueNotIn(setOf("a", "b", "c"))).isValid)
+    assertFalse(Validoctor.examine(null, valueNotIn(listOf(null, "a", "b", "c"))).isValid)
+    assertFalse(Validoctor.examine(765, valueNotIn(listOf(5, 23, 765, 43))).isValid)
+    assertFalse(
+      Validoctor.examine(SimpleTestClass(1, "a", "1", true),
+        valueNotIn(listOf(SimpleTestClass(2, "b", "2", false), SimpleTestClass(1, "a", "1", true)))).isValid)
+    assertFalse(Validoctor.examine(null, valueNotIn(listOf<String?>(null))).isValid)
+  }
+
+  @Test
   fun predefinedRule_equalTo() {
     assertTrue(Validoctor.examine("a", equalTo("a")).isValid)
     assertTrue(Validoctor.examine(7, equalTo(7)).isValid)
@@ -315,6 +358,18 @@ class SimpleRulesTest {
     assertFalse(Validoctor.examine("", equalTo(null)).isValid)
     assertFalse(Validoctor.examine("123", equalTo("12")).isValid)
     assertFalse(Validoctor.examine(SimpleTestClass(1, "a", "1", false), equalTo(SimpleTestClass(1, "a", "2", false))).isValid)
+  }
+
+  @Test
+  fun predefinedRule_notEqualTo() {
+    assertTrue(Validoctor.examine(7.0, notEqualTo(7.000001)).isValid)
+    assertTrue(Validoctor.examine("", notEqualTo(null)).isValid)
+    assertTrue(Validoctor.examine("123", notEqualTo("12")).isValid)
+    assertTrue(Validoctor.examine(null, notEqualTo(null)).isValid)
+    assertTrue(Validoctor.examine(SimpleTestClass(1, "a", "1", false), notEqualTo(SimpleTestClass(1, "a", "2", false))).isValid)
+    assertFalse(Validoctor.examine("a", notEqualTo("a")).isValid)
+    assertFalse(Validoctor.examine(7, notEqualTo(7)).isValid)
+    assertFalse(Validoctor.examine(SimpleTestClass(1, "a", "1", false), notEqualTo(SimpleTestClass(1, "a", "1", false))).isValid)
   }
 
   @Test
