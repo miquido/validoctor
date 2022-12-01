@@ -336,4 +336,19 @@ public final class Rules {
   public static <T> Rule<T> named(String violationMessage, Rule<T> rule) {
     return rule.withViolationMessage(violationMessage);
   }
+
+  /**
+   * Creates a batch of Rules that will be tested as an atomic package - all Rules will always be executed.
+   * <br>This may be useful for separating sets of Rules into steps of more complicated hierarchical validation scenarios.
+   * <br>Any dependencies and conditions added with {@link Rules#chained(Rule[])} or
+   * {@link Rules#conditional(Predicate, Rule)} will apply to whole batch.
+   * <br>{@link Rules#named(String, Rule)} is not supported by BatchRules - rules passed as batch params can still
+   * be named though.
+   * @param rules Rules to join into a batch
+   * @param <T> patient type
+   * @return BatchRule including specified rules
+   */
+  public static <T> Rule<T> batch(Rule<T>... rules) {
+    return new BatchRule<>(Arrays.asList(rules));
+  }
 }

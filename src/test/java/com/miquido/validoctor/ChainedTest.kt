@@ -34,7 +34,7 @@ class ChainedTest {
 
   @Test
   fun chainedAlongWithNonchained() {
-    val diagnosis = Validoctor.examine("aaa ", stringNoSpacePadding(),  chained(stringNotEmpty(), stringMinLength(5), stringMaxLength(10)))
+    val diagnosis = Validoctor.examine("aaa ", stringNoSpacePadding(), chained(stringNotEmpty(), stringMinLength(5), stringMaxLength(10)))
     assertEquals(2, diagnosis.ailments[""]?.size)
     assertTrue(diagnosis.ailments[""]?.contains("TOO_SHORT")!!)
     assertTrue(diagnosis.ailments[""]?.contains("NO_WHITESPACE_PADDING_REQUIRED")!!)
