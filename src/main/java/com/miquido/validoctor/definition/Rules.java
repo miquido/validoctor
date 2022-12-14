@@ -348,6 +348,7 @@ public final class Rules {
    * @param <T> patient type
    * @return BatchRule including specified rules
    */
+  @SafeVarargs
   public static <T> Rule<T> batch(Rule<T>... rules) {
     return new BatchRule<>(Arrays.asList(rules));
   }

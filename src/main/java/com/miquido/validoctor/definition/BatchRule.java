@@ -50,7 +50,7 @@ public class BatchRule<T> implements Rule<T> {
 
     /**
      * Not supported in this class - will just return this.
-     * @inheritDoc
+     * @see Rule#withViolationMessage(String)
      * @param violationMessage new message to use on violation
      * @return this BatchRule
      */
