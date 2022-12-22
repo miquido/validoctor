@@ -30,15 +30,15 @@ class FieldsTest {
   @Test
   fun fieldTest() {
     val rule = Validoctor.rulesFor(TestClass::class.java)
-      .field("name", stringNotEmpty(), stringTrimmedNotEmpty(), stringNoSpacePadding(), stringLengthInRange(4, 20))
+      .field("name", "NAME", stringNotEmpty(), stringTrimmedNotEmpty(), stringNoSpacePadding(), stringLengthInRange(4, 20))
       .field("kcal", notNull(), numberPositive(), numberInRange(0, 10000))
       .field("intSet", notNull(), collectionNotEmpty(), collectionMinSize(3))
       .build()
     val patient = TestClass(" abc ", null, null, null, 1f, 10001, null, setOf(1, 2), null)
     val diagnosis = Validoctor.examine(patient, "p", rule)
     assertFalse(diagnosis.isValid)
-    assertEquals(1, diagnosis.ailments["p.name"]?.size)
-    assertEquals("NO_WHITESPACE_PADDING_REQUIRED", diagnosis.ailments["p.name"]?.first())
+    assertEquals(1, diagnosis.ailments["p.NAME"]?.size)
+    assertEquals("NO_WHITESPACE_PADDING_REQUIRED", diagnosis.ailments["p.NAME"]?.first())
     assertEquals(1, diagnosis.ailments["p.kcal"]?.size)
     assertEquals("TOO_LOW_OR_TOO_HIGH", diagnosis.ailments["p.kcal"]?.first())
     assertEquals(1, diagnosis.ailments["p.intSet"]?.size)

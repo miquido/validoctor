@@ -8,6 +8,7 @@ import com.miquido.validoctor.execution.MultipleFieldsRuleExecution;
 import com.miquido.validoctor.execution.ReducedFieldsRuleExecution;
 import com.miquido.validoctor.execution.RuleExecution;
 import com.miquido.validoctor.execution.TypeRuleExecution;
+import com.miquido.validoctor.result.Diagnosis;
 import com.miquido.validoctor.target.CollectionFieldRuleTarget;
 import com.miquido.validoctor.target.EnclosingObjectTarget;
 import com.miquido.validoctor.target.FieldRuleTarget;
@@ -35,6 +36,7 @@ public class RuleBuilder<T> {
 
   /**
    * Add rules for single field.
+   * Overload of {@link RuleBuilder#field(String, String, Rule[])} that uses actual field name for display purposes as well.
    * @param field field name
    * @param rules rules
    * @param <P> field type
@@ -42,7 +44,20 @@ public class RuleBuilder<T> {
    */
   @SafeVarargs
   public final <P> RuleBuilder<T> field(String field, Rule<P>... rules) {
-    FieldRuleTarget<T, P> target = new FieldRuleTarget<>(field, objectClass);
+    return field(field, field, rules);
+  }
+
+  /**
+   * Add rules for single field.
+   * @param field field name
+   * @param fieldDisplayName field name to display in resulting {@link Diagnosis} object
+   * @param rules rules
+   * @param <P> field type
+   * @return builder
+   */
+  @SafeVarargs
+  public final <P> RuleBuilder<T> field(String field, String fieldDisplayName, Rule<P>... rules) {
+    FieldRuleTarget<T, P> target = new FieldRuleTarget<>(field, fieldDisplayName, objectClass);
     List<RuleExecution<T, P>> executions = Arrays.stream(rules)
         .map(rule -> new FieldRuleExecution<>(target, rule))
         .collect(Collectors.toList());

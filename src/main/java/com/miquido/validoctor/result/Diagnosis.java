@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Holds a result of a validation: flag marking the patient object as valid or not,
+ * and a map of patient objects' fields to their violation messages.
+ */
 public class Diagnosis {
   private boolean valid = true;
   private Map<String, Set<String>> ailments = new HashMap<>();
