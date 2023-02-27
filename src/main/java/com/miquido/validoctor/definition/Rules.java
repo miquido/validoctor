@@ -276,7 +276,7 @@ public final class Rules {
    * Passed: patient is null or equal to specified expectedValue.<br>
    * Violated: patient is not equal to specified expectedValue.
    */
-  public static Rule<Object> equalTo(Object expectedValue) {
+  public static <T> Rule<T> equalTo(T expectedValue) {
     return new SimpleRule<>("VALUE_NOT_ALLOWED", obj -> obj == null || obj.equals(expectedValue));
   }
 
@@ -284,7 +284,7 @@ public final class Rules {
    * Passed: patient is null or not equal to specified unexpectedValue.<br>
    * Violated: patient is equal to specified unexpectedValue.
    */
-  public static Rule<Object> notEqualTo(Object unexpectedValue) {
+  public static <T> Rule<T> notEqualTo(T unexpectedValue) {
     return new SimpleRule<>("VALUE_NOT_ALLOWED", obj -> obj == null || !obj.equals(unexpectedValue));
   }
 
