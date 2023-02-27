@@ -22,7 +22,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-  implementation "com.miquido:validoctor:2.1.1"
+  implementation "com.miquido:validoctor:2.1.2"
 }
 ```
 Validoctor is a data validation library handling validations on complex data structures. It is designed to be 
