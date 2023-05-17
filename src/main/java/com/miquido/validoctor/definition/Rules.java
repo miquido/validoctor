@@ -327,7 +327,9 @@ public final class Rules {
   }
 
   /**
-   * Creates a new Rule that is identical to specified rule but has the specified violationMessage.
+   * Either creates a new Rule that is identical to specified rule but has the specified violationMessage,
+   * or changes behavior of this rule to only use specified violationMessage instead of any others
+   * (implementation dependent).
    * @param violationMessage violationMessage to use
    * @param rule rule
    * @param <T> patient type

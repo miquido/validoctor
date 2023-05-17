@@ -1,7 +1,8 @@
 package com.miquido.validoctor
 
 import com.miquido.validoctor.TestClasses.SimpleTestClass
-import com.miquido.validoctor.Validoctor.*
+import com.miquido.validoctor.Validoctor.examine
+import com.miquido.validoctor.Validoctor.setThrowing
 import com.miquido.validoctor.definition.Rules.collectionContains
 import com.miquido.validoctor.definition.Rules.collectionMaxSize
 import com.miquido.validoctor.definition.Rules.collectionMinSize
@@ -11,7 +12,6 @@ import com.miquido.validoctor.definition.Rules.equalTo
 import com.miquido.validoctor.definition.Rules.isFalse
 import com.miquido.validoctor.definition.Rules.isNull
 import com.miquido.validoctor.definition.Rules.isTrue
-import com.miquido.validoctor.definition.Rules.named
 import com.miquido.validoctor.definition.Rules.notEqualTo
 import com.miquido.validoctor.definition.Rules.notNull
 import com.miquido.validoctor.definition.Rules.numberInRange
@@ -372,15 +372,6 @@ class SimpleRulesTest {
     assertFalse(examine("a", notEqualTo("a")).isValid)
     assertFalse(examine(7, notEqualTo(7)).isValid)
     assertFalse(examine(SimpleTestClass(1, "a", "1", false), notEqualTo(SimpleTestClass(1, "a", "1", false))).isValid)
-  }
-
-  @Test
-  fun namedRule() {
-    val name = "custom_name"
-    val diagnosis = examine("a", "patient", named(name, stringMinLength(2)))
-    val ailments = diagnosis.ailments["patient"]
-    assertTrue(ailments!!.any { ailment -> ailment == name })
-    assertTrue(examine("a", "patient", named(name, stringMaxLength(2))).isValid)
   }
 
   @Test

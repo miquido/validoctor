@@ -28,7 +28,8 @@ public interface Rule<T> {
 
   /**
    * Can be supported by implementing classes by creating and returning a new instance of this Rule
-   * that produces a specified violationMessage in case of failing predicate, instead of its default one.
+   * that produces a specified violationMessage in case of failing predicate, instead of its default one;
+   * or by replacing any existing violationMessages by specified one.
    * @param violationMessage new message to use on violation
    */
   Rule<T> withViolationMessage(String violationMessage);

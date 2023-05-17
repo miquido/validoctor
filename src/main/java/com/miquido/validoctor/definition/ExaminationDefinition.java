@@ -14,6 +14,7 @@ public class ExaminationDefinition<T> implements Rule<T> {
   private final List<RuleExecution<T, ?>> ruleExecutions;
   private final Predicate<T> condition;
   private final Rule<T> dependency;
+  private String messageOverride;
 
   public ExaminationDefinition(List<RuleExecution<T, ?>> ruleExecutions) {
     this(ruleExecutions, obj -> true, null);
@@ -31,6 +32,10 @@ public class ExaminationDefinition<T> implements Rule<T> {
     if (condition.test(patient) && dependencyAilments.isEmpty()) {
       return ruleExecutions.stream()
           .flatMap(re -> re.perform(patient).stream())
+          .map(ailment -> {
+            if (messageOverride != null) return new Ailment(ailment.field, messageOverride);
+            else return ailment;
+          })
           .collect(Collectors.toSet());
     } else {
       return dependencyAilments;
@@ -49,6 +54,7 @@ public class ExaminationDefinition<T> implements Rule<T> {
 
   @Override
   public Rule<T> withViolationMessage(String violationMessage) {
-    throw new IllegalArgumentException("violation message changes not supported for complex rules");
+    messageOverride = violationMessage;
+    return this;
   }
 }
