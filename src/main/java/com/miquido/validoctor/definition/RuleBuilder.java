@@ -1,20 +1,9 @@
 package com.miquido.validoctor.definition;
 
 import com.miquido.validoctor.Validoctor;
-import com.miquido.validoctor.execution.CollectionFieldRuleExecution;
-import com.miquido.validoctor.execution.EnclosingObjectRuleExecution;
-import com.miquido.validoctor.execution.FieldRuleExecution;
-import com.miquido.validoctor.execution.MultipleFieldsRuleExecution;
-import com.miquido.validoctor.execution.ReducedFieldsRuleExecution;
-import com.miquido.validoctor.execution.RuleExecution;
-import com.miquido.validoctor.execution.TypeRuleExecution;
+import com.miquido.validoctor.execution.*;
 import com.miquido.validoctor.result.Diagnosis;
-import com.miquido.validoctor.target.CollectionFieldRuleTarget;
-import com.miquido.validoctor.target.EnclosingObjectTarget;
-import com.miquido.validoctor.target.FieldRuleTarget;
-import com.miquido.validoctor.target.MultipleFieldsRuleTarget;
-import com.miquido.validoctor.target.ReducedFieldsRuleTarget;
-import com.miquido.validoctor.target.TypeRuleTarget;
+import com.miquido.validoctor.target.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -67,6 +56,7 @@ public class RuleBuilder<T> {
 
   /**
    * Add rules for elements of a collection-type field.
+   * Overload of {@link RuleBuilder#elements(String, String, Rule[])} that uses actual field name for display purposes as well.
    * @param field field name
    * @param rules rules
    * @param <P> elements type
@@ -74,7 +64,20 @@ public class RuleBuilder<T> {
    */
   @SafeVarargs
   public final <P> RuleBuilder<T> elements(String field, Rule<P>... rules) {
-    CollectionFieldRuleTarget<T, P> collectionTarget = new CollectionFieldRuleTarget<>(field, objectClass);
+    return elements(field, field, rules);
+  }
+
+  /**
+   * Add rules for elements of a collection-type field.
+   * @param field field name
+   * @param fieldDisplayName field name to display in resulting {@link Diagnosis} object
+   * @param rules rules
+   * @param <P> elements type
+   * @return builder
+   */
+  @SafeVarargs
+  public final <P> RuleBuilder<T> elements(String field, String fieldDisplayName, Rule<P>... rules) {
+    CollectionFieldRuleTarget<T, P> collectionTarget = new CollectionFieldRuleTarget<>(field, fieldDisplayName, objectClass);
     List<RuleExecution<T, P>> executions = Arrays.stream(rules)
         .map(rule -> new CollectionFieldRuleExecution<>(collectionTarget, rule))
         .collect(Collectors.toList());

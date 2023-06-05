@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class CollectionFieldRuleExecution<T, P> extends RuleExecution<T, P> {
 
@@ -23,11 +24,10 @@ public class CollectionFieldRuleExecution<T, P> extends RuleExecution<T, P> {
         .mapToObj(index ->
             rule.apply(patients.get(index)).stream()
                 .map(ailment -> {
-                  String field = fieldName + "[" + index + "]";
-                  if (ailment.field != null) {
-                    field += "." + ailment.field;
-                  }
-                  return new Ailment(field, ailment.ailments);
+                    String field = Stream.of(fieldName + "[" + index + "]", ailment.field)
+                        .filter(s -> s != null && !s.isEmpty())
+                        .collect(Collectors.joining("."));
+                    return new Ailment(field, ailment.ailments);
                 })
         )
         .flatMap(Function.identity())

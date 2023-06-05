@@ -24,7 +24,8 @@ public class TestClasses {
       if (this == o) return true;
       if (!(o instanceof SimpleTestClass)) return false;
       SimpleTestClass that = (SimpleTestClass) o;
-      return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(title, that.title) && Objects.equals(done, that.done);
+      return Objects.equals(id, that.id) && Objects.equals(name, that.name)
+          && Objects.equals(title, that.title) && Objects.equals(done, that.done);
     }
 
     @Override
@@ -32,6 +33,7 @@ public class TestClasses {
       return Objects.hash(id, name, title, done);
     }
   }
+
 
   public static class TestClass {
     private String name;
@@ -57,16 +59,55 @@ public class TestClasses {
       this.intSet = intSet;
       this.insideList = insideList;
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      TestClass testClass = (TestClass) o;
+      return Float.compare(testClass.volumeL, volumeL) == 0 && Objects.equals(name, testClass.name)
+          && Objects.equals(skuId, testClass.skuId) && Objects.equals(description, testClass.description)
+          && Objects.equals(weightKg, testClass.weightKg) && Objects.equals(kcal, testClass.kcal)
+          && Objects.equals(inside, testClass.inside) && Objects.equals(intSet, testClass.intSet)
+          && Objects.equals(insideList, testClass.insideList);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(name, skuId, description, weightKg, volumeL, kcal, inside, intSet, insideList);
+    }
   }
 
 
   public static class TestInsideClass {
     private String name;
     private double score;
+    private double optScore;
+    private List<String> list;
 
     public TestInsideClass(String name, double score) {
       this.name = name;
       this.score = score;
+    }
+
+    public TestInsideClass(String name, double score, double optScore, List<String> list) {
+      this.name = name;
+      this.score = score;
+      this.optScore = optScore;
+      this.list = list;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      TestInsideClass that = (TestInsideClass) o;
+      return Double.compare(that.score, score) == 0 && Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(name, score);
     }
   }
 }
